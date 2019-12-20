@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+  <title>Document</title>
+</head>
+
+<body ng-app="app" ng-controller="ctrl">
+  <ul>
+    <li ng-repeat="x in myData">
+      <p>{{x.event}}</p>
+      <p>{{x.when}}</p>
+      <p>{{x.where}}</p>
+      <p>{{x.tickets}}</p>
+      <button type="post" ng-click="delete_item(x)">Delete event</button>
+    </li>
+  </ul>
+  <script>
+    var app = angular.module('app', []);
+    app.controller('ctrl', function($scope, $http) {
+      $http.get("https://api.sethcharleston.com/test1").then(function(response) {
+        data = response.data;
+        data.sort(function(a, b) {
+          a = new Date(a.when);
+          b = new Date(b.when);
+          return a < b ? -1 : a > b ? 1 : 0;
+        });
+        $scope.myData = data;
+      });
+      $scope.delete_item = function(item) {
+        var url = 'https://api.sethcharleston.com/test1/delete';
+        var data = {
+          event: item.event,
+          where: item.where,
+          when: item.when,
+          tickets: item.tickets
+        };
+        console.log("I'm getting called when you press that button!" + data.event + data.when + data.where + data.tickets)
+        fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(res => res.json())
+          .then(response => console.log('Success:', JSON.stringify(response)))
+          .then(refresh())
+          .catch(error => console.error('Error:', error));
+      }
+    });
+
+    function refresh() {
+      setTimeout(function() {
+        location.reload()
+      }, 100);
+    }
+  </script>
+</body>
+
+</html>

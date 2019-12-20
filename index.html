@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="main.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+  <title>Document</title>
+</head>
+
+<body ng-app="app1">
+
+  <section>
+    <div ng-controller="ctrl1">
+      Event: <input type="text" ng-model="event"><br>
+      Month: <input type="text" ng-model="month"> Day: <input type="text" ng-model="day"> Year: <input type="text" ng-model="year"><br>
+      Time: <input type="text" ng-model="time"><br>
+      Where: <input type="text" ng-model="where"><br>
+      Tickets: <input type="text" ng-model="tickets"><br>
+      <br>
+      <button type="post" ng-click="send_data()">Submit event</button>
+    </div>
+    <p>To edit events, simply copy the Event Name into the the "Event" box and put new values in the "When" "Where" and "Tickets" boxes.</p>
+  </section>
+  <script>
+    //FOR PUTTING TO DYNAMODB
+    var app = angular.module('app1', []);
+    app.controller('ctrl1', function($scope) {
+      $scope.send_data = function() {
+        var eventDate = $scope.month + " " + $scope.day + ", " + $scope.year + ", " + $scope.time;
+        console.log(eventDate);
+        var url = 'https://api.sethcharleston.com/test1';
+        var data = {
+          event: $scope.event,
+          where: $scope.where,
+          when: eventDate,
+          tickets: $scope.tickets
+        };
+
+        fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(res => res.json())
+          .then(response => console.log('Success:', JSON.stringify(response)))
+          .then(document.getElementById('iframe').contentDocument.location.reload(true))
+          .catch(error => console.error('Error:', error));
+      }
+    });
+  </script>
+
+  <section>
+    <div ng-controller="ctrl2">
+      Text For the Bio: <textarea ng-model="text"></textarea><br>
+      <br>
+      <button type="post" ng-click="send_data()">Submit Bio</button>
+    </div>
+    <p>Change the text for the bio on the homepage.</p>
+  </section>
+  <script>
+    //FOR PUTTING TO DYNAMODB
+    app.controller('ctrl2', function($scope) {
+      $scope.send_data = function() {
+        var url = 'https://api.sethcharleston.com/test1/text/';
+        var data = {
+          location: 'bio',
+          text: $scope.text
+        };
+
+        fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(res => res.json())
+          .then(response => console.log('Success:', JSON.stringify(response)))
+          .catch(error => console.error('Error:', error));
+      }
+    });
+  </script>
+
+  <section>
+    <div ng-controller="ctrl3">
+      Song Name: <input type="text" ng-model="song"><br>
+      Spotify Embed Link: <input type="text" ng-model="link"><br>
+      Release Date: <br>
+      Month: <input type="text" ng-model="month"> Day: <input type="text" ng-model="day"> Year: <input type="text" ng-model="year"><br>
+      <br>
+      <button type="post" ng-click="send_data()">Submit Song</button>
+    </div>
+    <p>Use to add songs or albums to the music page.</p>
+  </section>
+  <section>
+    <iframe id="iframe" src="delete.html" frameborder="0"></iframe>
+  </section>
+  <section>
+    <iframe id="iframe" src="delete_songs.html" frameborder="0"></iframe>
+  </section>
+  <script>
+    //FOR PUTTING TO DYNAMODB
+    app.controller('ctrl3', function($scope) {
+      $scope.send_data = function() {
+        var releaseDate = $scope.month + " " + $scope.day + ", " + $scope.year;
+        var url = 'https://api.sethcharleston.com/test1/songs';
+        var data = {
+          song: $scope.song,
+          link: $scope.link,
+          release: releaseDate
+        };
+
+        fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(res => res.json())
+          .then(response => console.log('Success:', JSON.stringify(response)))
+          .catch(error => console.error('Error:', error));
+      }
+    });
+  </script>
+
+</body>
+
+</html>
