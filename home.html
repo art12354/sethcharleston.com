@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <!-- angularjs -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+  <title>Document</title>
+</head>
+
+<body class="container  p-3 my-3 bg-dark text-white">
+  <h1>Website Editing Tool</h1>
+  <p>Editing your site -- reimagined</p>
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" data-toggle="tab" href="#bio">Bio</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#events">Events</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="music">Music</a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <!-- BIO -->
+    <div class="tab-pane container active" id="bio">
+      <div class="form-group">
+        <label for="bio">Text For the Bio:</label>
+        <textarea class="form-control" rows="10" id="bioText"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" onclick="send_bio_data()">Submit Bio</button>
+      <script>
+        //FOR PUTTING TO DYNAMODB
+        function send_bio_data() {
+          var url = 'https://api.sethcharleston.com/test1/text/';
+          var data = {
+            location: 'bio',
+            text: document.getElementById("bioText").value
+          };
+          fetch(url, {
+              method: 'POST',
+              body: JSON.stringify(data),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(res => res.json())
+            .then(response => console.log('Success:', JSON.stringify(response)))
+            .catch(error => console.error('Error:', error));
+        }
+      </script>
+      <script>
+        //FOR GRABBING FROM DYNAMODB
+        fetch('https://api.sethcharleston.com/test1/text')
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(data) {
+            data.forEach(function(text) {
+              console.log(text);
+              if (text.location = "bio") {
+                document.getElementById("bioText").value = text.text;
+              }
+            });
+          });
+      </script>
+    </div>
+    <!-- EVENTS -->
+    <div class="tab-pane container fade" id="events">
+      <div class="form-group">
+        <label for="event">Event:</label>
+        <input type="event" class="form-control" placeholder="The Seth Charleston Band at Coachman's!" id="event">
+      </div>
+      <div class="form-group">
+        <label for="month">Month:</label>
+        <input type="month" class="form-control" placeholder="January" id="month">
+      </div>
+      <div class="form-group">
+        <label for="day">Day:</label>
+        <input type="day" class="form-control" placeholder="1" id="day">
+      </div>
+      <div class="form-group">
+        <label for="year">Year:</label>
+        <input type="year" class="form-control" placeholder="2018" id="year">
+      </div>
+      <div class="form-group">
+        <label for="time">Time:</label>
+        <input type="time" class="form-control" placeholder="7:00 pm" id="time">
+      </div>
+      <div class="form-group">
+        <label for="where">Where:</label>
+        <input type="where" class="form-control" placeholder="Coachman's" id="where">
+      </div>
+      <div class="form-group">
+        <label for="tickets">Tickets:</label>
+        <input type="tickets" class="form-control" placeholder="ticketmaster.com" id="tickets">
+      </div>
+      <button type="submit" onclick="send_event_data()" class="btn btn-primary">Submit Event</button>
+      <script>
+        //FOR PUTTING TO DYNAMODB
+           function send_event_data() {
+            var eventDate = document.getElementById("month").value + " " + document.getElementById("day").value + ", " + document.getElementById("year").value + ", " + document.getElementById("time").value;
+            console.log(eventDate);
+            var url = 'https://api.sethcharleston.com/test1';
+            var data = {
+              event: document.getElementById("event").value,
+              where: document.getElementById("where").value,
+              when: eventDate,
+              tickets: document.getElementById("tickets").value
+            };
+            fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              })
+              .then(res => res.json())
+              .then(response => console.log('Success:', JSON.stringify(response)))
+              .catch(error => console.error('Error:', error));
+          }
+      </script>
+      <section class="pt-3"></section>
+      <p>Events:</p>
+      <div id="eventInfo" class="card-deck"></div>
+      <script>
+        events = [];
+        var x = "";
+        fetch('https://api.sethcharleston.com/test1')
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(data) {
+            data.sort(function(a, b) {
+              a = new Date(a.when);
+              b = new Date(b.when);
+              return a<b ? -1 : a>b ? 1 : 0;
+            });
+            data.forEach(function(event) {
+              console.log(event);
+              x += "<div class=\"card\"><div class=\"card-body bg-info\"><p>"+event.event+"</p>"+"<p>"+event.when+"</p>"+"<p>"+event.where+"</p>"+"<p>"+event.tickets+"</p><button class=\"btn btn-dark mr-3\">edit</button><button class=\"btn btn-dark\">delete</button></div></div>";
+              document.getElementById("eventInfo").innerHTML = x;
+            });
+          });
+
+      </script>
+    </div>
+    <!-- MUSIC -->
+    <div class="tab-pane container fade" id="music">
+      <p>this is the music page</p>
+    </div>
+  </div>
+</body>
+
+</html>
