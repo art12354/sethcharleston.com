@@ -200,7 +200,7 @@ main {
   }
 .section {
   grid-area: section;
-  background-image: url("Seth_Charleston_Music_Drawing.jpg");
+  background-image: url("../photos/Seth_Charleston_Music_Drawing.jpg");
   height: 200px;
   background-size: 100%;
   background-position: center;
