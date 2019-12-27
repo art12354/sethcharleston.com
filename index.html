@@ -18,7 +18,7 @@
   <title>Website Editor</title>
 </head>
 
-<body class="container  p-3 my-3 bg-dark text-white">
+<body class="container  p-3 my-3 bg-dark text-white" onload="generateBio()">
   <h1>Website Editing Tool</h1>
   <p>Editing your site -- reimagined</p>
 
@@ -45,6 +45,7 @@
       </div>
       <button type="submit" class="btn btn-primary" onclick="send_bio_data()">Submit Bio</button>
       <div id="bioAlert" class="pt-3">
+        <p>Feel free to use any of <a href="http://www.tagindex.net/html/text/index.html" target="_blank">these</a> tags!</p>
 
       </div>
       <script>
@@ -74,20 +75,27 @@
             });
         }
       </script>
+      <div class="pt-3">
+        <p>Rendered Bio:</p>
+        <div id="bioInfo" class="card-deck"></div>
+      </div>
       <script>
         //FOR GRABBING FROM DYNAMODB
-        fetch("https://api.sethcharleston.com/test1/text")
-          .then(function(response) {
-            return response.json();
-          })
-          .then(function(data) {
-            data.forEach(function(text) {
-              console.log(text);
-              if (text.location === "bio") {
-                document.getElementById("bioText").value = text.text;
-              }
+        function generateBio() {
+          fetch("https://api.sethcharleston.com/test1/text")
+            .then(function(response) {
+              return response.json();
+            })
+            .then(function(data) {
+              data.forEach(function(text) {
+                console.log(text);
+                if (text.location === "bio") {
+                  document.getElementById("bioText").value = text.text;
+                  document.getElementById("bioInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + text.text + "</p>" + "</div></div>";;
+                }
+              });
             });
-          });
+        }
       </script>
     </div>
     <!-- EVENTS -->
@@ -150,7 +158,7 @@
             .catch(error => {
               console.error("Error:", error);
               document.getElementById("bioAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error + "</div>";
-            }).then( () => {
+            }).then(() => {
               timeoutID = window.setTimeout(generateEvents(), 10000, 'That was really slow!');
             });
         }
@@ -247,7 +255,7 @@
                       console.error("Error:", error);
                       document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error +
                         "</div>";
-                    }).then( () => {
+                    }).then(() => {
                       timeoutID = window.setTimeout(generateEvents(), 10000, 'That was really slow!');
                     });
                 }
@@ -307,7 +315,7 @@
             .catch(error => {
               console.error("Error:", error);
               document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error + "</div>";
-            }).then( () => {
+            }).then(() => {
               timeoutID = window.setTimeout(generateSongs(), 10000, 'That was really slow!');
             });
         }
@@ -401,7 +409,7 @@
                       console.error("Error:", error);
                       document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error +
                         "</div>";
-                    }).then( () => {
+                    }).then(() => {
                       timeoutID = window.setTimeout(generateSongs(), 10000, 'That was really slow!');
                     });
                 }
