@@ -1,3 +1,4 @@
+<!-- login: https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com-->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -19,13 +20,68 @@
 </head>
 
 <body class="container  p-3 my-3 bg-dark text-white" onload="generateBio()">
-  <h1>Website Editing Tool</h1>
+  <div class="row">
+    <h1 class="col">Website Editing Tool</h1>
+    <p class="col">Logged in: <p id="login"><div class="text-danger">False</div></p>
+  </div>
   <p>Editing your site -- reimagined</p>
+  <script>
+    // for testing to see if logged in
+
+    // grab info
+    var queryString = window.location.hash;
+    console.log(queryString);
+    // take off begining #
+    queryString = queryString.slice(1);
+    console.log(queryString);
+    // split query string into its component parts
+    var arr = queryString.split('&');
+
+    var list = []
+
+    for (var i = 0; i < arr.length; i++) {
+      // separate the keys and the values
+      var a = arr[i].split('=');
+      // set parameter name and value (use 'true' if empty)
+      var paramName = a[0];
+      var paramValue = typeof (a[1]) === 'undefined' ? true : a[1];
+      list.push({a[0]:a[1]});
+    }
+    console.log(list);
+
+
+
+
+
+    // if (!urlParams.has('id_token')) {
+    //   return;
+    // }
+
+    var url = 'https://api.sethcharleston.com/test1/access';
+    var token = urlParams.get('id_token');
+    console.log(token);
+    // fetch(url, {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': token
+    //   }
+    // })
+    //   .then(res => res.json())
+    //   .then(response => {
+    //     console.log("Success:", JSON.stringify(response));
+    //     document.getElementById("login").innerHTML = "<div class=\"text-success\">True</div>";
+    //   })
+    //   .catch(error => {
+    //     console.error("Error:", error);
+    //     document.getElementById("login").innerHTML = "<div class=\"text-danger\">False</div>";
+    //   });
+  </script>
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs">
     <li class="nav-item">
-      <a class="nav-link active" data-toggle="tab" href="#bio">Bio</a>
+      <a class="nav-link active" data-toggle="tab" href="#bio" onclick="generateBio()">Bio</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" data-toggle="tab" href="#events" onclick="generateEvents()">Events</a>
@@ -82,6 +138,7 @@
       <script>
         //FOR GRABBING FROM DYNAMODB
         function generateBio() {
+          console.log("generating bio");
           fetch("https://api.sethcharleston.com/test1/text")
             .then(function(response) {
               return response.json();
