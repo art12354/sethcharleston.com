@@ -22,7 +22,7 @@
 <body class="container  p-3 my-3 bg-dark text-white" onload="generateBio()">
   <div class="row">
     <h1 class="col">Website Editing Tool</h1>
-    <p class="col">Logged in: <p id="login"><div class="text-danger">False</div></p>
+    <p class="col text-right">Logged in: <p id="login" class="text-danger">False</p>
   </div>
   <p>Editing your site -- reimagined</p>
   <script>
@@ -36,7 +36,6 @@
     var arr = queryString.split('&');
 
     var list = {};
-
     for (var i = 0; i < arr.length; i++) {
       // separate the keys and the values
       var a = arr[i].split('=');
@@ -55,15 +54,15 @@
         'Authorization': token
       }
     })
-      .then(res => res.json())
-      .then(response => {
-        console.log("Success:", JSON.stringify(response));
-        document.getElementById("login").innerHTML = "<div class=\"text-success\">True</div>";
+      .then(res => {
+        if (res.ok) {
+          document.getElementById("login").innerHTML = "True";
+          document.getElementById("login").className = "text-success";
+        }
       })
-      .catch(error => {
-        console.error("Error:", error);
-        document.getElementById("login").innerHTML = "<div class=\"text-danger\">False</div>";
-      });
+      .then(error => {
+        console.error(error);
+      })
   </script>
 
   <!-- Nav tabs -->
