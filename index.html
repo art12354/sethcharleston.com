@@ -30,14 +30,12 @@
 
     // grab info
     var queryString = window.location.hash;
-    console.log(queryString);
     // take off begining #
     queryString = queryString.slice(1);
-    console.log(queryString);
     // split query string into its component parts
     var arr = queryString.split('&');
 
-    var list = []
+    var list = {};
 
     for (var i = 0; i < arr.length; i++) {
       // separate the keys and the values
@@ -45,37 +43,27 @@
       // set parameter name and value (use 'true' if empty)
       var paramName = a[0];
       var paramValue = typeof (a[1]) === 'undefined' ? true : a[1];
-      list.push({a[0]:a[1]});
+      list[paramName] = paramValue;
     }
-    console.log(list);
-
-
-
-
-
-    // if (!urlParams.has('id_token')) {
-    //   return;
-    // }
-
     var url = 'https://api.sethcharleston.com/test1/access';
-    var token = urlParams.get('id_token');
-    console.log(token);
-    // fetch(url, {
-    //   method: 'GET',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': token
-    //   }
-    // })
-    //   .then(res => res.json())
-    //   .then(response => {
-    //     console.log("Success:", JSON.stringify(response));
-    //     document.getElementById("login").innerHTML = "<div class=\"text-success\">True</div>";
-    //   })
-    //   .catch(error => {
-    //     console.error("Error:", error);
-    //     document.getElementById("login").innerHTML = "<div class=\"text-danger\">False</div>";
-    //   });
+    var token = list['id_token'];
+    console.log('id_token: ', token);
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token
+      }
+    })
+      .then(res => res.json())
+      .then(response => {
+        console.log("Success:", JSON.stringify(response));
+        document.getElementById("login").innerHTML = "<div class=\"text-success\">True</div>";
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        document.getElementById("login").innerHTML = "<div class=\"text-danger\">False</div>";
+      });
   </script>
 
   <!-- Nav tabs -->
