@@ -22,12 +22,15 @@
 <body class="container  p-3 my-3 bg-dark text-white" onload="generateBio()">
   <div class="row">
     <h1 class="col">Website Editing Tool</h1>
-    <p class="col text-right">Logged in: <p id="login" class="text-danger">False</p>
+    <button type="button" onclick="login()" class="btn btn-warning" id="login">Sign In</button>
   </div>
   <p>Editing your site -- reimagined</p>
   <script>
+    function login() {
+      window.location.replace('https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com');
+    }
     // for testing to see if logged in
-
+    var signedIn = false;
     // grab info
     var queryString = window.location.hash;
     // take off begining #
@@ -56,8 +59,10 @@
     })
       .then(res => {
         if (res.ok) {
-          document.getElementById("login").innerHTML = "True";
-          document.getElementById("login").className = "text-success";
+          document.getElementById("login").innerHTML = "Signed In";
+          document.getElementById("login").className = "btn btn-success";
+          document.getElementById("login").disabled = true;
+          signedIn = true;
         }
       })
       .then(error => {
@@ -94,6 +99,10 @@
       <script>
         //FOR PUTTING TO DYNAMODB
         function send_bio_data() {
+          if (!signedIn) {
+            document.getElementById("bioAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
+            return;
+          }
           var url = "https://api.sethcharleston.com/test1/text/";
           var data = {
             location: "bio",
@@ -103,7 +112,8 @@
               method: "POST",
               body: JSON.stringify(data),
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": token
               }
             })
             .then(res => res.json())
@@ -177,6 +187,10 @@
         document.getElementById("tickets").value = "";
         //FOR PUTTING TO DYNAMODB
         function send_event_data() {
+          if (!signedIn) {
+            document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
+            return;
+          }
           var eventDate = new Date(document.getElementById("date").value + "T" + document.getElementById("time").value);
           console.log(eventDate);
           var url = "https://api.sethcharleston.com/test1";
@@ -190,7 +204,8 @@
               method: "POST",
               body: JSON.stringify(data),
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": token
               }
             })
             .then(res => res.json())
@@ -201,7 +216,7 @@
             })
             .catch(error => {
               console.error("Error:", error);
-              document.getElementById("bioAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error + "</div>";
+              document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error + "</div>";
             }).then(() => {
               timeoutID = window.setTimeout(generateEvents(), 10000, 'That was really slow!');
             });
@@ -236,7 +251,7 @@
             });
         }
 
-        // FOR EDITING EVENTS
+        // FOR EDITING EVENTS (populating the form with an existing event)
         function edit(eventToEdit) {
           fetch("https://api.sethcharleston.com/test1")
             .then(function(response) {
@@ -264,6 +279,10 @@
 
         //FOR DELETING EVENTS
         function deleteEvent(eventToDelete) {
+          if (!signedIn) {
+            document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
+            return;
+          }
           fetch("https://api.sethcharleston.com/test1")
             .then(function(response) {
               return response.json();
@@ -287,13 +306,15 @@
                       method: 'POST',
                       body: JSON.stringify(data),
                       headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        "Authorization": token
                       }
                     }).then(res => res.json())
                     .then(response => {
                       console.log("Success:", JSON.stringify(response));
                       document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-success alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Item Deleted! </strong>" +
                         JSON.stringify(response) + "</div>";
+                      generateEvents();
                     })
                     .catch(error => {
                       console.error("Error:", error);
@@ -333,6 +354,10 @@
         document.getElementById("releaseDate").value = "";
         //FOR PUTTING TO DYNAMODB
         function send_song_data() {
+          if (!signedIn) {
+            document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
+            return;
+          }
           //1995-12-17T03:24:00
           var eventDate = new Date(document.getElementById("releaseDate").value + "T00:00:00");
           console.log(eventDate);
@@ -347,7 +372,8 @@
               method: "POST",
               body: JSON.stringify(data),
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": token
               }
             })
             .then(res => res.json())
@@ -419,6 +445,10 @@
 
         //FOR DELETING SONGS
         function deleteSong(songToDelete) {
+          if (!signedIn) {
+            document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
+            return;
+          }
           fetch("https://api.sethcharleston.com/test1/songs")
             .then(function(response) {
               return response.json();
@@ -441,7 +471,8 @@
                       method: 'POST',
                       body: JSON.stringify(data),
                       headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        "Authorization": token
                       }
                     }).then(res => res.json())
                     .then(response => {
