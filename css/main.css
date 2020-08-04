@@ -77,6 +77,9 @@ nav a {
     padding: 20px;
     padding-top: 20px;
   }
+  #logo a {
+    text-align: center;
+  }
   #social a {
     font-size: 2em;
     padding-top: 30px;
