@@ -204,22 +204,38 @@ main {
   grid-area: info;
   text-align: center;
   /* padding-top: 40px; */
+  display: flex;
+  flex-direction: column;
+}
+.info div {
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+.info div a, .info div iframe {
+  box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
+}
+.info div h1, .info div p {
+  margin: 20px;
+}
+.info div div {
+  display: flex;
+  flex-direction: column;
 }
 @media screen and (min-width: 750px) {
   .info {
     font-size: 1.5em;
   }
+  .info div {
+    flex-wrap: nowrap;
+  }
 }
 .info h1 {
   font-size: 2em;
   font-family: 'Dancing Script';
-  display: none;
-  }
-
-  @media screen and (min-width: 750px) {
-    .info h1 {
-      display: block;
-    }
   }
 .section {
   grid-area: section;
@@ -258,37 +274,26 @@ footer {
   padding-top: 2em;
 	background-color: #393939;
 	color: whitesmoke;
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-  grid-row-gap: 50px;
-	grid-template-areas:
-		"title title"
-		"form form"
-		"social social"
-    "footer footer";
+	display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  align-content: space-around;
+  font-size: 1em;
+}
+
+footer section {
+
 }
 @media screen and (min-width: 750px) {
-  footer {
-    grid-template-areas:
-  		"title title"
-  		"form social"
-      "footer footer";
-  }
-}
-@media screen and (min-width: 1200px) {
-  footer {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-areas:
-  		". title title ."
-  		". form social ."
-      ". footer footer .";
+  footer section {
+    max-width: 40%;
   }
 }
 .title {
 	text-align: center;
 	font-size: 3em;
   font-family: 'Dancing Script';
-	grid-area: title;
 }
 
 #mc_embed_signup {
@@ -297,14 +302,13 @@ footer {
 }
 #imbeingrealstupid {
   text-align: center;
-  font-size: 1.5em;
   font-family: 'Dancing Script';
   margin-bottom: 10px;
 }
 .mc-field-group {
   text-align: left;
   font-family: 'Dancing Script';
-  font-size: 1.2em;
+  font-size: 0.5em;
 }
 .mc-field-group input {
 	width: 90%;
@@ -321,7 +325,6 @@ footer {
 	width: 120px;
 	margin: 10px;
 	height: 30px;
-  font-size: 0.8em;
   font-family: 'Adamina';
 	background-color: whitesmoke;
 	color: #393939;
@@ -332,14 +335,12 @@ footer {
   opacity: 0.4;
 }
 .social {
-  grid-area: social;
   text-align: center;
 
 }
 .social .fa {
 	color: #B6B6B6;
   padding: 10px;
-  font-size: 3em;
   width: 30px;
   text-align: center;
   text-decoration: none;
@@ -348,24 +349,25 @@ footer {
 .social a:hover {
     opacity: 0.7;
 }
-.social p{
-  font-size: 2em;
-  font-family: 'Dancing Script';
-}
-.social p a {
-  text-decoration: none;
-  color: #B6B6B6;
-  margin: 5px 2px;
-  font-family: 'Adamina';
-  font-size: 0.5em;
-}
 .footer {
-  grid-area: footer;
   text-align: center;
+  font-family: 'Adamina';
+  text-decoration: none;
+  font-size: 0.4em;
+  margin-left: 20px;
 }
 .footer a {
   text-decoration: none;
   color: whitesmoke;
+}
+.footerImg img {
+  max-width: 100%;
+  display: none;
+}
+@media screen and (min-width: 750px) {
+  .footerImg img {
+    display: block;
+  }
 }
 .spacer {
   text-align: center;
