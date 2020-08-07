@@ -174,7 +174,6 @@ header h1 {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  background-attachment: fixed;
   background-image: url("../photos/homePage.jpg");
   margin-bottom: 20px;
   display: flex;
