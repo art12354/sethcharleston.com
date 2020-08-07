@@ -1,0 +1,427 @@
+.fa {
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+}
+body, html {
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+body {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "header"
+    "main"
+    "footer";
+    background-color: whitesmoke;
+}
+nav {
+  position: fixed;
+  width: 100%;
+	background-color: #393939;
+  opacity: 0.9;
+  overflow: hidden;
+  z-index: 2;
+}
+@media screen and (min-width: 750px) {
+  nav {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-areas:
+  		"links logo social";
+  }
+}
+#links {
+  grid-area: links;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  display: none;
+}
+#logo {
+  grid-area: logo;
+  justify-content: center;
+  align-items: stretch;
+  display: flex;
+}
+.logo {
+  max-height: 1.5em;
+  font-size: 1.25em;
+}
+.logoWrap {
+  width: 50%;
+}
+#social {
+  grid-area: social;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  display: none;
+}
+nav a {
+  font-family: 'Dancing Script';
+	text-decoration: none;
+	font-size: 1.5em;
+	color: whitesmoke;
+}
+@media screen and (min-width: 750px) {
+  nav a {
+    font-size: 2.5em;
+  }
+  #links, #logo, #social {
+    display: flex;
+  }
+  #links a {
+    padding: 20px;
+    padding-top: 20px;
+  }
+  #logo a {
+    text-align: center;
+  }
+  #social a {
+    font-size: 2em;
+    padding-top: 30px;
+  }
+}
+.link:hover {
+	background-color: whitesmoke;
+	color: #2F2F2F;
+	text-decoration: none;
+}
+.active {
+  color: #aaa;
+}
+.icon {
+  display: block;
+  text-align: right;
+  font-size: 2.5em;
+  padding-right: 20px;
+  width: 50%;
+}
+@media screen and (min-width: 750px) {
+  .icon {
+      display: none;
+  }
+}
+.topNav.responsive {
+  height: 100%;
+}
+.topNav.responsive #links, .topNav.responsive #social {
+  display: flex;
+}
+.topNav.responsive #links {
+  flex-direction: column;
+  text-align: center;
+}
+.topNav.responsive #links a {
+  padding: 20px;
+}
+.topNav.responsive a {
+  float: none;
+  font-size: 2.5em;
+}
+.topNav.responsive #social a {
+  font-size: 2em;
+}
+.topNav.responsive #logo .logoWrap {
+  max-height: 2em;
+  font-size: 1.5em;
+}
+
+header {
+  grid-area: header;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  background-color: whitesmoke;
+  text-align: center;
+}
+header video {
+    right: 0;
+    bottom: 0;
+    max-width: 100%;
+    display: none;
+}
+@media screen and (min-width: 750px) {
+  header video {
+      display: block;
+  }
+}
+header h1 {
+  margin-top: 200px;
+  font-size: 6em;
+  font-family: 'Dancing Script';
+  color: #2F2F2F;
+}
+.words {
+  position: absolute;
+  top: 40vh;
+  left: 20%;
+  right: 20%;
+  width: 60%;
+}
+.non_index_img {
+  position: static;
+  width: 100%;
+}
+#homeImage {
+  position: static;
+  width: 100%;
+  height: 100vh;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url("../photos/homePage.jpg");
+  margin-bottom: 20px;
+  display: flex;
+}
+@media screen and (min-width: 750px) {
+  #homeImage {
+      display: none;
+  }
+  .words {
+    display: none;
+  }
+}
+main {
+  display: grid;
+  grid-template-columns: 1fr 8fr 1fr;
+  grid-row-gap: 4em;
+  grid-template-areas:
+    ". info ."
+    "section section section"
+    ". video .";
+  background-color: whitesmoke;
+  color: #393939;
+  padding-bottom: 1em;
+}
+@media screen and (min-width: 1200px) {
+  main {
+    grid-template-columns: 3fr 1fr 8fr 1fr 3fr;
+    grid-template-areas:
+      ". . info . ."
+      "section section section section section"
+      ". . video . .";
+  }
+}
+.info {
+  grid-area: info;
+  text-align: center;
+  /* padding-top: 40px; */
+  display: flex;
+  flex-direction: column;
+  font-family: 'Adamina';
+}
+.info div {
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+.info div a, .info div iframe {
+  box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
+}
+.info div h1, .info div p {
+  margin: 20px;
+}
+.info div div {
+  display: flex;
+  flex-direction: column;
+}
+@media screen and (min-width: 750px) {
+  .info {
+    font-size: 1.5em;
+  }
+  .info div {
+    flex-wrap: nowrap;
+  }
+}
+.info h1 {
+  font-size: 2em;
+  font-family: 'Dancing Script';
+  }
+.section {
+  grid-area: section;
+  background-image: url("../photos/Seth_Charleston_Music_Drawing.jpg");
+  height: 200px;
+  background-size: 100%;
+  background-position: center;
+}
+@media screen and (min-width: 750px) {
+  .section {
+    height: 500px;
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+}
+.video {
+  grid-area: video;
+  padding-bottom: 60px;
+}
+.video iframe {
+  width: 100%;
+  height: 230px;
+  box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
+}
+.video h1 {
+  margin-top: 0;
+}
+@media screen and (min-width: 750px) {
+  .video iframe {
+    height: 400px;
+  }
+}
+footer {
+	width: 100%;
+  padding-top: 2em;
+	background-color: #393939;
+	color: whitesmoke;
+	display: flex;
+  text-align: center;
+  align-items: stretch;
+  justify-content: center;
+  align-content: center;
+  font-size: 1em;
+}
+
+footer section {
+
+}
+@media screen and (min-width: 750px) {
+  footer section {
+    max-width: 40%;
+  }
+}
+.title {
+	text-align: center;
+	font-size: 3em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: space-around;
+  justify-content: space-around;
+}
+
+#mc_embed_signup {
+	grid-area: form;
+	padding: 0px 5%;
+}
+#imbeingrealstupid {
+  text-align: center;
+  font-family: 'Dancing Script';
+  margin-bottom: 10px;
+  font-size: 0.75em;
+}
+.mc-field-group {
+  text-align: left;
+  font-size: 0.3em;
+  font-family: 'Adamina';
+}
+.mc-field-group input {
+	width: 90%;
+	height: 20px;
+	margin: 10px;
+  padding: 2px;
+	background-color: whitesmoke;
+	color: #393939;
+	border-radius: 5px;
+	border: none;
+}
+
+#mc-embedded-subscribe {
+	width: 120px;
+	margin: 10px;
+	height: 30px;
+  font-family: 'Adamina';
+	background-color: whitesmoke;
+	color: #393939;
+	border-radius: 5px;
+	border: none;
+}
+#mc-embedded-subscribe:hover {
+  opacity: 0.4;
+}
+.social {
+  text-align: center;
+
+}
+.social .fa {
+	color: #B6B6B6;
+  padding: 10px;
+  width: 30px;
+  text-align: center;
+  text-decoration: none;
+  margin: 5px 2px;
+}
+.social a:hover {
+    opacity: 0.7;
+}
+.footer {
+  text-align: center;
+  font-family: 'Adamina';
+  text-decoration: none;
+  font-size: 0.4em;
+  margin: 20px;
+}
+.footer a {
+  text-decoration: none;
+  color: whitesmoke;
+}
+.footerImg {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+.footerImg img {
+  max-width: 100%;
+  margin: 20px;
+  box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
+  display: none;
+}
+@media screen and (min-width: 750px) {
+  .footerImg img {
+    display: block;
+  }
+}
+.spacer {
+  text-align: center;
+  font-size: 16vw;
+  font-family: 'Dancing Script';
+  color: #393939;
+  margin-bottom: 40px;
+  margin-top: 30px;
+}
+.fader {
+  width: 100%;
+  height: 40px;
+  background-image: linear-gradient(rgba(0,0,0,0), whitesmoke);
+  align-self: flex-end;
+}
+.album {
+  grid-column-start: 2;
+  grid-column-end: 3;
+}
+@media screen and (min-width: 1200px) {
+  .album {
+    grid-column-start: 2;
+    grid-column-end: 5;
+  }
+}
+.album iframe {
+  width: 100%;
+  height: 300px;
+  box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
+}
+.events {
+  border-style: solid;
+  border-width: medium;
+  margin-bottom: 50px;
+  box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
+}
