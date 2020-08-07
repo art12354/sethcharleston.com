@@ -137,6 +137,7 @@ header {
   background-size: cover;
   background-attachment: fixed;
   background-color: whitesmoke;
+  text-align: center;
 }
 header video {
     right: 0;
@@ -148,6 +149,12 @@ header video {
   header video {
       display: block;
   }
+}
+header h1 {
+  margin-top: 200px;
+  font-size: 6em;
+  font-family: 'Dancing Script';
+  color: #2F2F2F;
 }
 .words {
   position: absolute;
@@ -170,6 +177,7 @@ header video {
   background-attachment: fixed;
   background-image: url("../photos/homePage.jpg");
   margin-bottom: 20px;
+  display: flex;
 }
 @media screen and (min-width: 750px) {
   #homeImage {
@@ -206,6 +214,7 @@ main {
   /* padding-top: 40px; */
   display: flex;
   flex-direction: column;
+  font-family: 'Adamina';
 }
 .info div {
   display: flex;
@@ -276,9 +285,9 @@ footer {
 	color: whitesmoke;
 	display: flex;
   text-align: center;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  align-content: space-around;
+  align-content: center;
   font-size: 1em;
 }
 
@@ -293,7 +302,11 @@ footer section {
 .title {
 	text-align: center;
 	font-size: 3em;
-  font-family: 'Dancing Script';
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: space-around;
+  justify-content: space-around;
 }
 
 #mc_embed_signup {
@@ -304,11 +317,12 @@ footer section {
   text-align: center;
   font-family: 'Dancing Script';
   margin-bottom: 10px;
+  font-size: 0.75em;
 }
 .mc-field-group {
   text-align: left;
-  font-family: 'Dancing Script';
-  font-size: 0.5em;
+  font-size: 0.3em;
+  font-family: 'Adamina';
 }
 .mc-field-group input {
 	width: 90%;
@@ -354,14 +368,22 @@ footer section {
   font-family: 'Adamina';
   text-decoration: none;
   font-size: 0.4em;
-  margin-left: 20px;
+  margin: 20px;
 }
 .footer a {
   text-decoration: none;
   color: whitesmoke;
 }
+.footerImg {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
 .footerImg img {
   max-width: 100%;
+  margin: 20px;
+  box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
   display: none;
 }
 @media screen and (min-width: 750px) {
@@ -377,13 +399,12 @@ footer section {
   margin-bottom: 40px;
   margin-top: 30px;
 }
-/* .fader {
+.fader {
   width: 100%;
-  height: 150px;
-  position: absolute;
+  height: 40px;
   background-image: linear-gradient(rgba(0,0,0,0), whitesmoke);
-  top: 150px;
-} */
+  align-self: flex-end;
+}
 .album {
   grid-column-start: 2;
   grid-column-end: 3;
