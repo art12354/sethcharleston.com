@@ -264,8 +264,7 @@ main {
   }
 }
 .video {
-  grid-area: video;
-  padding-bottom: 60px;
+  padding-top: 60px;
 }
 .video iframe {
   width: 100%;
