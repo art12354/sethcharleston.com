@@ -265,6 +265,7 @@ main {
 }
 .video {
   padding-top: 60px;
+  flex-direction: column-reverse;
 }
 .video iframe {
   width: 100%;
@@ -275,6 +276,9 @@ main {
   margin-top: 0;
 }
 @media screen and (min-width: 750px) {
+  .video {
+    flex-direction: row;
+  }
   .video iframe {
     height: 400px;
   }
