@@ -224,7 +224,7 @@ main {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 60px;
+  margin-bottom: 60px;
 }
 .info div a, .info div iframe {
   box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
@@ -263,8 +263,11 @@ main {
     background-repeat: no-repeat;
   }
 }
+.spotify {
+  flex-direction: column-reverse;
+}
 .video {
-  padding-top: 60px;
+  margin-bottom: 0;
   flex-direction: column-reverse;
 }
 .video iframe {
@@ -276,7 +279,11 @@ main {
   margin-top: 0;
 }
 @media screen and (min-width: 750px) {
+  .spotify {
+    flex-direction: row;
+  }
   .video {
+    padding-top: 60px;
     flex-direction: row;
   }
   .video iframe {
