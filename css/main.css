@@ -397,6 +397,7 @@ footer section {
   max-width: 100%;
   box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
   display: none;
+  margin-bottom: 20px;
 }
 @media screen and (min-width: 750px) {
   .footerImg img {
