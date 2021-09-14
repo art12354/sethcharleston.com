@@ -165,7 +165,7 @@ header h1 {
 }
 .non_index_img {
   position: static;
-  width: 100%;
+  max-height: 100vh;
 }
 #homeImage {
   position: static;
@@ -174,7 +174,7 @@ header h1 {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  background-image: url("../photos/homePage.jpg");
+  background-image: url("../photos/Homepage2.jpeg");
   margin-bottom: 20px;
   display: flex;
 }
