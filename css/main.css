@@ -51,7 +51,7 @@ nav {
   font-size: 1.25em;
 }
 .logoWrap {
-  width: 50%;
+  /* width: 50%; */
 }
 #social {
   grid-area: social;
@@ -215,6 +215,10 @@ main {
   color: #393939;
   padding-bottom: 1em;
 }
+.main {
+  font-family: 'Adamina';
+  text-align: center;
+}
 @media screen and (min-width: 1200px) {
   main {
     grid-template-columns: 2fr 1fr 8fr 1fr 2fr;
@@ -228,7 +232,7 @@ main {
   }
 }
 .info {
-  /* grid-area: info; */
+  grid-area: info;
   text-align: center;
   font-family: 'Adamina';
 }
@@ -259,6 +263,10 @@ main {
     flex-wrap: nowrap;
   }
 }
+.info h1 {
+  font-size: 2em;
+  font-family: 'Dancing Script';
+  }
 .section {
   grid-area: section;
   background-image: url("../photos/Seth_Charleston_Music_Drawing.jpg");
@@ -446,7 +454,7 @@ footer section {
 }
 .events {
   border-style: solid;
-  border-width: medium;
+  border-width: 1px;
   margin-bottom: 50px;
   box-shadow: 0 16px 32px 0 rgba(0,0,0,0.8);
   grid-column-start: 2;
