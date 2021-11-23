@@ -87,8 +87,8 @@
       <div class="spotify">
         <!-- <iframe src="https://open.spotify.com/embed/album/6wOt3Hk0Wc8gDu7q5eOn7F" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe> -->
         <div>
-          <h1>New music is coming!</h1>
-          <p>I’m gearing up to release two of my most vulnerable and heartfelt works as part of a two-track single on 9/24. These songs tell a story of love, loss, and heartbreak. They’re both about a girl who changed my life forever.</p>
+          <h1 id="frontPageHeader">New music is coming!</h1>
+          <p id="frontPageText">I’m gearing up to release two of my most vulnerable and heartfelt works as part of a two-track single on 9/24. These songs tell a story of love, loss, and heartbreak. They’re both about a girl who changed my life forever.</p>
         </div>
       </div>
       <!-- <div>
@@ -142,18 +142,18 @@
     </section>
   </footer>
   <script>
-    events = [];
-    var x = "";
     fetch('https://api.sethcharleston.com/test1/text')
       .then(function(response) {
         return response.json();
       })
       .then(function(data) {
-        data.forEach(function(text) {
-          console.log(text);
-          if (text.location = "bio") {
-            x = text.text;
-            document.getElementById("bio").innerHTML = x;
+        data.forEach(function(item) {
+          console.log(item);
+          if (item.location === "frontPageHeader") {
+            document.getElementById("frontPageHeader").innerHTML = item.text;
+          }
+          if (item.location === "frontPageText") {
+            document.getElementById("frontPageText").innerHTML = item.text;
           }
         });
       });
