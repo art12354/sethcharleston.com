@@ -73,7 +73,10 @@
   <!-- Nav tabs -->
   <ul class="nav nav-tabs">
     <li class="nav-item">
-      <a class="nav-link active" data-toggle="tab" href="#bio" onclick="generateBio()">Bio</a>
+      <a class="nav-link active" data-toggle="tab" href="#front_page" onclick="generateFrontPage()">Front Page</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#bio" onclick="generateBio()">Bio</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" data-toggle="tab" href="#events" onclick="generateEvents()">Events</a>
@@ -85,8 +88,75 @@
 
   <!-- Tab panes -->
   <div class="tab-content">
+    <!-- Front Page -->
+    <div class="tab-pane container active" id="front_page">
+      <div class="form-group">
+        <label for="front_page">Text For the Front Page:</label>
+        <textarea class="form-control" rows="10" id="frontPageText"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" onclick="send_front_page_data()">Submit Front Page</button>
+      <div id="frontPageAlert" class="pt-3">
+        <p>Feel free to use any of <a href="http://www.tagindex.net/html/text/index.html" target="_blank">these</a> tags!</p>
+
+      </div>
+      <script>
+        //FOR PUTTING TO DYNAMODB
+        function send_front_page_data() {
+          if (!signedIn) {
+            document.getElementById("frontPageAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
+            return;
+          }
+          var url = "https://api.sethcharleston.com/test1/text/";
+          var data = {
+            location: "frontPage",
+            text: document.getElementById("frontPageText").value
+          };
+          fetch(url, {
+              method: "POST",
+              body: JSON.stringify(data),
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": token
+              }
+            })
+            .then(res => res.json())
+            .then(response => {
+              console.log("Success:", JSON.stringify(response));
+              document.getElementById("frontPageAlert").innerHTML = "<div class=\"alert alert-success alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Success! </strong>" + JSON.stringify(
+                response) + "</div>";
+            })
+            .catch(error => {
+              console.error("Error:", error);
+              document.getElementById("frontPageAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error + "</div>";
+            });
+        }
+      </script>
+      <div class="pt-3">
+        <p>Rendered Front Page Text:</p>
+        <div id="frontPageInfo" class="card-deck"></div>
+      </div>
+      <script>
+        //FOR GRABBING FROM DYNAMODB
+        function generateFrontPage() {
+          console.log("generating Front Page Text");
+          fetch("https://api.sethcharleston.com/test1/text")
+            .then(function(response) {
+              return response.json();
+            })
+            .then(function(data) {
+              data.forEach(function(text) {
+                console.log(text);
+                if (text.location === "frontPage") {
+                  document.getElementById("frontPageText").value = text.text;
+                  document.getElementById("frontPageInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + text.text + "</p>" + "</div></div>";;
+                }
+              });
+            });
+        }
+      </script>
+    </div>
     <!-- BIO -->
-    <div class="tab-pane container active" id="bio">
+    <div class="tab-pane container fade" id="bio">
       <div class="form-group">
         <label for="bio">Text For the Bio:</label>
         <textarea class="form-control" rows="10" id="bioText"></textarea>
