@@ -110,14 +110,8 @@
           }
           var url = "https://api.sethcharleston.com/test1/text/";
           var data = [
-            {
-              location: "frontPageText",
-              text: document.getElementById("frontPageText").value
-            },
-            {
-              location: "frontPageHeader",
-              text: document.getElementbyId("frontPageHeader").value
-            }
+            {location: "frontPageText",text: document.getElementById("frontPageText").value},
+            {location: "frontPageHeader",text: document.getElementById("frontPageHeader").value}
           ];
           console.log(JSON.stringify(data));
           fetch(url, {
