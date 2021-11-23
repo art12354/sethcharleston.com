@@ -19,7 +19,7 @@
   <title>Website Editor</title>
 </head>
 
-<body class="container  p-3 my-3 bg-dark text-white" onload="generateBio()">
+<body class="container  p-3 my-3 bg-dark text-white" onload="generateFrontPage()">
   <div class="row">
     <h1 class="col">Website Editing Tool</h1>
     <button type="button" onclick="login()" class="btn btn-warning" id="login">Sign In</button>
@@ -91,7 +91,9 @@
     <!-- Front Page -->
     <div class="tab-pane container active" id="front_page">
       <div class="form-group">
-        <label for="front_page">Text For the Front Page:</label>
+        <label for="front_page_header">Header For the Front Page:</label>
+        <textarea class="form-control" rows="1" id="frontPageHeader"></textarea>
+        <label for="front_page_text">Text For the Front Page:</label>
         <textarea class="form-control" rows="10" id="frontPageText"></textarea>
       </div>
       <button type="submit" class="btn btn-primary" onclick="send_front_page_data()">Submit Front Page</button>
