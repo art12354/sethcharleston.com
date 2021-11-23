@@ -109,10 +109,17 @@
             return;
           }
           var url = "https://api.sethcharleston.com/test1/text/";
-          var data = {
-            location: "frontPage",
-            text: document.getElementById("frontPageText").value
-          };
+          var data = [
+            {
+              location: "frontPageText",
+              text: document.getElementById("frontPageText").value
+            },
+            {
+              location: "frontPageHeader",
+              text: document.getElementbyId("frontPageHeader").value
+            }
+          ];
+          console.log(JSON.stringify(data))
           fetch(url, {
               method: "POST",
               body: JSON.stringify(data),
@@ -135,7 +142,8 @@
       </script>
       <div class="pt-3">
         <p>Rendered Front Page Text:</p>
-        <div id="frontPageInfo" class="card-deck"></div>
+        <div id="frontPageHeaderInfo" class="card-deck"></div>
+        <div id="frontPageTextInfo" class="card-deck"></div>
       </div>
       <script>
         //FOR GRABBING FROM DYNAMODB
@@ -148,9 +156,13 @@
             .then(function(data) {
               data.forEach(function(text) {
                 console.log(text);
-                if (text.location === "frontPage") {
+                if (text.location === "frontPageHeader") {
+                  document.getElementById("frontPageHeader").value = text.text;
+                  document.getElementById("frontPageHeaderInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + text.text + "</p>" + "</div></div>";
+                }
+                if (text.location === "frontPageText") {
                   document.getElementById("frontPageText").value = text.text;
-                  document.getElementById("frontPageInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + text.text + "</p>" + "</div></div>";;
+                  document.getElementById("frontPageTextInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + text.text + "</p>" + "</div></div>";
                 }
               });
             });
