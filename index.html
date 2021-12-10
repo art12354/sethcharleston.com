@@ -1,4 +1,4 @@
-<!-- login: https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com-->
+<!-- login: https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,59 +16,35 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <!-- angularjs -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+  <!-- login script -->
+  <script src="js/login.js"></script>
+  <!-- front page scripts -->
+  <script src="js/send_front_page_data.js"></script>
+  <script src="js/generateFrontPage.js"></script>
+  <!-- bio page scripts -->
+  <script src="js/send_bio_data.js"></script>
+  <script src="js/generateBio.js"></script>
+  <!-- event page scripts -->
+  <script src="js/send_event_data.js"></script>
+  <script src="js/generateEvents.js"></script>
+  <script src="js/editEvent.js"></script>
+  <script src="js/deleteEvent.js"></script>
+  <!-- song page scripts -->
+  <script src="js/send_song_data.js"></script>
+  <script src="js/generateSongs.js"></script>
+  <script src="js/editSong.js"></script>
+  <script src="js/deleteSong.js"></script>
+
   <title>Website Editor</title>
 </head>
 
 <body class="container  p-3 my-3 bg-dark text-white" onload="generateFrontPage()">
+
   <div class="row">
     <h1 class="col">Website Editing Tool</h1>
     <button type="button" onclick="login()" class="btn btn-warning" id="login">Sign In</button>
   </div>
   <p>Editing your site -- reimagined</p>
-  <script>
-    function login() {
-      window.location.replace('https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com');
-    }
-    // for testing to see if logged in
-    var signedIn = false;
-    // grab info
-    var queryString = window.location.hash;
-    // take off begining #
-    queryString = queryString.slice(1);
-    // split query string into its component parts
-    var arr = queryString.split('&');
-
-    var list = {};
-    for (var i = 0; i < arr.length; i++) {
-      // separate the keys and the values
-      var a = arr[i].split('=');
-      // set parameter name and value (use 'true' if empty)
-      var paramName = a[0];
-      var paramValue = typeof (a[1]) === 'undefined' ? true : a[1];
-      list[paramName] = paramValue;
-    }
-    var url = 'https://api.sethcharleston.com/test1/access';
-    var token = list['id_token'];
-    console.log('id_token: ', token);
-    fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token
-      }
-    })
-      .then(res => {
-        if (res.ok) {
-          document.getElementById("login").innerHTML = "Signed In";
-          document.getElementById("login").className = "btn btn-success";
-          document.getElementById("login").disabled = true;
-          signedIn = true;
-        }
-      })
-      .then(error => {
-        console.error(error);
-      })
-  </script>
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs">
@@ -99,70 +75,15 @@
       <button type="submit" class="btn btn-primary" onclick="send_front_page_data()">Submit Front Page</button>
       <div id="frontPageAlert" class="pt-3">
         <p>Feel free to use any of <a href="http://www.tagindex.net/html/text/index.html" target="_blank">these</a> tags!</p>
-
       </div>
-      <script>
-        //FOR PUTTING TO DYNAMODB
-        function send_front_page_data() {
-          if (!signedIn) {
-            document.getElementById("frontPageAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
-            return;
-          }
-          var url = "https://api.sethcharleston.com/test1/text/";
-          var data = [
-            {location: "frontPageText",text: document.getElementById("frontPageText").value},
-            {location: "frontPageHeader",text: document.getElementById("frontPageHeader").value}
-          ];
-          console.log("sending: " + JSON.stringify(data));
-          fetch(url, {
-              method: "POST",
-              body: JSON.stringify(data),
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": token
-              }
-            })
-            .then(res => res.json())
-            .then(response => {
-              console.log("Success:", JSON.stringify(response));
-              document.getElementById("frontPageAlert").innerHTML = "<div class=\"alert alert-success alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Success! </strong>" + JSON.stringify(
-                response) + "</div>";
-            })
-            .catch(error => {
-              console.error("Error:", error);
-              document.getElementById("frontPageAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error + "</div>";
-            });
-        }
-      </script>
+
       <div class="pt-3">
         <p>Rendered Front Page Text:</p>
         <div id="frontPageHeaderInfo" class="card-deck"></div>
         <div id="frontPageTextInfo" class="card-deck"></div>
       </div>
-      <script>
-        //FOR GRABBING FROM DYNAMODB
-        function generateFrontPage() {
-          console.log("generating Front Page Text");
-          fetch("https://api.sethcharleston.com/test1/text")
-            .then(function(response) {
-              return response.json();
-            })
-            .then(function(data) {
-              data.forEach(function(text) {
-                console.log(text);
-                if (text.location === "frontPageHeader") {
-                  document.getElementById("frontPageHeader").value = text.text;
-                  document.getElementById("frontPageHeaderInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + text.text + "</p>" + "</div></div>";
-                }
-                if (text.location === "frontPageText") {
-                  document.getElementById("frontPageText").value = text.text;
-                  document.getElementById("frontPageTextInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + text.text + "</p>" + "</div></div>";
-                }
-              });
-            });
-        }
-      </script>
     </div>
+
     <!-- BIO -->
     <div class="tab-pane container fade" id="bio">
       <div class="form-group">
@@ -172,64 +93,14 @@
       <button type="submit" class="btn btn-primary" onclick="send_bio_data()">Submit Bio</button>
       <div id="bioAlert" class="pt-3">
         <p>Feel free to use any of <a href="http://www.tagindex.net/html/text/index.html" target="_blank">these</a> tags!</p>
-
       </div>
-      <script>
-        //FOR PUTTING TO DYNAMODB
-        function send_bio_data() {
-          if (!signedIn) {
-            document.getElementById("bioAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
-            return;
-          }
-          var url = "https://api.sethcharleston.com/test1/text/";
-          var data = {
-            location: "bio",
-            text: document.getElementById("bioText").value
-          };
-          fetch(url, {
-              method: "POST",
-              body: JSON.stringify(data),
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": token
-              }
-            })
-            .then(res => res.json())
-            .then(response => {
-              console.log("Success:", JSON.stringify(response));
-              document.getElementById("bioAlert").innerHTML = "<div class=\"alert alert-success alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Success! </strong>" + JSON.stringify(
-                response) + "</div>";
-            })
-            .catch(error => {
-              console.error("Error:", error);
-              document.getElementById("bioAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error + "</div>";
-            });
-        }
-      </script>
+
       <div class="pt-3">
         <p>Rendered Bio:</p>
         <div id="bioInfo" class="card-deck"></div>
       </div>
-      <script>
-        //FOR GRABBING FROM DYNAMODB
-        function generateBio() {
-          console.log("generating bio");
-          fetch("https://api.sethcharleston.com/test1/text")
-            .then(function(response) {
-              return response.json();
-            })
-            .then(function(data) {
-              data.forEach(function(text) {
-                console.log(text);
-                if (text.location === "bio") {
-                  document.getElementById("bioText").value = text.text;
-                  document.getElementById("bioInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + text.text + "</p>" + "</div></div>";;
-                }
-              });
-            });
-        }
-      </script>
     </div>
+
     <!-- EVENTS -->
     <div class="tab-pane container fade" id="events">
       <div class="form-group">
@@ -254,158 +125,12 @@
       </div>
       <button type="submit" onclick="send_event_data()" class="btn btn-primary">Submit Event</button>
       <div id="eventAlert" class="pt-3">
-
       </div>
-      <script>
-        //RESETTING TEXTAREA'S
-        document.getElementById("event").value = "";
-        document.getElementById("date").value = "";
-        document.getElementById("time").value = "";
-        document.getElementById("where").value = "";
-        document.getElementById("tickets").value = "";
-        //FOR PUTTING TO DYNAMODB
-        function send_event_data() {
-          if (!signedIn) {
-            document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
-            return;
-          }
-          var eventDate = new Date(document.getElementById("date").value + "T" + document.getElementById("time").value);
-          console.log(eventDate);
-          var url = "https://api.sethcharleston.com/test1";
-          var data = {
-            event: document.getElementById("event").value,
-            where: document.getElementById("where").value,
-            when: eventDate.toString(),
-            tickets: document.getElementById("tickets").value
-          };
-          fetch(url, {
-              method: "POST",
-              body: JSON.stringify(data),
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": token
-              }
-            })
-            .then(res => res.json())
-            .then(response => {
-              console.log("Success:", JSON.stringify(response));
-              document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-success alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Success! </strong>" + JSON.stringify(
-                response) + "</div>";
-            })
-            .catch(error => {
-              console.error("Error:", error);
-              document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error + "</div>";
-            }).then(() => {
-              timeoutID = window.setTimeout(generateEvents(), 10000, 'That was really slow!');
-            });
-        }
-      </script>
+
       <div class="pt-3">
         <p>Events:</p>
         <div id="eventInfo" class="card-deck"></div>
       </div>
-      <script>
-        // GENERATING EXISTING EVENTS
-        function generateEvents() {
-          console.log("generating events")
-          var x = "";
-          fetch("https://api.sethcharleston.com/test1")
-            .then(function(response) {
-              return response.json();
-            })
-            .then(function(data) {
-              data.sort(function(a, b) {
-                a = new Date(a.when);
-                b = new Date(b.when);
-                return a < b ? -1 : a > b ? 1 : 0;
-              });
-              data.forEach(function(event) {
-                console.log(event);
-                var when = new Date(event.when);
-                x += "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + event.event + "</p>" + "<p>" + when.toDateString() + " at " + when.toTimeString() + "</p>" + "<p>" + event.where + "</p>" + "<p>" + event.tickets +
-                  "</p><button class=\"btn btn-dark mr-3\" onclick=\"edit('" + event.event + "')\">edit</button><button class=\"btn btn-danger\" onclick=\"deleteEvent('" + event.event + "')\">delete</button></div></div>";
-                document.getElementById("eventInfo").innerHTML = x;
-              });
-            });
-        }
-
-        // FOR EDITING EVENTS (populating the form with an existing event)
-        function edit(eventToEdit) {
-          fetch("https://api.sethcharleston.com/test1")
-            .then(function(response) {
-              return response.json();
-            })
-            .then(function(data) {
-              data.sort(function(a, b) {
-                a = new Date(a.when);
-                b = new Date(b.when);
-                return a < b ? -1 : a > b ? 1 : 0;
-              });
-              data.forEach(function(event) {
-                if (eventToEdit === event.event) {
-                  document.getElementById("event").value = event.event;
-                  var date = new Date(event.when);
-                  document.getElementById("date").value = date.toISOString().slice(0, 10);
-                  document.getElementById("time").value = date.toTimeString().slice(0, 8);
-                  document.getElementById("where").value = event.where;
-                  document.getElementById("tickets").value = event.tickets;
-                  window.scrollTo(0, 100);
-                }
-              });
-            });
-        }
-
-        //FOR DELETING EVENTS
-        function deleteEvent(eventToDelete) {
-          if (!signedIn) {
-            document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
-            return;
-          }
-          fetch("https://api.sethcharleston.com/test1")
-            .then(function(response) {
-              return response.json();
-            })
-            .then(function(data) {
-              data.sort(function(a, b) {
-                a = new Date(a.when);
-                b = new Date(b.when);
-                return a < b ? -1 : a > b ? 1 : 0;
-              });
-              data.forEach(function(event) {
-                if (eventToDelete === event.event) {
-                  var url = 'https://api.sethcharleston.com/test1/delete';
-                  var data = {
-                    event: event.event,
-                    where: event.where,
-                    when: event.when,
-                    tickets: event.tickets
-                  };
-                  fetch(url, {
-                      method: 'POST',
-                      body: JSON.stringify(data),
-                      headers: {
-                        'Content-Type': 'application/json',
-                        "Authorization": token
-                      }
-                    }).then(res => res.json())
-                    .then(response => {
-                      console.log("Success:", JSON.stringify(response));
-                      document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-success alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Item Deleted! </strong>" +
-                        JSON.stringify(response) + "</div>";
-                      generateEvents();
-                    })
-                    .catch(error => {
-                      console.error("Error:", error);
-                      document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error +
-                        "</div>";
-                    }).then(() => {
-                      timeoutID = window.setTimeout(generateEvents(), 10000, 'That was really slow!');
-                    });
-                }
-              });
-            });
-        }
-      </script>
     </div>
     <!-- MUSIC -->
     <div class="tab-pane container fade" id="music">
@@ -423,155 +148,15 @@
       </div>
       <button type="submit" onclick="send_song_data()" class="btn btn-primary">Submit Event</button>
       <div id="songAlert" class="pt-3">
-
       </div>
-      <script>
-        //RESETTING TEXTAREA'S
-        document.getElementById("song").value = "";
-        document.getElementById("link").value = "";
-        document.getElementById("releaseDate").value = "";
-        //FOR PUTTING TO DYNAMODB
-        function send_song_data() {
-          if (!signedIn) {
-            document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
-            return;
-          }
-          //1995-12-17T03:24:00
-          var eventDate = new Date(document.getElementById("releaseDate").value + "T00:00:00");
-          console.log(eventDate);
-          var url = "https://api.sethcharleston.com/test1/songs";
-          var data = {
-            song: document.getElementById("song").value,
-            link: document.getElementById("link").value,
-            release: eventDate.toString()
-          };
-          console.log(data);
-          fetch(url, {
-              method: "POST",
-              body: JSON.stringify(data),
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": token
-              }
-            })
-            .then(res => res.json())
-            .then(response => {
-              console.log("Success:", JSON.stringify(response));
-              document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-success alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Success! </strong>" + JSON.stringify(
-                response) + "</div>";
-            })
-            .catch(error => {
-              console.error("Error:", error);
-              document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error + "</div>";
-            }).then(() => {
-              timeoutID = window.setTimeout(generateSongs(), 10000, 'That was really slow!');
-            });
-        }
-      </script>
+
       <div class="pt-3">
         <p>Songs:</p>
         <div id="songInfo" class="card-deck"></div>
       </div>
-      <script>
-        // GENERATING EXISTING SONGS
-        function generateSongs() {
-          console.log("generating songs")
-          var x = "";
-          fetch("https://api.sethcharleston.com/test1/songs")
-            .then(function(songResponse) {
-              return songResponse.json();
-            })
-            .then(function(songData) {
-              songData.sort(function(songA, songB) {
-                songA = new Date(songA.release);
-                songB = new Date(songB.release);
-                return songA < songB ? -1 : songA > songB ? 1 : 0;
-              });
-              songData.forEach(function(song) {
-                console.log(song);
-                var releaseDate = new Date(song.release);
-                x += "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + song.song + "</p>" + "<p>" + releaseDate.toDateString() + "</p>" + "<p>" + song.link + "</p>" + "<button class=\"btn btn-dark mr-3\" onclick=\"editSong('" +
-                  song.song + "')\">edit</button><button class=\"btn btn-danger\" onclick=\"deleteSong('" + song.song + "')\">delete</button></div></div>";
-                document.getElementById("songInfo").innerHTML = x;
-              });
-            });
-        }
-
-        // FOR EDITING SONGS
-        function editSong(songToEdit) {
-          fetch("https://api.sethcharleston.com/test1/songs")
-            .then(function(response) {
-              return response.json();
-            })
-            .then(function(data) {
-              data.sort(function(a, b) {
-                a = new Date(a.release);
-                b = new Date(b.release);
-                return a < b ? -1 : a > b ? 1 : 0;
-              });
-              data.forEach(function(song) {
-                if (songToEdit === song.song) {
-                  document.getElementById("song").value = song.song;
-                  var releaseDate = new Date(song.release);
-                  document.getElementById("releaseDate").value = releaseDate.toISOString().slice(0, 10);
-                  document.getElementById("link").value = song.link;
-                  window.scrollTo(0, 100);
-                }
-              });
-            });
-        }
-
-        //FOR DELETING SONGS
-        function deleteSong(songToDelete) {
-          if (!signedIn) {
-            document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
-            return;
-          }
-          fetch("https://api.sethcharleston.com/test1/songs")
-            .then(function(response) {
-              return response.json();
-            })
-            .then(function(data) {
-              data.sort(function(a, b) {
-                a = new Date(a.release);
-                b = new Date(b.release);
-                return a < b ? -1 : a > b ? 1 : 0;
-              });
-              data.forEach(function(song) {
-                if (songToDelete === song.song) {
-                  var url = 'https://api.sethcharleston.com/test1/delete_song';
-                  var data = {
-                    song: song.song,
-                    link: song.link,
-                    release: song.release
-                  };
-                  fetch(url, {
-                      method: 'POST',
-                      body: JSON.stringify(data),
-                      headers: {
-                        'Content-Type': 'application/json',
-                        "Authorization": token
-                      }
-                    }).then(res => res.json())
-                    .then(response => {
-                      console.log("Success:", JSON.stringify(response));
-                      document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-success alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Item Deleted! </strong>" +
-                        JSON.stringify(response) + "</div>";
-                    })
-                    .catch(error => {
-                      console.error("Error:", error);
-                      document.getElementById("songAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + error +
-                        "</div>";
-                    }).then(() => {
-                      timeoutID = window.setTimeout(generateSongs(), 10000, 'That was really slow!');
-                    });
-                }
-              });
-            });
-        }
-      </script>
     </div>
   </div>
+
 </body>
 
 </html>
