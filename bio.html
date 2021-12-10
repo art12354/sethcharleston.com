@@ -147,7 +147,7 @@
       .then(function(data) {
         data.forEach(function(text) {
           console.log(text);
-          if (text.location = "bio") {
+          if (text.location === "bio") {
             x = text.text;
             document.getElementById("bio").innerHTML = x;
           }
