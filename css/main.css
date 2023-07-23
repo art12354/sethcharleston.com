@@ -335,9 +335,14 @@ footer {
 	display: flex;
 	text-align: center;
 	align-items: stretch;
-	justify-content: space-evenly;
+	justify-content: center;
 	align-content: center;
 	font-size: 1em;
+}
+@media screen and (min-width: 750px) {
+  footer {
+    justify-content: space-around;
+  }
 }
 
 footer section {
