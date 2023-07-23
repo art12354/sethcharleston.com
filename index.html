@@ -97,9 +97,9 @@
         <a class="twitter-timeline" data-height="380px" data-theme="light" href="https://twitter.com/sethcharleston?ref_src=twsrc%5Etfw">Tweets by sethcharleston</a>
         <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
       </div> -->
-      <div class="video">
+      <div class="video" id="frontPageVideo">
         <h1>Newest Video</h1>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/ez1xoAw82Ns" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/ez1xoAw82Ns" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
       </div>
     </section>
   </main>
@@ -155,6 +155,9 @@
           }
           if (item.location === "frontPageText") {
             document.getElementById("frontPageText").innerHTML = item.text;
+          }
+          if (item.location === "frontPageVideo") {
+            document.getElementById("frontPageVideo").innerHTML += item.text;
           }
         });
       });
