@@ -16,6 +16,10 @@ function generateFrontPage() {
           document.getElementById("frontPageText").value = text.text;
           document.getElementById("frontPageTextInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\"><p>" + text.text + "</p>" + "</div></div>";
         }
+        if (text.location === "frontPageVideo") {
+          document.getElementById("frontPageText").value = text.text;
+          document.getElementById("frontPageTextInfo").innerHTML = "<div class=\"card\"><div class=\"card-body bg-info\">" + text.text + "</div></div>";
+        }
       });
     });
 }

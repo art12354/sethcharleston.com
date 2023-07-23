@@ -12,6 +12,10 @@ function send_front_page_data() {
     {
       location: "frontPageHeader",
       text: document.getElementById("frontPageHeader").value
+    },
+    {
+      location: "frontPageVideo",
+      text: document.getElementById("frontPageVideo").value
     }
   ];
   console.log("sending: " + JSON.stringify(data));
