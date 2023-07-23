@@ -5,10 +5,10 @@ function send_bio_data() {
     return;
   }
   var url = "https://api.sethcharleston.com/test1/text/";
-  var data = {
+  var data = [{
     location: "bio",
     text: document.getElementById("bioText").value
-  };
+  }];
   fetch(url, {
       method: "POST",
       body: JSON.stringify(data),
