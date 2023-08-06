@@ -28,8 +28,8 @@ function generateSongs() {
                   <p>${song.song}</p>
                   <p>${releaseDate.toDateString()}</p>
                   <p>${song.link}</p>
-                  <button class="btn btn-dark mr-3" onclick="editSong(${song.song})">edit</button>
-                  <button class="btn btn-danger" onclick="deleteSong(${song.song})">delete</button>
+                  <button class="btn btn-dark mr-3" onclick="editSong('${song.song}')">edit</button>
+                  <button class="btn btn-danger" onclick="deleteSong('${song.song}')">delete</button>
                 </div>
               </div>`;
         document.getElementById("songInfo").innerHTML = x;

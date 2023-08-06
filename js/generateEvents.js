@@ -21,8 +21,8 @@ function generateEvents() {
                   <p>${when.toDateString()} at ${when.toTimeString()}</p>
                   <p>${event.where}</p>
                   <p>${event.tickets}</p>
-                  <button class="btn btn-dark mr-3" onclick="editEvent('${event.event}')">edit</button>
-                  <button class="btn btn-danger" onclick="deleteEvent('${event.event}')">delete</button>
+                  <button class="btn btn-dark mr-3" onclick="editEvent('${event.event.replace(/'/g, '&#39;')}')">edit</button>
+                  <button class="btn btn-danger" onclick="deleteEvent('${event.event.replace(/'/g, '&#39;')}')">delete</button>
                 </div>
               </div>`;
         document.getElementById("eventInfo").innerHTML = x;
