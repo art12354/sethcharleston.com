@@ -19,6 +19,7 @@ function deleteEvent(eventToDelete) {
           var url = 'https://api.sethcharleston.com/test1/delete';
           var data = {
             event: event.event,
+            name: event.name,
             where: event.where,
             when: event.when,
             tickets: event.tickets

@@ -15,7 +15,8 @@ function editEvent(eventToEdit) {
         console.log(eventToEdit);
         console.log(event);
         if (eventToEdit === event.event) {
-          document.getElementById("event").value = event.event;
+          document.getElementById("event").value = event.name;
+          document.getElementById("key").value = event.event;
           var date = new Date(event.when);
           document.getElementById("date").value = date.toISOString().slice(0, 10);
           document.getElementById("time").value = date.toTimeString().slice(0, 8);

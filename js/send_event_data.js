@@ -14,7 +14,8 @@ function send_event_data() {
   console.log(eventDate);
   var url = "https://api.sethcharleston.com/test1";
   var data = {
-    event: document.getElementById("event").text,
+    event: document.getElementById("key").text,
+    name: document.getElementById("event").text,
     where: document.getElementById("where").text,
     when: eventDate.toString(),
     tickets: document.getElementById("tickets").text
