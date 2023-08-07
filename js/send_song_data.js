@@ -9,8 +9,8 @@ function send_song_data() {
   console.log(eventDate);
   var url = "https://api.sethcharleston.com/test1/songs";
   var data = {
-    song: document.getElementById("song").text,
-    link: document.getElementById("link").text,
+    song: document.getElementById("song").value,
+    link: document.getElementById("link").value,
     release: eventDate.toString()
   };
   console.log(data);
