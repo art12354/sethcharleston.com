@@ -10,17 +10,17 @@ function send_event_data() {
     document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
     return;
   }
-  var dateString = document.getElementById("date").text + "T" + document.getElementById("time").text;
+  var dateString = document.getElementById("date").value + "T" + document.getElementById("time").value;
   console.log(dateString)
   var eventDate = new Date(dateString);
   console.log(eventDate);
   var url = "https://api.sethcharleston.com/test1";
   var data = {
-    event: document.getElementById("key").text,
-    name: document.getElementById("event").text,
-    where: document.getElementById("where").text,
+    event: document.getElementById("key").value,
+    name: document.getElementById("event").value,
+    where: document.getElementById("where").value,
     when: eventDate.toString(),
-    tickets: document.getElementById("tickets").text
+    tickets: document.getElementById("tickets").value
   };
   console.log(data);
   fetch(url, {
