@@ -10,7 +10,9 @@ function send_event_data() {
     document.getElementById("eventAlert").innerHTML = "<div class=\"alert alert-warning alert-dismissible\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Uh oh! </strong>" + "You are not signed in!" + "</div>";
     return;
   }
-  var eventDate = new Date(document.getElementById("date").text + "T" + document.getElementById("time").text);
+  var dateString = document.getElementById("date").text + "T" + document.getElementById("time").text;
+  console.log(dateString)
+  var eventDate = new Date(dateString);
   console.log(eventDate);
   var url = "https://api.sethcharleston.com/test1";
   var data = {
@@ -20,6 +22,7 @@ function send_event_data() {
     when: eventDate.toString(),
     tickets: document.getElementById("tickets").text
   };
+  console.log(data);
   fetch(url, {
       method: "POST",
       body: JSON.stringify(data),
