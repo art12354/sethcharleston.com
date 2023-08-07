@@ -333,15 +333,17 @@ footer {
 	background-color: #393939;
 	color: whitesmoke;
 	display: flex;
-	text-align: center;
-	align-items: stretch;
-	justify-content: center;
-	align-content: center;
 	font-size: 1em;
+	justify-content: center;
 }
 @media screen and (min-width: 750px) {
   footer {
     justify-content: space-around;
+  }
+}
+@media screen and (min-width: 1200px) {
+  footer {
+    justify-content: center;
   }
 }
 
@@ -350,7 +352,8 @@ footer section {
 }
 @media screen and (min-width: 750px) {
   footer section {
-    max-width: 40%;
+    width: 40%;
+    max-width: 400px;
   }
 }
 .title {
@@ -359,8 +362,6 @@ footer section {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	align-content: space-around;
-	justify-content: space-around;
 }
 
 #mc_embed_signup {
@@ -439,9 +440,8 @@ footer section {
 }
 .footerImg {
   display: flex;
-  justify-content: center;
-  align-content: center;
   align-items: center;
+  justify-content: center;
 }
 .footerImg img {
   display: none;
