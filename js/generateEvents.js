@@ -9,7 +9,7 @@ function generateEvents() {
       return jsonResponse;
     })
     .then(function(data) {
-      data.sort(function(a, b) {
+      data.Items.sort(function(a, b) {
         a = new Date(a.when);
         b = new Date(b.when);
         return a < b ? -1 : a > b ? 1 : 0;
