@@ -9,12 +9,7 @@ function deleteEvent(eventToDelete) {
       return response.json();
     })
     .then(function(data) {
-      data.sort(function(a, b) {
-        a = new Date(a.when);
-        b = new Date(b.when);
-        return a < b ? -1 : a > b ? 1 : 0;
-      });
-      data.forEach(function(event) {
+      data.Items.forEach(function(event) {
         if (eventToDelete === event.event) {
           var url = 'https://api.sethcharleston.com/test1/delete';
           var data = {
