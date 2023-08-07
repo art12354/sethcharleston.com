@@ -151,7 +151,7 @@
         });
         data.forEach(function(song) {
           console.log(song);
-          x += "<section class=\"album\"><iframe style=\"border-radius:12px\" src=\"" + song.link + "?utm_source=generator\" width=\"100%\" height=\"352\" frameborder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe></section>";
+          x += "<section class=\"album\">"+song.link+"</section>";
           document.getElementById("info").innerHTML = x;
         });
       });
