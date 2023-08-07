@@ -4,7 +4,9 @@ function generateEvents() {
   var x = "";
   fetch("https://api.sethcharleston.com/test1")
     .then(function(response) {
-      return response.json();
+      var jsonResponse = response.json()
+      console.log(jsonResponse)
+      return jsonResponse;
     })
     .then(function(data) {
       data.sort(function(a, b) {
