@@ -4,12 +4,12 @@ function generateEvents() {
   var x = "";
   fetch("https://api.sethcharleston.com/test1")
     .then(function(response) {
-      var jsonResponse = response.json()
+      var jsonResponse = response.json().Items
       console.log(jsonResponse)
       return jsonResponse;
     })
     .then(function(data) {
-      data.Items.sort(function(a, b) {
+      data.sort(function(a, b) {
         a = new Date(a.when);
         b = new Date(b.when);
         return a < b ? -1 : a > b ? 1 : 0;
