@@ -152,7 +152,7 @@
           console.log(event);
           var when = new Date(event.when);
           var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-          x += "<div class=\"events\"><h1>" + event.name + "</h1>" + "<p>" + when.toLocaleDateString("en-US", options) + "</p>" + "<p>" + event.where + "</p>" + "<p>" + event.tickets + "</p></div>";
+          x += "<div class=\"events\"><h1>" + event.name + "</h1>" + "<p>" + when.toLocaleDateString("en-US", options) + "</p>" + "<p>" + event.where + "</p>" + "<button class=\"ticket-button\"><a href=\"" +event.tickets + "\" target=\"_blank\"> Tickets </a></button></div>";
           document.getElementById("info").innerHTML = x;
         });
       } catch (error) {
