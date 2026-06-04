@@ -56,10 +56,28 @@ Parameters:
   EditorCallbackUrl:
     Type: String
     Default: https://edit.sethcharleston.com
+  StartOnSourceChange:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether source changes automatically start this pipeline.
+  RequireManualApproval:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether to require manual approval before deploying the packaged artifact.
 
 Conditions:
   UseGitHubSource: !Equals [!Ref SourceProvider, GitHub]
   UseCodeCommitSource: !Equals [!Ref SourceProvider, CodeCommit]
+  EnableCodeCommitSourceChange: !And
+    - !Condition UseCodeCommitSource
+    - !Equals [!Ref StartOnSourceChange, "true"]
+  RequireApproval: !Equals [!Ref RequireManualApproval, "true"]
 
 Resources:
   ArtifactBucket:
@@ -240,7 +258,7 @@ Resources:
                   ConnectionArn: !Ref ConnectionArn
                   FullRepositoryId: !Sub "${GitHubOwner}/${GitHubRepo}"
                   BranchName: !Ref GitHubBranch
-                  DetectChanges: true
+                  DetectChanges: !Ref StartOnSourceChange
                   OutputArtifactFormat: CODE_ZIP
                 OutputArtifacts:
                   - Name: SourceArtifact
@@ -277,6 +295,20 @@ Resources:
               OutputArtifacts:
                 - Name: WebsiteArtifact
               RunOrder: 1
+        - !If
+          - RequireApproval
+          - Name: Approve
+            Actions:
+              - Name: Approve_Production_Deploy
+                ActionTypeId:
+                  Category: Approval
+                  Owner: AWS
+                  Provider: Manual
+                  Version: "1"
+                Configuration:
+                  CustomData: !Sub "Approve deployment to ${WebsiteBucketName} from ${CodeCommitRepositoryName}:${CodeCommitBranch}."
+                RunOrder: 1
+          - !Ref AWS::NoValue
         - Name: Deploy
           Actions:
             - Name: Deploy
@@ -306,7 +338,7 @@ Resources:
 
   CodeCommitSourceChangeRule:
     Type: AWS::Events::Rule
-    Condition: UseCodeCommitSource
+    Condition: EnableCodeCommitSourceChange
     Properties:
       Description: !Sub "Start ${PipelineName} when ${CodeCommitRepositoryName}:${CodeCommitBranch} changes."
       EventPattern:

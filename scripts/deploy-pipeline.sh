@@ -22,6 +22,8 @@ API_BASE_URL="${API_BASE_URL:-https://api.sethcharleston.com}"
 LOGIN_BASE_URL="${LOGIN_BASE_URL:-https://login.sethcharleston.com}"
 COGNITO_CLIENT_ID="${COGNITO_CLIENT_ID:-76g2um3ps3ri68ac30agopcmc9}"
 EDITOR_CALLBACK_URL="${EDITOR_CALLBACK_URL:-https://edit.sethcharleston.com}"
+START_ON_SOURCE_CHANGE="${START_ON_SOURCE_CHANGE:-true}"
+REQUIRE_MANUAL_APPROVAL="${REQUIRE_MANUAL_APPROVAL:-false}"
 
 if [[ "$SOURCE_PROVIDER" == "GitHub" ]]; then
   connection_status="$(
@@ -61,6 +63,8 @@ aws cloudformation deploy \
     LoginBaseUrl="$LOGIN_BASE_URL" \
     CognitoClientId="$COGNITO_CLIENT_ID" \
     EditorCallbackUrl="$EDITOR_CALLBACK_URL" \
+    StartOnSourceChange="$START_ON_SOURCE_CHANGE" \
+    RequireManualApproval="$REQUIRE_MANUAL_APPROVAL" \
   --tags \
     Project=sethcharleston \
     ManagedBy=cloudformation \
