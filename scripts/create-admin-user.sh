@@ -4,6 +4,7 @@ set -euo pipefail
 AWS_REGION="${AWS_REGION:-us-east-1}"
 STACK_NAME="${STACK_NAME:-sethcharleston-staging-backend}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-}"
+CONFIRM_FOR_PASSWORD_RESET="${CONFIRM_FOR_PASSWORD_RESET:-true}"
 
 if [[ -z "$ADMIN_EMAIL" ]]; then
   echo "Set ADMIN_EMAIL to a whitelisted admin email address." >&2
@@ -44,11 +45,19 @@ else
 fi
 
 if [[ -n "${ADMIN_PASSWORD:-}" ]]; then
+  password="$ADMIN_PASSWORD"
+elif [[ "$CONFIRM_FOR_PASSWORD_RESET" == "true" ]]; then
+  password="$(uuidgen)$(uuidgen)Aa1!"
+else
+  password=""
+fi
+
+if [[ -n "$password" ]]; then
   aws cognito-idp admin-set-user-password \
     --user-pool-id "$USER_POOL_ID" \
     --username "$ADMIN_EMAIL" \
-    --password "$ADMIN_PASSWORD" \
+    --password "$password" \
     --permanent \
     --region "$AWS_REGION" >/dev/null
-  echo "Set permanent password for $ADMIN_EMAIL."
+  echo "Confirmed $ADMIN_EMAIL with a permanent password so hosted password reset can be used."
 fi

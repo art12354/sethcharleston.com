@@ -346,7 +346,7 @@ ADMIN_EMAIL=art12354@gmail.com \
 ./scripts/create-admin-user.sh
 ```
 
-The backend user pool enables password reset through verified email. Admin users are restricted by `AllowedAdminEmails`, which defaults to `art12354@gmail.com,seth.charleston@gmail.com`; override `ALLOWED_ADMIN_EMAILS` when deploying if that list changes. Public self-signup remains disabled.
+The backend user pool enables password reset through verified email. Admin-created users must be `CONFIRMED` before the hosted forgot-password flow works, so `create-admin-user.sh` sets an unprinted random permanent password by default; the user should then use forgot password in the hosted UI. Admin users are restricted by `AllowedAdminEmails`, which defaults to `art12354@gmail.com,seth.charleston@gmail.com`; override `ALLOWED_ADMIN_EMAILS` when deploying if that list changes. Public self-signup remains disabled.
 
 ## Hidden Runtime Assumptions
 
