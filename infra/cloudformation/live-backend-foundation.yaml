@@ -1,0 +1,265 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Imported live production backend foundation for sethcharleston.com.
+
+Parameters:
+  LambdaArtifactBucket:
+    Type: String
+    Default: sethcharleston-prod-lambda-artifacts-305372771047-us-east-1
+  LambdaArtifactPrefix:
+    Type: String
+    Default: production-lambda-import/20260604T044034Z
+  AllowlistFunctionArn:
+    Type: String
+    Default: arn:aws:lambda:us-east-1:305372771047:function:sethcharleston-prod-admin-user-allowlist
+
+Resources:
+  EventsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: seth_charleston_events
+      AttributeDefinitions:
+        - AttributeName: event
+          AttributeType: S
+      KeySchema:
+        - AttributeName: event
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  MusicTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: seth_charleston_music
+      AttributeDefinitions:
+        - AttributeName: song
+          AttributeType: S
+      KeySchema:
+        - AttributeName: song
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  TextTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: seth_charleston_text
+      AttributeDefinitions:
+        - AttributeName: location
+          AttributeType: S
+      KeySchema:
+        - AttributeName: location
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  AdminUserPool:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      UserPoolName: seth_charleston
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+        UnusedAccountValidityDays: 7
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      LambdaConfig:
+        PreSignUp: !Ref AllowlistFunctionArn
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 7
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+
+  AdminUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      ClientName: seth_charleston
+      UserPoolId: !Ref AdminUserPool
+      GenerateSecret: false
+      RefreshTokenValidity: 30
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes:
+        - email
+        - openid
+      CallbackURLs:
+        - https://edit.sethcharleston.com
+      ExplicitAuthFlows:
+        - ALLOW_CUSTOM_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_USER_SRP_AUTH
+      SupportedIdentityProviders:
+        - COGNITO
+
+  GetEventsFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: seth_charleston_get_events
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: arn:aws:iam::305372771047:role/service-role/seth_charleston_get_events
+      Timeout: 3
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Sub "${LambdaArtifactPrefix}/seth_charleston_get_events.zip"
+
+  PostEventsFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: seth_charleston_post_events
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: arn:aws:iam::305372771047:role/seth_charleston_post_events
+      Timeout: 3
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Sub "${LambdaArtifactPrefix}/seth_charleston_post_events.zip"
+
+  DeleteEventsFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: seth_charleston_delete_events
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: arn:aws:iam::305372771047:role/seth_charleston_delete_events
+      Timeout: 3
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Sub "${LambdaArtifactPrefix}/seth_charleston_delete_events.zip"
+
+  GetSongsFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: seth_charleston_get_songs
+      Runtime: nodejs8.10
+      Handler: index.handler
+      Role: arn:aws:iam::305372771047:role/service-role/seth_charleston_get_songs-role-6x29t8oy
+      Timeout: 3
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Sub "${LambdaArtifactPrefix}/seth_charleston_get_songs.zip"
+
+  PostSongFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: seth_charleston_post_song
+      Runtime: nodejs8.10
+      Handler: index.handler
+      Role: arn:aws:iam::305372771047:role/service-role/seth_charleston_post_song-role-qt7h0ybj
+      Timeout: 3
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Sub "${LambdaArtifactPrefix}/seth_charleston_post_song.zip"
+
+  DeleteSongsFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: seth_charleston_delete_songs
+      Runtime: nodejs8.10
+      Handler: index.handler
+      Role: arn:aws:iam::305372771047:role/service-role/seth_charleston_delete_songs-role-ok4cghny
+      Timeout: 3
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Sub "${LambdaArtifactPrefix}/seth_charleston_delete_songs.zip"
+
+  GetTextFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: seth_charleston_get_text
+      Runtime: nodejs14.x
+      Handler: index.handler
+      Role: arn:aws:iam::305372771047:role/service-role/seth_charleston_get_text-role-wzy2g64p
+      Timeout: 3
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Sub "${LambdaArtifactPrefix}/seth_charleston_get_text.zip"
+
+  PostTextFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: seth_charleston_post_text
+      Runtime: nodejs14.x
+      Handler: index.handler
+      Role: arn:aws:iam::305372771047:role/service-role/seth_charleston_post_text-role-tlphcec0
+      Timeout: 3
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Sub "${LambdaArtifactPrefix}/seth_charleston_post_text.zip"
+
+  InvalidateCdnFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: seth_charleston_invalidate_cdn
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: arn:aws:iam::305372771047:role/service-role/seth_charleston_invalidate_cdn-role-lao5mpx9
+      Timeout: 3
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Sub "${LambdaArtifactPrefix}/seth_charleston_invalidate_cdn.zip"
+
+Outputs:
+  UserPoolId:
+    Value: !Ref AdminUserPool
+  UserPoolClientId:
+    Value: !Ref AdminUserPoolClient
+  EventsTableName:
+    Value: !Ref EventsTable
+  MusicTableName:
+    Value: !Ref MusicTable
+  TextTableName:
+    Value: !Ref TextTable

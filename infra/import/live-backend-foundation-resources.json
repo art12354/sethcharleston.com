@@ -1,0 +1,101 @@
+[
+  {
+    "ResourceType": "AWS::DynamoDB::Table",
+    "LogicalResourceId": "EventsTable",
+    "ResourceIdentifier": {
+      "TableName": "seth_charleston_events"
+    }
+  },
+  {
+    "ResourceType": "AWS::DynamoDB::Table",
+    "LogicalResourceId": "MusicTable",
+    "ResourceIdentifier": {
+      "TableName": "seth_charleston_music"
+    }
+  },
+  {
+    "ResourceType": "AWS::DynamoDB::Table",
+    "LogicalResourceId": "TextTable",
+    "ResourceIdentifier": {
+      "TableName": "seth_charleston_text"
+    }
+  },
+  {
+    "ResourceType": "AWS::Cognito::UserPool",
+    "LogicalResourceId": "AdminUserPool",
+    "ResourceIdentifier": {
+      "UserPoolId": "us-east-1_KyvNSufwI"
+    }
+  },
+  {
+    "ResourceType": "AWS::Cognito::UserPoolClient",
+    "LogicalResourceId": "AdminUserPoolClient",
+    "ResourceIdentifier": {
+      "UserPoolId": "us-east-1_KyvNSufwI",
+      "ClientId": "76g2um3ps3ri68ac30agopcmc9"
+    }
+  },
+  {
+    "ResourceType": "AWS::Lambda::Function",
+    "LogicalResourceId": "GetEventsFunction",
+    "ResourceIdentifier": {
+      "FunctionName": "seth_charleston_get_events"
+    }
+  },
+  {
+    "ResourceType": "AWS::Lambda::Function",
+    "LogicalResourceId": "PostEventsFunction",
+    "ResourceIdentifier": {
+      "FunctionName": "seth_charleston_post_events"
+    }
+  },
+  {
+    "ResourceType": "AWS::Lambda::Function",
+    "LogicalResourceId": "DeleteEventsFunction",
+    "ResourceIdentifier": {
+      "FunctionName": "seth_charleston_delete_events"
+    }
+  },
+  {
+    "ResourceType": "AWS::Lambda::Function",
+    "LogicalResourceId": "GetSongsFunction",
+    "ResourceIdentifier": {
+      "FunctionName": "seth_charleston_get_songs"
+    }
+  },
+  {
+    "ResourceType": "AWS::Lambda::Function",
+    "LogicalResourceId": "PostSongFunction",
+    "ResourceIdentifier": {
+      "FunctionName": "seth_charleston_post_song"
+    }
+  },
+  {
+    "ResourceType": "AWS::Lambda::Function",
+    "LogicalResourceId": "DeleteSongsFunction",
+    "ResourceIdentifier": {
+      "FunctionName": "seth_charleston_delete_songs"
+    }
+  },
+  {
+    "ResourceType": "AWS::Lambda::Function",
+    "LogicalResourceId": "GetTextFunction",
+    "ResourceIdentifier": {
+      "FunctionName": "seth_charleston_get_text"
+    }
+  },
+  {
+    "ResourceType": "AWS::Lambda::Function",
+    "LogicalResourceId": "PostTextFunction",
+    "ResourceIdentifier": {
+      "FunctionName": "seth_charleston_post_text"
+    }
+  },
+  {
+    "ResourceType": "AWS::Lambda::Function",
+    "LogicalResourceId": "InvalidateCdnFunction",
+    "ResourceIdentifier": {
+      "FunctionName": "seth_charleston_invalidate_cdn"
+    }
+  }
+]
