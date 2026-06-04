@@ -19,6 +19,7 @@ The clean rebuild version of the Lambda backend used by `https://api.sethcharles
 - One modern Lambda handler for the public read and authenticated admin mutation routes
 - REST API Gateway stage `test1`
 - Cognito user pool authorizer for admin-only POST routes
+- Cognito email password recovery and admin email allowlist
 - Optional `api.sethcharleston.com` custom domain and Route 53 records
 
 The GitHub-to-AWS deployment path is defined in [infra/cloudformation/codepipeline.yaml](infra/cloudformation/codepipeline.yaml). It creates:
@@ -68,6 +69,7 @@ EVENTS_TABLE_NAME=seth_charleston_dev_events \
 MUSIC_TABLE_NAME=seth_charleston_dev_music \
 TEXT_TABLE_NAME=seth_charleston_dev_text \
 API_DOMAIN_NAME=api-dev.sethcharleston.com \
+ALLOWED_ADMIN_EMAILS=art12354@gmail.com,seth.charleston@gmail.com \
 ./scripts/deploy-backend.sh
 ```
 
@@ -339,18 +341,12 @@ The frontend currently calls these API routes under the `test1` stage:
 To create an admin user after deploying the backend:
 
 ```bash
-USER_POOL_ID=$(aws cloudformation describe-stacks \
-  --stack-name sethcharleston-backend-api \
-  --region us-east-1 \
-  --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue | [0]" \
-  --output text)
-
-aws cognito-idp admin-create-user \
-  --user-pool-id "$USER_POOL_ID" \
-  --username admin@example.com \
-  --user-attributes Name=email,Value=admin@example.com Name=email_verified,Value=true \
-  --region us-east-1
+STACK_NAME=sethcharleston-staging-backend \
+ADMIN_EMAIL=art12354@gmail.com \
+./scripts/create-admin-user.sh
 ```
+
+The backend user pool enables password reset through verified email. Admin users are restricted by `AllowedAdminEmails`, which defaults to `art12354@gmail.com,seth.charleston@gmail.com`; override `ALLOWED_ADMIN_EMAILS` when deploying if that list changes. Public self-signup remains disabled.
 
 ## Hidden Runtime Assumptions
 

@@ -38,6 +38,10 @@ Parameters:
     Type: String
     Default: ""
     Description: Route 53 hosted zone ID for the apex domain. Leave blank to use the execute-api URL.
+  AllowedAdminEmails:
+    Type: String
+    Default: "art12354@gmail.com,seth.charleston@gmail.com"
+    Description: Comma-separated lowercase email addresses allowed to be created in the admin user pool.
 
 Conditions:
   UseCustomDomain: !Not [!Equals [!Ref HostedZoneId, ""]]
@@ -94,8 +98,50 @@ Resources:
         - AttributeName: location
           KeyType: HASH
 
+  AdminUserAllowlistRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  AdminUserAllowlist:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${ProjectName}-${Environment}-admin-user-allowlist"
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt AdminUserAllowlistRole.Arn
+      MemorySize: 128
+      Timeout: 5
+      Environment:
+        Variables:
+          ALLOWED_ADMIN_EMAILS: !Ref AllowedAdminEmails
+      Code:
+        ZipFile: |
+          import os
+          def handler(event, context):
+              allowed = {
+                  email.strip().lower()
+                  for email in os.environ.get("ALLOWED_ADMIN_EMAILS", "").split(",")
+                  if email.strip()
+              }
+              attrs = event.get("request", {}).get("userAttributes", {})
+              email = (attrs.get("email") or event.get("userName") or "").strip().lower()
+              if not allowed or email not in allowed:
+                  raise Exception("Email address is not allowed for this admin user pool.")
+              return event
+
   AdminUserPool:
     Type: AWS::Cognito::UserPool
+    DependsOn:
+      - AdminUserAllowlistPermission
     Properties:
       UserPoolName: !Sub "${ProjectName}-${Environment}-admin"
       AdminCreateUserConfig:
@@ -104,6 +150,20 @@ Resources:
         - email
       AutoVerifiedAttributes:
         - email
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      LambdaConfig:
+        PreSignUp: !GetAtt AdminUserAllowlist.Arn
+
+  AdminUserAllowlistPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AdminUserAllowlist
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
 
   AdminUserPoolClient:
     Type: AWS::Cognito::UserPoolClient

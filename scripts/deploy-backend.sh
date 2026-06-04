@@ -17,6 +17,7 @@ EVENTS_TABLE_NAME="${EVENTS_TABLE_NAME:-seth_charleston_events}"
 MUSIC_TABLE_NAME="${MUSIC_TABLE_NAME:-seth_charleston_music}"
 TEXT_TABLE_NAME="${TEXT_TABLE_NAME:-seth_charleston_text}"
 HOSTED_ZONE_ID="${HOSTED_ZONE_ID:-}"
+ALLOWED_ADMIN_EMAILS="${ALLOWED_ADMIN_EMAILS:-art12354@gmail.com,seth.charleston@gmail.com}"
 
 if [[ -z "$HOSTED_ZONE_ID" && -n "$APEX_DOMAIN_NAME" ]]; then
   HOSTED_ZONE_ID="$(
@@ -48,6 +49,7 @@ aws cloudformation deploy \
     MusicTableName="$MUSIC_TABLE_NAME" \
     TextTableName="$TEXT_TABLE_NAME" \
     HostedZoneId="$HOSTED_ZONE_ID" \
+    AllowedAdminEmails="$ALLOWED_ADMIN_EMAILS" \
   --tags \
     Project="$PROJECT_NAME" \
     Environment="$ENVIRONMENT" \

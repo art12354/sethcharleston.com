@@ -4,6 +4,7 @@ set -euo pipefail
 AWS_REGION="${AWS_REGION:-us-east-1}"
 HOSTED_ZONE_ID="${HOSTED_ZONE_ID:-Z27ZS6MVE7C6ZT}"
 ACM_CERTIFICATE_ARN="${ACM_CERTIFICATE_ARN:-arn:aws:acm:us-east-1:305372771047:certificate/2db52ae6-5372-472a-b689-42126941926a}"
+ALLOWED_ADMIN_EMAILS="${ALLOWED_ADMIN_EMAILS:-art12354@gmail.com,seth.charleston@gmail.com}"
 BRANCH_NAME="${BRANCH_NAME:-$(git branch --show-current 2>/dev/null || true)}"
 
 if [[ -z "$BRANCH_NAME" ]]; then
@@ -41,6 +42,7 @@ API_DOMAIN_NAME="$API_DOMAIN" \
 API_CERTIFICATE_ARN="$ACM_CERTIFICATE_ARN" \
 HOSTED_AUTH_DOMAIN_NAME="$LOGIN_DOMAIN" \
 EDITOR_CALLBACK_URL="https://${EDITOR_DOMAIN}" \
+ALLOWED_ADMIN_EMAILS="$ALLOWED_ADMIN_EMAILS" \
 EVENTS_TABLE_NAME="seth_charleston_${table_slug}_events" \
 MUSIC_TABLE_NAME="seth_charleston_${table_slug}_music" \
 TEXT_TABLE_NAME="seth_charleston_${table_slug}_text" \

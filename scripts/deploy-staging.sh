@@ -9,6 +9,7 @@ SITE_DOMAIN="${SITE_DOMAIN:-staging.sethcharleston.com}"
 API_DOMAIN="${API_DOMAIN:-api-staging.sethcharleston.com}"
 EDITOR_DOMAIN="${EDITOR_DOMAIN:-edit-staging.sethcharleston.com}"
 LOGIN_DOMAIN="${LOGIN_DOMAIN:-login-staging.sethcharleston.com}"
+ALLOWED_ADMIN_EMAILS="${ALLOWED_ADMIN_EMAILS:-art12354@gmail.com,seth.charleston@gmail.com}"
 
 API_BASE_URL="https://${API_DOMAIN}"
 LOGIN_BASE_URL="https://${LOGIN_DOMAIN}"
@@ -32,6 +33,7 @@ API_DOMAIN_NAME="$API_DOMAIN" \
 API_CERTIFICATE_ARN="$ACM_CERTIFICATE_ARN" \
 HOSTED_AUTH_DOMAIN_NAME="$LOGIN_DOMAIN" \
 EDITOR_CALLBACK_URL="$EDITOR_CALLBACK_URL" \
+ALLOWED_ADMIN_EMAILS="$ALLOWED_ADMIN_EMAILS" \
 EVENTS_TABLE_NAME=seth_charleston_staging_events \
 MUSIC_TABLE_NAME=seth_charleston_staging_music \
 TEXT_TABLE_NAME=seth_charleston_staging_text \

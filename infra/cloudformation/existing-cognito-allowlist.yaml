@@ -1,0 +1,165 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Attach an email allowlist pre-signup trigger to an existing Cognito user pool.
+
+Parameters:
+  UserPoolId:
+    Type: String
+    Description: Existing Cognito user pool ID.
+  FunctionName:
+    Type: String
+    Default: sethcharleston-prod-admin-user-allowlist
+  AllowedAdminEmails:
+    Type: String
+    Default: "art12354@gmail.com,seth.charleston@gmail.com"
+    Description: Comma-separated lowercase email addresses allowed to be created in the admin user pool.
+
+Resources:
+  AllowlistRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  AllowlistFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref FunctionName
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt AllowlistRole.Arn
+      MemorySize: 128
+      Timeout: 5
+      Environment:
+        Variables:
+          ALLOWED_ADMIN_EMAILS: !Ref AllowedAdminEmails
+      Code:
+        ZipFile: |
+          import os
+          def handler(event, context):
+              allowed = {
+                  email.strip().lower()
+                  for email in os.environ.get("ALLOWED_ADMIN_EMAILS", "").split(",")
+                  if email.strip()
+              }
+              attrs = event.get("request", {}).get("userAttributes", {})
+              email = (attrs.get("email") or event.get("userName") or "").strip().lower()
+              if not allowed or email not in allowed:
+                  raise Exception("Email address is not allowed for this admin user pool.")
+              return event
+
+  AllowlistInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AllowlistFunction
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !Sub "arn:${AWS::Partition}:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}"
+
+  ConfiguratorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ConfigureUserPoolTrigger
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:DescribeUserPool
+                  - cognito-idp:UpdateUserPool
+                Resource: !Sub "arn:${AWS::Partition}:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}"
+
+  ConfiguratorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt ConfiguratorRole.Arn
+      MemorySize: 128
+      Timeout: 30
+      Code:
+        ZipFile: |
+          import json, urllib.request
+          import boto3
+          cognito = boto3.client("cognito-idp")
+          def respond(event, context, status, data=None, reason=None):
+              body = {
+                  "Status": status,
+                  "Reason": reason or f"See CloudWatch Logs: {context.log_stream_name}",
+                  "PhysicalResourceId": event.get("PhysicalResourceId") or f"{event['ResourceProperties']['UserPoolId']}-allowlist-trigger",
+                  "StackId": event["StackId"],
+                  "RequestId": event["RequestId"],
+                  "LogicalResourceId": event["LogicalResourceId"],
+                  "Data": data or {},
+              }
+              encoded = json.dumps(body).encode()
+              req = urllib.request.Request(event["ResponseURL"], data=encoded, method="PUT")
+              req.add_header("content-type", "")
+              req.add_header("content-length", str(len(encoded)))
+              urllib.request.urlopen(req, timeout=10).read()
+          def handler(event, context):
+              try:
+                  props = event["ResourceProperties"]
+                  pool_id = props["UserPoolId"]
+                  trigger_arn = props["TriggerArn"]
+                  pool = cognito.describe_user_pool(UserPoolId=pool_id)["UserPool"]
+                  lambda_config = dict(pool.get("LambdaConfig") or {})
+                  if event["RequestType"] == "Delete":
+                      if lambda_config.get("PreSignUp") == trigger_arn:
+                          lambda_config.pop("PreSignUp", None)
+                  else:
+                      lambda_config["PreSignUp"] = trigger_arn
+                  update_args = {
+                      "UserPoolId": pool_id,
+                      "LambdaConfig": lambda_config,
+                      "AccountRecoverySetting": {
+                          "RecoveryMechanisms": [
+                              {"Name": "verified_email", "Priority": 1}
+                          ]
+                      },
+                  }
+                  for key in [
+                      "AdminCreateUserConfig",
+                      "AutoVerifiedAttributes",
+                      "EmailConfiguration",
+                      "Policies",
+                      "VerificationMessageTemplate",
+                      "UserAttributeUpdateSettings",
+                  ]:
+                      if key in pool:
+                          update_args[key] = pool[key]
+                  cognito.update_user_pool(**update_args)
+                  respond(event, context, "SUCCESS", {"UserPoolId": pool_id, "PreSignUp": lambda_config.get("PreSignUp", "")})
+              except Exception as exc:
+                  respond(event, context, "FAILED", reason=str(exc))
+
+  ExistingUserPoolTrigger:
+    Type: Custom::ExistingCognitoAllowlistTrigger
+    DependsOn:
+      - AllowlistInvokePermission
+    Properties:
+      ServiceToken: !GetAtt ConfiguratorFunction.Arn
+      UserPoolId: !Ref UserPoolId
+      TriggerArn: !GetAtt AllowlistFunction.Arn
+
+Outputs:
+  AllowlistFunctionArn:
+    Value: !GetAtt AllowlistFunction.Arn
+  UserPoolId:
+    Value: !Ref UserPoolId
