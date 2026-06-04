@@ -1,0 +1,618 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Imported production API Gateway REST API for sethcharleston.com.
+
+Parameters:
+  ApiCertificateArn:
+    Type: String
+    Default: arn:aws:acm:us-east-1:305372771047:certificate/2db52ae6-5372-472a-b689-42126941926a
+  UserPoolArn:
+    Type: String
+    Default: arn:aws:cognito-idp:us-east-1:305372771047:userpool/us-east-1_KyvNSufwI
+  UserPoolClientId:
+    Type: String
+    Default: 76g2um3ps3ri68ac30agopcmc9
+
+Resources:
+  RestApi:
+    Type: AWS::ApiGateway::RestApi
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: seth_charleston_events
+      Description: events comms
+      ApiKeySourceType: HEADER
+      DisableExecuteApiEndpoint: false
+      EndpointConfiguration:
+        Types:
+          - EDGE
+
+  LoginAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: login
+      RestApiId: !Ref RestApi
+      Type: COGNITO_USER_POOLS
+      AuthType: cognito_user_pools
+      IdentitySource: method.request.header.Authorization
+      IdentityValidationExpression: !Ref UserPoolClientId
+      ProviderARNs:
+        - !Ref UserPoolArn
+
+  TextResource:
+    Type: AWS::ApiGateway::Resource
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: text
+
+  SongsResource:
+    Type: AWS::ApiGateway::Resource
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: songs
+
+  DeleteResource:
+    Type: AWS::ApiGateway::Resource
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: delete
+
+  AccessResource:
+    Type: AWS::ApiGateway::Resource
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: access
+
+  DeleteSongResource:
+    Type: AWS::ApiGateway::Resource
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: delete_song
+
+  RootGetMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !GetAtt RestApi.RootResourceId
+      HttpMethod: GET
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_get_events/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        ContentHandling: CONVERT_TO_TEXT
+        TimeoutInMillis: 29000
+        CacheNamespace: c0kcrm7w0m
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  RootPostMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !GetAtt RestApi.RootResourceId
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref LoginAuthorizer
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_post_events/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        ContentHandling: CONVERT_TO_TEXT
+        TimeoutInMillis: 29000
+        CacheNamespace: c0kcrm7w0m
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  RootOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !GetAtt RestApi.RootResourceId
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        CacheNamespace: c0kcrm7w0m
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  TextGetMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref TextResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_get_text/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        ContentHandling: CONVERT_TO_TEXT
+        TimeoutInMillis: 29000
+        CacheNamespace: 68pp93
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  TextPostMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref TextResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref LoginAuthorizer
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_post_text/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        ContentHandling: CONVERT_TO_TEXT
+        TimeoutInMillis: 29000
+        CacheNamespace: 68pp93
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  TextOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref TextResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        CacheNamespace: 68pp93
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  SongsGetMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref SongsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_get_songs/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        ContentHandling: CONVERT_TO_TEXT
+        TimeoutInMillis: 29000
+        CacheNamespace: cr154g
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  SongsPostMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref SongsResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref LoginAuthorizer
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_post_song/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        ContentHandling: CONVERT_TO_TEXT
+        TimeoutInMillis: 29000
+        CacheNamespace: cr154g
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  SongsOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref SongsResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        CacheNamespace: cr154g
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  DeletePostMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref DeleteResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref LoginAuthorizer
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_delete_events/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        ContentHandling: CONVERT_TO_TEXT
+        TimeoutInMillis: 29000
+        CacheNamespace: ic340p
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  DeleteOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref DeleteResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        CacheNamespace: ic340p
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  AccessGetMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref AccessResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref LoginAuthorizer
+      ApiKeyRequired: false
+      RequestParameters:
+        method.request.header.Authorization: true
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        CacheNamespace: jr9uig
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  AccessOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref AccessResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        CacheNamespace: jr9uig
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  DeleteSongPostMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref DeleteSongResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref LoginAuthorizer
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_delete_songs/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        ContentHandling: CONVERT_TO_TEXT
+        TimeoutInMillis: 29000
+        CacheNamespace: jvfzo4
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  DeleteSongOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref DeleteSongResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        CacheNamespace: jvfzo4
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    DependsOn:
+      - RootGetMethod
+      - RootPostMethod
+      - RootOptionsMethod
+      - TextGetMethod
+      - TextPostMethod
+      - TextOptionsMethod
+      - SongsGetMethod
+      - SongsPostMethod
+      - SongsOptionsMethod
+      - DeletePostMethod
+      - DeleteOptionsMethod
+      - AccessGetMethod
+      - AccessOptionsMethod
+      - DeleteSongPostMethod
+      - DeleteSongOptionsMethod
+    Properties:
+      RestApiId: !Ref RestApi
+
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RestApiId: !Ref RestApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: test1
+      CacheClusterEnabled: false
+      CacheClusterSize: "0.5"
+      TracingEnabled: false
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          MetricsEnabled: false
+          DataTraceEnabled: false
+          ThrottlingBurstLimit: 5000
+          ThrottlingRateLimit: 10000
+          CachingEnabled: false
+          CacheTtlInSeconds: 300
+          CacheDataEncrypted: false
+
+  ApiDomainName:
+    Type: AWS::ApiGateway::DomainName
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      DomainName: api.sethcharleston.com
+      CertificateArn: !Ref ApiCertificateArn
+      EndpointConfiguration:
+        Types:
+          - EDGE
+      SecurityPolicy: TLS_1_0
+
+  ApiBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      DomainName: !Ref ApiDomainName
+      RestApiId: !Ref RestApi
+
+Outputs:
+  RestApiId:
+    Value: !Ref RestApi
+  ApiStageName:
+    Value: !Ref ApiStage
+  ApiDomainName:
+    Value: !Ref ApiDomainName

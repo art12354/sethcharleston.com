@@ -1,0 +1,223 @@
+[
+  {
+    "ResourceType": "AWS::ApiGateway::RestApi",
+    "LogicalResourceId": "RestApi",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Authorizer",
+    "LogicalResourceId": "LoginAuthorizer",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "AuthorizerId": "z3qept"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Resource",
+    "LogicalResourceId": "TextResource",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "68pp93"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Resource",
+    "LogicalResourceId": "SongsResource",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "cr154g"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Resource",
+    "LogicalResourceId": "DeleteResource",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "ic340p"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Resource",
+    "LogicalResourceId": "AccessResource",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "jr9uig"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Resource",
+    "LogicalResourceId": "DeleteSongResource",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "jvfzo4"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "RootGetMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "c0kcrm7w0m",
+      "HttpMethod": "GET"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "RootPostMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "c0kcrm7w0m",
+      "HttpMethod": "POST"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "RootOptionsMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "c0kcrm7w0m",
+      "HttpMethod": "OPTIONS"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "TextGetMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "68pp93",
+      "HttpMethod": "GET"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "TextPostMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "68pp93",
+      "HttpMethod": "POST"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "TextOptionsMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "68pp93",
+      "HttpMethod": "OPTIONS"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "SongsGetMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "cr154g",
+      "HttpMethod": "GET"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "SongsPostMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "cr154g",
+      "HttpMethod": "POST"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "SongsOptionsMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "cr154g",
+      "HttpMethod": "OPTIONS"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "DeletePostMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "ic340p",
+      "HttpMethod": "POST"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "DeleteOptionsMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "ic340p",
+      "HttpMethod": "OPTIONS"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "AccessGetMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "jr9uig",
+      "HttpMethod": "GET"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "AccessOptionsMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "jr9uig",
+      "HttpMethod": "OPTIONS"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "DeleteSongPostMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "jvfzo4",
+      "HttpMethod": "POST"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Method",
+    "LogicalResourceId": "DeleteSongOptionsMethod",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "ResourceId": "jvfzo4",
+      "HttpMethod": "OPTIONS"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Deployment",
+    "LogicalResourceId": "ApiDeployment",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "DeploymentId": "v216zu"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::Stage",
+    "LogicalResourceId": "ApiStage",
+    "ResourceIdentifier": {
+      "RestApiId": "ht1utrpnua",
+      "StageName": "test1"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::DomainName",
+    "LogicalResourceId": "ApiDomainName",
+    "ResourceIdentifier": {
+      "DomainName": "api.sethcharleston.com"
+    }
+  },
+  {
+    "ResourceType": "AWS::ApiGateway::BasePathMapping",
+    "LogicalResourceId": "ApiBasePathMapping",
+    "ResourceIdentifier": {
+      "DomainName": "api.sethcharleston.com",
+      "BasePath": "(none)"
+    }
+  }
+]
