@@ -49,17 +49,24 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       Tags:
         - Key: sethcharleston
           Value: S3
       WebsiteConfiguration:
         IndexDocument: index.html
-        ErrorDocument: error.html
+        ErrorDocument: index.html
 
   SiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
+    DependsOn:
+      - SiteBucket
     Properties:
       Bucket: !Ref SiteBucket
       PolicyDocument:
@@ -122,6 +129,15 @@ Resources:
           MinTTL: 0
           DefaultTTL: 86400
           MaxTTL: 31536000
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
         ViewerCertificate:
           AcmCertificateArn: !Ref AcmCertificateArn
           MinimumProtocolVersion: TLSv1.1_2016
