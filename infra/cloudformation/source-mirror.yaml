@@ -1,0 +1,248 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Mirror GitHub repositories into AWS CodeCommit for AWS-native pipeline sources.
+
+Parameters:
+  GitHubOwner:
+    Type: String
+    Default: art12354
+  WebsiteRepoName:
+    Type: String
+    Default: sethcharleston.com
+  EditorRepoName:
+    Type: String
+    Default: edit.sethcharleston.com
+  GitHubTokenSecretName:
+    Type: String
+    Default: sethcharleston/github/mirror-token
+  GitHubWebhookSecretName:
+    Type: String
+    Default: sethcharleston/github/webhook-secret
+
+Resources:
+  WebsiteCodeCommitRepository:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: !Ref WebsiteRepoName
+      RepositoryDescription: !Sub "Mirror of ${GitHubOwner}/${WebsiteRepoName}"
+
+  EditorCodeCommitRepository:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: !Ref EditorRepoName
+      RepositoryDescription: !Sub "Mirror of ${GitHubOwner}/${EditorRepoName}"
+
+  GitHubTokenSecret:
+    Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: !Ref GitHubTokenSecretName
+      Description: GitHub token used by CodeBuild to mirror repositories into CodeCommit.
+      SecretString: '{"token":"replace-me"}'
+
+  GitHubWebhookSecret:
+    Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: !Ref GitHubWebhookSecretName
+      Description: Shared secret used to validate GitHub webhook signatures.
+      GenerateSecretString:
+        PasswordLength: 48
+        ExcludePunctuation: true
+
+  MirrorProjectRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: MirrorProjectAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/sethcharleston-git-mirror*"
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/sethcharleston-git-mirror*:*"
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref GitHubTokenSecret
+              - Effect: Allow
+                Action:
+                  - codecommit:GetRepository
+                  - codecommit:GitPull
+                  - codecommit:GitPush
+                Resource:
+                  - !GetAtt WebsiteCodeCommitRepository.Arn
+                  - !GetAtt EditorCodeCommitRepository.Arn
+
+  MirrorProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: sethcharleston-git-mirror
+      ServiceRole: !GetAtt MirrorProjectRole.Arn
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        EnvironmentVariables:
+          - Name: GITHUB_OWNER
+            Value: !Ref GitHubOwner
+          - Name: GITHUB_TOKEN_SECRET_NAME
+            Value: !Ref GitHubTokenSecretName
+      Source:
+        Type: NO_SOURCE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            build:
+              commands:
+                - set -eu
+                - test -n "$REPOSITORY_NAME"
+                - TOKEN_JSON="$(aws secretsmanager get-secret-value --secret-id "$GITHUB_TOKEN_SECRET_NAME" --query SecretString --output text)"
+                - TOKEN="$(printf '%s' "$TOKEN_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["token"])')"
+                - test "$TOKEN" != "replace-me"
+                - SOURCE_URL="https://x-access-token:${TOKEN}@github.com/${GITHUB_OWNER}/${REPOSITORY_NAME}.git"
+                - TARGET_URL="$(aws codecommit get-repository --repository-name "$REPOSITORY_NAME" --query 'repositoryMetadata.cloneUrlHttp' --output text)"
+                - git config --global credential.helper '!aws codecommit credential-helper $@'
+                - git config --global credential.UseHttpPath true
+                - rm -rf repo.git
+                - git clone --mirror "$SOURCE_URL" repo.git
+                - cd repo.git
+                - git push --mirror "$TARGET_URL"
+
+  WebhookHandlerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: WebhookAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref GitHubWebhookSecret
+              - Effect: Allow
+                Action: codebuild:StartBuild
+                Resource: !GetAtt MirrorProject.Arn
+
+  WebhookHandler:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: sethcharleston-github-mirror-webhook
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt WebhookHandlerRole.Arn
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          WEBHOOK_SECRET_NAME: !Ref GitHubWebhookSecretName
+          MIRROR_PROJECT_NAME: !Ref MirrorProject
+          ALLOWED_REPOSITORIES: !Sub "${WebsiteRepoName},${EditorRepoName}"
+      Code:
+        ZipFile: |
+          import base64, hashlib, hmac, json, os
+          import boto3
+          cb = boto3.client("codebuild")
+          sm = boto3.client("secretsmanager")
+          def response(code, body):
+              return {"statusCode": code, "headers": {"content-type": "application/json"}, "body": json.dumps(body)}
+          def handler(event, context):
+              headers = {k.lower(): v for k, v in (event.get("headers") or {}).items()}
+              raw = event.get("body") or ""
+              if event.get("isBase64Encoded"):
+                  raw_bytes = base64.b64decode(raw)
+              else:
+                  raw_bytes = raw.encode()
+              secret = sm.get_secret_value(SecretId=os.environ["WEBHOOK_SECRET_NAME"])["SecretString"]
+              expected = "sha256=" + hmac.new(secret.encode(), raw_bytes, hashlib.sha256).hexdigest()
+              actual = headers.get("x-hub-signature-256", "")
+              if not hmac.compare_digest(expected, actual):
+                  return response(401, {"message": "invalid signature"})
+              github_event = headers.get("x-github-event", "")
+              if github_event != "push":
+                  return response(202, {"message": "ignored event", "event": github_event})
+              payload = json.loads(raw_bytes.decode() or "{}")
+              repo = ((payload.get("repository") or {}).get("name") or "").strip()
+              allowed = {name.strip() for name in os.environ["ALLOWED_REPOSITORIES"].split(",")}
+              if repo not in allowed:
+                  return response(202, {"message": "ignored repository", "repository": repo})
+              cb.start_build(
+                  projectName=os.environ["MIRROR_PROJECT_NAME"],
+                  environmentVariablesOverride=[
+                      {"name": "REPOSITORY_NAME", "value": repo, "type": "PLAINTEXT"}
+                  ],
+              )
+              return response(202, {"message": "mirror started", "repository": repo})
+
+  WebhookApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: sethcharleston-github-mirror-webhook
+      ProtocolType: HTTP
+
+  WebhookIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WebhookApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt WebhookHandler.Arn
+      PayloadFormatVersion: "2.0"
+
+  WebhookRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebhookApi
+      RouteKey: POST /github
+      Target: !Sub "integrations/${WebhookIntegration}"
+
+  WebhookStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref WebhookApi
+      StageName: "$default"
+      AutoDeploy: true
+
+  WebhookInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref WebhookHandler
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${WebhookApi}/*/*/github"
+
+Outputs:
+  WebsiteRepositoryCloneUrlHttp:
+    Value: !GetAtt WebsiteCodeCommitRepository.CloneUrlHttp
+  EditorRepositoryCloneUrlHttp:
+    Value: !GetAtt EditorCodeCommitRepository.CloneUrlHttp
+  WebhookUrl:
+    Value: !Sub "${WebhookApi.ApiEndpoint}/github"
+  GitHubTokenSecretName:
+    Value: !Ref GitHubTokenSecretName
+  GitHubWebhookSecretName:
+    Value: !Ref GitHubWebhookSecretName
+  MirrorProjectName:
+    Value: !Ref MirrorProject

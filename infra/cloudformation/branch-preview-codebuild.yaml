@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CodeCommit-triggered CodeBuild automation for full DNS-backed branch preview environments.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: sethcharleston-branch-preview
+  CodeCommitRepositoryName:
+    Type: String
+    Default: sethcharleston.com
+  StagingBranch:
+    Type: String
+    Default: master
+  ExcludedBranches:
+    Type: String
+    Default: main,master
+
+Resources:
+  BranchPreviewRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  BranchPreviewProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref ProjectName
+      ServiceRole: !GetAtt BranchPreviewRole.Arn
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+      Source:
+        Type: CODECOMMIT
+        Location: !Sub "https://git-codecommit.${AWS::Region}.amazonaws.com/v1/repos/${CodeCommitRepositoryName}"
+        BuildSpec: buildspec.branch-preview.yml
+
+  BranchPreviewStarterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: StartBranchPreviewBuild
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: codebuild:StartBuild
+                Resource: !GetAtt BranchPreviewProject.Arn
+
+  BranchPreviewStarter:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: sethcharleston-branch-preview-starter
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt BranchPreviewStarterRole.Arn
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          PROJECT_NAME: !Ref BranchPreviewProject
+          STAGING_BRANCH: !Ref StagingBranch
+          EXCLUDED_BRANCHES: !Ref ExcludedBranches
+      Code:
+        ZipFile: |
+          import json, os
+          import boto3
+          cb = boto3.client("codebuild")
+          def handler(event, context):
+              detail = event.get("detail") or {}
+              branch = (detail.get("referenceName") or "").strip()
+              event_name = detail.get("event")
+              excluded = {name.strip() for name in os.environ["EXCLUDED_BRANCHES"].split(",")}
+              if not branch or branch in excluded:
+                  return {"statusCode": 202, "body": json.dumps({"message": "ignored branch", "branch": branch})}
+              if event_name == "referenceDeleted":
+                  action = "destroy"
+                  source_version = os.environ["STAGING_BRANCH"]
+              elif event_name in {"referenceCreated", "referenceUpdated"}:
+                  action = "deploy"
+                  source_version = branch
+              else:
+                  return {"statusCode": 202, "body": json.dumps({"message": "ignored event", "event": event_name})}
+              build = cb.start_build(
+                  projectName=os.environ["PROJECT_NAME"],
+                  sourceVersion=source_version,
+                  environmentVariablesOverride=[
+                      {"name": "BRANCH_NAME", "value": branch, "type": "PLAINTEXT"},
+                      {"name": "PREVIEW_ACTION", "value": action, "type": "PLAINTEXT"},
+                  ],
+              )
+              return {"statusCode": 202, "body": json.dumps({"message": "started", "branch": branch, "action": action, "buildId": build["build"]["id"]})}
+
+  BranchPreviewSourceChangeRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: !Sub "Start branch preview automation when ${CodeCommitRepositoryName} feature branches change."
+      EventPattern:
+        source:
+          - aws.codecommit
+        detail-type:
+          - CodeCommit Repository State Change
+        resources:
+          - !Sub "arn:${AWS::Partition}:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepositoryName}"
+        detail:
+          event:
+            - referenceCreated
+            - referenceUpdated
+            - referenceDeleted
+          referenceType:
+            - branch
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt BranchPreviewStarter.Arn
+          Id: BranchPreviewStarter
+
+  BranchPreviewStarterInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref BranchPreviewStarter
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt BranchPreviewSourceChangeRule.Arn
+
+Outputs:
+  ProjectName:
+    Value: !Ref BranchPreviewProject
+  StarterFunctionName:
+    Value: !Ref BranchPreviewStarter
+  SourceChangeRuleName:
+    Value: !Ref BranchPreviewSourceChangeRule

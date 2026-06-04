@@ -1,0 +1,339 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: GitHub-triggered CodePipeline for packaging and deploying the static sethcharleston.com website.
+
+Parameters:
+  PipelineName:
+    Type: String
+    Default: sethcharleston.com
+  BuildProjectName:
+    Type: String
+    Default: sethcharleston-site-package
+    AllowedPattern: "^[A-Za-z0-9_-]+$"
+  GitHubOwner:
+    Type: String
+    Default: art12354
+  GitHubRepo:
+    Type: String
+    Default: sethcharleston.com
+  GitHubBranch:
+    Type: String
+    Default: master
+  SourceProvider:
+    Type: String
+    Default: GitHub
+    AllowedValues:
+      - GitHub
+      - CodeCommit
+    Description: Use GitHub CodeConnections directly, or use an AWS CodeCommit mirror.
+  CodeCommitRepositoryName:
+    Type: String
+    Default: sethcharleston.com
+  CodeCommitBranch:
+    Type: String
+    Default: master
+  ConnectionArn:
+    Type: String
+    Default: arn:aws:codestar-connections:us-east-1:305372771047:connection/6ac1a538-e4aa-4c85-9dce-4b2797063880
+    Description: AWS CodeConnections/CodeStar connection ARN for GitHub.
+  WebsiteBucketName:
+    Type: String
+    Default: sethcharleston.com
+  InvalidationFunctionName:
+    Type: String
+    Default: seth_charleston_invalidate_cdn
+  CloudFrontDistributionId:
+    Type: String
+    Default: E3FWVWV0D2QOJ4
+  ApiBaseUrl:
+    Type: String
+    Default: https://api.sethcharleston.com
+  LoginBaseUrl:
+    Type: String
+    Default: https://login.sethcharleston.com
+  CognitoClientId:
+    Type: String
+    Default: 76g2um3ps3ri68ac30agopcmc9
+  EditorCallbackUrl:
+    Type: String
+    Default: https://edit.sethcharleston.com
+
+Conditions:
+  UseGitHubSource: !Equals [!Ref SourceProvider, GitHub]
+  UseCodeCommitSource: !Equals [!Ref SourceProvider, CodeCommit]
+
+Resources:
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodeBuildAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${BuildProjectName}*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                Resource: !Sub "${ArtifactBucket.Arn}/*"
+              - Effect: Allow
+                Action: cloudformation:ValidateTemplate
+                Resource: "*"
+
+  PackageProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref BuildProjectName
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        EnvironmentVariables:
+          - Name: API_BASE_URL
+            Type: PLAINTEXT
+            Value: !Ref ApiBaseUrl
+          - Name: LOGIN_BASE_URL
+            Type: PLAINTEXT
+            Value: !Ref LoginBaseUrl
+          - Name: COGNITO_CLIENT_ID
+            Type: PLAINTEXT
+            Value: !Ref CognitoClientId
+          - Name: EDITOR_CALLBACK_URL
+            Type: PLAINTEXT
+            Value: !Ref EditorCallbackUrl
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec.yml
+
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodePipelineAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                  - s3:PutObject
+                Resource:
+                  - !GetAtt ArtifactBucket.Arn
+                  - !Sub "${ArtifactBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - s3:DeleteObject
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${WebsiteBucketName}"
+                  - !Sub "arn:${AWS::Partition}:s3:::${WebsiteBucketName}/*"
+              - Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource: !GetAtt PackageProject.Arn
+              - Effect: Allow
+                Action:
+                  - codestar-connections:UseConnection
+                  - codeconnections:UseConnection
+                Resource: !Ref ConnectionArn
+              - Effect: Allow
+                Action:
+                  - codecommit:GetBranch
+                  - codecommit:GetCommit
+                  - codecommit:GetRepository
+                  - codecommit:GitPull
+                  - codecommit:UploadArchive
+                  - codecommit:GetUploadArchiveStatus
+                  - codecommit:CancelUploadArchive
+                Resource: !Sub "arn:${AWS::Partition}:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepositoryName}"
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${InvalidationFunctionName}"
+
+  CodeCommitEventsRole:
+    Type: AWS::IAM::Role
+    Condition: UseCodeCommitSource
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StartPipelineOnCodeCommitChange
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: codepipeline:StartPipelineExecution
+                Resource: !Sub "arn:${AWS::Partition}:codepipeline:${AWS::Region}:${AWS::AccountId}:${PipelineName}"
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Ref PipelineName
+      RoleArn: !GetAtt PipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactBucket
+      ExecutionMode: SUPERSEDED
+      PipelineType: V1
+      Stages:
+        - Name: Source
+          Actions:
+            - !If
+              - UseGitHubSource
+              - Name: Source
+                ActionTypeId:
+                  Category: Source
+                  Owner: AWS
+                  Provider: CodeStarSourceConnection
+                  Version: "1"
+                Configuration:
+                  ConnectionArn: !Ref ConnectionArn
+                  FullRepositoryId: !Sub "${GitHubOwner}/${GitHubRepo}"
+                  BranchName: !Ref GitHubBranch
+                  DetectChanges: true
+                  OutputArtifactFormat: CODE_ZIP
+                OutputArtifacts:
+                  - Name: SourceArtifact
+                RunOrder: 1
+              - !Ref AWS::NoValue
+            - !If
+              - UseCodeCommitSource
+              - Name: Source
+                ActionTypeId:
+                  Category: Source
+                  Owner: AWS
+                  Provider: CodeCommit
+                  Version: "1"
+                Configuration:
+                  RepositoryName: !Ref CodeCommitRepositoryName
+                  BranchName: !Ref CodeCommitBranch
+                  PollForSourceChanges: false
+                OutputArtifacts:
+                  - Name: SourceArtifact
+                RunOrder: 1
+              - !Ref AWS::NoValue
+        - Name: Package
+          Actions:
+            - Name: Package_Static_Site
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref PackageProject
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: WebsiteArtifact
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: S3
+                Version: "1"
+              Configuration:
+                BucketName: !Ref WebsiteBucketName
+                Extract: true
+              InputArtifacts:
+                - Name: WebsiteArtifact
+              RunOrder: 1
+        - Name: Create_Invalidation
+          Actions:
+            - Name: Invalidate_CDN
+              ActionTypeId:
+                Category: Invoke
+                Owner: AWS
+                Provider: Lambda
+                Version: "1"
+              Configuration:
+                FunctionName: !Ref InvalidationFunctionName
+                UserParameters: !Ref CloudFrontDistributionId
+              RunOrder: 1
+
+  CodeCommitSourceChangeRule:
+    Type: AWS::Events::Rule
+    Condition: UseCodeCommitSource
+    Properties:
+      Description: !Sub "Start ${PipelineName} when ${CodeCommitRepositoryName}:${CodeCommitBranch} changes."
+      EventPattern:
+        source:
+          - aws.codecommit
+        detail-type:
+          - CodeCommit Repository State Change
+        resources:
+          - !Sub "arn:${AWS::Partition}:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepositoryName}"
+        detail:
+          event:
+            - referenceCreated
+            - referenceUpdated
+          referenceType:
+            - branch
+          referenceName:
+            - !Ref CodeCommitBranch
+      State: ENABLED
+      Targets:
+        - Arn: !Sub "arn:${AWS::Partition}:codepipeline:${AWS::Region}:${AWS::AccountId}:${Pipeline}"
+          Id: !Sub "${PipelineName}-source-change"
+          RoleArn: !GetAtt CodeCommitEventsRole.Arn
+
+Outputs:
+  PipelineName:
+    Value: !Ref Pipeline
+  ArtifactBucketName:
+    Value: !Ref ArtifactBucket
+  PackageProjectName:
+    Value: !Ref PackageProject

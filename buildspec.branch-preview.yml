@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - export PREVIEW_ACTION="${PREVIEW_ACTION:-deploy}"
+      - export BRANCH_NAME="${BRANCH_NAME:-}"
+      - if [ -z "$BRANCH_NAME" ]; then export BRANCH_NAME="${CODEBUILD_WEBHOOK_HEAD_REF#refs/heads/}"; fi
+      - if [ -z "$BRANCH_NAME" ] || [ "$BRANCH_NAME" = "$CODEBUILD_WEBHOOK_HEAD_REF" ]; then export BRANCH_NAME="${CODEBUILD_SOURCE_VERSION#refs/heads/}"; fi
+      - if [ "$BRANCH_NAME" = "master" ] || [ "$BRANCH_NAME" = "main" ]; then echo "main/master deploy through staging, skipping branch preview"; exit 0; fi
+      - if [ "$PREVIEW_ACTION" = "destroy" ]; then ./scripts/destroy-branch.sh; else ./scripts/deploy-branch.sh; fi

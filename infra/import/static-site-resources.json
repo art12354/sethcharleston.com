@@ -1,0 +1,23 @@
+[
+  {
+    "ResourceType": "AWS::S3::Bucket",
+    "LogicalResourceId": "SiteBucket",
+    "ResourceIdentifier": {
+      "BucketName": "sethcharleston.com"
+    }
+  },
+  {
+    "ResourceType": "AWS::S3::BucketPolicy",
+    "LogicalResourceId": "SiteBucketPolicy",
+    "ResourceIdentifier": {
+      "Bucket": "sethcharleston.com"
+    }
+  },
+  {
+    "ResourceType": "AWS::CloudFront::Distribution",
+    "LogicalResourceId": "SiteDistribution",
+    "ResourceIdentifier": {
+      "Id": "E3FWVWV0D2QOJ4"
+    }
+  }
+]

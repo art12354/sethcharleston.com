@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - aws cloudformation validate-template --template-body file://infra/cloudformation/static-site.yaml --region "$AWS_DEFAULT_REGION"
+      - aws cloudformation validate-template --template-body file://infra/cloudformation/backend-api.yaml --region "$AWS_DEFAULT_REGION"
+      - aws cloudformation validate-template --template-body file://infra/cloudformation/codepipeline.yaml --region "$AWS_DEFAULT_REGION"
+      - aws cloudformation validate-template --template-body file://infra/cloudformation/branch-preview-codebuild.yaml --region "$AWS_DEFAULT_REGION"
+      - rm -rf dist
+      - mkdir -p dist
+      - cp index.html about.html music.html shows.html sitemap.xml dist/
+      - cp -R css photos videos dist/
+      - find dist -type f -name "*.html" -print0 | xargs -0 sed -i "s#https://api.sethcharleston.com#${API_BASE_URL:-https://api.sethcharleston.com}#g"
+      - find dist -type f -print
+
+artifacts:
+  base-directory: dist
+  files:
+    - "**/*"
