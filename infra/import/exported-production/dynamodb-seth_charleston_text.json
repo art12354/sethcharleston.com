@@ -1,0 +1,34 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "location",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "seth_charleston_text",
+        "KeySchema": [
+            {
+                "AttributeName": "location",
+                "KeyType": "HASH"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2019-03-24T15:47:14.522000-04:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+        },
+        "TableSizeBytes": 3761,
+        "ItemCount": 4,
+        "TableArn": "arn:aws:dynamodb:us-east-1:305372771047:table/seth_charleston_text",
+        "TableId": "57a3f571-7add-4351-a915-287bb3959f7f",
+        "DeletionProtectionEnabled": false,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 5,
+            "WriteUnitsPerSecond": 5,
+            "Status": "ACTIVE"
+        }
+    }
+}

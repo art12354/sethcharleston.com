@@ -1,0 +1,76 @@
+{
+    "UserPoolClient": {
+        "UserPoolId": "us-east-1_KyvNSufwI",
+        "ClientName": "seth_charleston",
+        "ClientId": "76g2um3ps3ri68ac30agopcmc9",
+        "LastModifiedDate": "2020-07-29T17:41:00.952000-04:00",
+        "CreationDate": "2020-07-27T16:47:00.778000-04:00",
+        "RefreshTokenValidity": 30,
+        "TokenValidityUnits": {},
+        "ReadAttributes": [
+            "address",
+            "birthdate",
+            "email",
+            "email_verified",
+            "family_name",
+            "gender",
+            "given_name",
+            "locale",
+            "middle_name",
+            "name",
+            "nickname",
+            "phone_number",
+            "phone_number_verified",
+            "picture",
+            "preferred_username",
+            "profile",
+            "updated_at",
+            "website",
+            "zoneinfo"
+        ],
+        "WriteAttributes": [
+            "address",
+            "birthdate",
+            "email",
+            "family_name",
+            "gender",
+            "given_name",
+            "locale",
+            "middle_name",
+            "name",
+            "nickname",
+            "phone_number",
+            "picture",
+            "preferred_username",
+            "profile",
+            "updated_at",
+            "website",
+            "zoneinfo"
+        ],
+        "ExplicitAuthFlows": [
+            "ALLOW_CUSTOM_AUTH",
+            "ALLOW_REFRESH_TOKEN_AUTH",
+            "ALLOW_USER_PASSWORD_AUTH",
+            "ALLOW_USER_SRP_AUTH"
+        ],
+        "SupportedIdentityProviders": [
+            "COGNITO"
+        ],
+        "CallbackURLs": [
+            "https://edit.sethcharleston.com"
+        ],
+        "AllowedOAuthFlows": [
+            "code",
+            "implicit"
+        ],
+        "AllowedOAuthScopes": [
+            "email",
+            "openid"
+        ],
+        "AllowedOAuthFlowsUserPoolClient": true,
+        "PreventUserExistenceErrors": "ENABLED",
+        "EnableTokenRevocation": false,
+        "EnablePropagateAdditionalUserContextData": false,
+        "AuthSessionValidity": 3
+    }
+}

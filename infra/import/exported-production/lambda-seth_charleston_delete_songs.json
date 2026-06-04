@@ -1,0 +1,35 @@
+{
+    "FunctionName": "seth_charleston_delete_songs",
+    "FunctionArn": "arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_delete_songs",
+    "Runtime": "nodejs8.10",
+    "Role": "arn:aws:iam::305372771047:role/service-role/seth_charleston_delete_songs-role-ok4cghny",
+    "Handler": "index.handler",
+    "CodeSize": 393,
+    "Description": "",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "LastModified": "2019-03-24T23:38:34.439+0000",
+    "CodeSha256": "r5hazzJptmw07kPYl9P14/HFzBOXlT6Roetfu4MhdZ8=",
+    "Version": "$LATEST",
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    },
+    "RevisionId": "080244d9-78cb-4260-b22a-04823696a25a",
+    "State": "Active",
+    "LastUpdateStatus": "Successful",
+    "PackageType": "Zip",
+    "Architectures": [
+        "x86_64"
+    ],
+    "EphemeralStorage": {
+        "Size": 512
+    },
+    "SnapStart": {
+        "ApplyOn": "None",
+        "OptimizationStatus": "Off"
+    },
+    "LoggingConfig": {
+        "LogFormat": "Text",
+        "LogGroup": "/aws/lambda/seth_charleston_delete_songs"
+    }
+}

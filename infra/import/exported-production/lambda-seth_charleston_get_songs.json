@@ -1,0 +1,35 @@
+{
+    "FunctionName": "seth_charleston_get_songs",
+    "FunctionArn": "arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_get_songs",
+    "Runtime": "nodejs8.10",
+    "Role": "arn:aws:iam::305372771047:role/service-role/seth_charleston_get_songs-role-6x29t8oy",
+    "Handler": "index.handler",
+    "CodeSize": 605,
+    "Description": "",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "LastModified": "2019-03-24T21:12:43.263+0000",
+    "CodeSha256": "UHccxi7CUsjFgMyUkdqnkh4LkBfkzSj4ZXulc7eVtq8=",
+    "Version": "$LATEST",
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    },
+    "RevisionId": "22d13247-ad9c-4b6d-ba63-0ac29be91fbe",
+    "State": "Active",
+    "LastUpdateStatus": "Successful",
+    "PackageType": "Zip",
+    "Architectures": [
+        "x86_64"
+    ],
+    "EphemeralStorage": {
+        "Size": 512
+    },
+    "SnapStart": {
+        "ApplyOn": "None",
+        "OptimizationStatus": "Off"
+    },
+    "LoggingConfig": {
+        "LogFormat": "Text",
+        "LogGroup": "/aws/lambda/seth_charleston_get_songs"
+    }
+}

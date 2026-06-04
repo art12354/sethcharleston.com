@@ -1,0 +1,38 @@
+{
+    "FunctionName": "seth_charleston_delete_events",
+    "FunctionArn": "arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_delete_events",
+    "Runtime": "nodejs18.x",
+    "Role": "arn:aws:iam::305372771047:role/seth_charleston_delete_events",
+    "Handler": "index.handler",
+    "CodeSize": 800,
+    "Description": "",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "LastModified": "2023-08-07T01:25:34.000+0000",
+    "CodeSha256": "oDguMPEF9ypMqvu8URrSHm7Y6wzNFJK7eSNvAViCqF4=",
+    "Version": "$LATEST",
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    },
+    "RevisionId": "4b32037a-cdb5-474f-862f-784e0430d4ca",
+    "State": "Active",
+    "LastUpdateStatus": "Successful",
+    "PackageType": "Zip",
+    "Architectures": [
+        "x86_64"
+    ],
+    "EphemeralStorage": {
+        "Size": 512
+    },
+    "SnapStart": {
+        "ApplyOn": "None",
+        "OptimizationStatus": "Off"
+    },
+    "RuntimeVersionConfig": {
+        "RuntimeVersionArn": "arn:aws:lambda:us-east-1::runtime:9a9659568bf79d197303268f6f12daf1b07196863769ffdfec56057ebf0b0553"
+    },
+    "LoggingConfig": {
+        "LogFormat": "Text",
+        "LogGroup": "/aws/lambda/seth_charleston_delete_events"
+    }
+}

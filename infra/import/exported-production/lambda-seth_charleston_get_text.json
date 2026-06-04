@@ -1,0 +1,35 @@
+{
+    "FunctionName": "seth_charleston_get_text",
+    "FunctionArn": "arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_get_text",
+    "Runtime": "nodejs14.x",
+    "Role": "arn:aws:iam::305372771047:role/service-role/seth_charleston_get_text-role-wzy2g64p",
+    "Handler": "index.handler",
+    "CodeSize": 604,
+    "Description": "",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "LastModified": "2021-11-23T21:16:16.000+0000",
+    "CodeSha256": "msJqX3dOcqBjugtAHk5w4fD5pHX9lHgFRzZoVxLgGvw=",
+    "Version": "$LATEST",
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    },
+    "RevisionId": "d429db7e-10e2-49d6-9132-331e793d7941",
+    "State": "Active",
+    "LastUpdateStatus": "Successful",
+    "PackageType": "Zip",
+    "Architectures": [
+        "x86_64"
+    ],
+    "EphemeralStorage": {
+        "Size": 512
+    },
+    "SnapStart": {
+        "ApplyOn": "None",
+        "OptimizationStatus": "Off"
+    },
+    "LoggingConfig": {
+        "LogFormat": "Text",
+        "LogGroup": "/aws/lambda/seth_charleston_get_text"
+    }
+}

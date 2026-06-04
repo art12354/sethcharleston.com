@@ -1,0 +1,34 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "event",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "seth_charleston_events",
+        "KeySchema": [
+            {
+                "AttributeName": "event",
+                "KeyType": "HASH"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2018-09-06T15:54:56.699000-04:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+        },
+        "TableSizeBytes": 298,
+        "ItemCount": 1,
+        "TableArn": "arn:aws:dynamodb:us-east-1:305372771047:table/seth_charleston_events",
+        "TableId": "be947bc3-ef94-4a47-907b-d6a6d77df126",
+        "DeletionProtectionEnabled": false,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 5,
+            "WriteUnitsPerSecond": 5,
+            "Status": "ACTIVE"
+        }
+    }
+}

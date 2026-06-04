@@ -1,0 +1,19 @@
+{
+    "domainName": "api.sethcharleston.com",
+    "domainNameArn": "arn:aws:apigateway:us-east-1::/domainnames/api.sethcharleston.com",
+    "certificateArn": "arn:aws:acm:us-east-1:305372771047:certificate/2db52ae6-5372-472a-b689-42126941926a",
+    "certificateUploadDate": "2018-09-06T15:27:46-04:00",
+    "distributionDomainName": "d4kywkuh2lcxu.cloudfront.net",
+    "distributionHostedZoneId": "Z2FDTNDATAQYW2",
+    "endpointConfiguration": {
+        "types": [
+            "EDGE"
+        ]
+    },
+    "domainNameStatus": "AVAILABLE",
+    "securityPolicy": "TLS_1_0",
+    "tags": {
+        "sethcharleston": "apigateway"
+    },
+    "routingMode": "BASE_PATH_MAPPING_ONLY"
+}

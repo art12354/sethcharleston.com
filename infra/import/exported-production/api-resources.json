@@ -1,0 +1,661 @@
+{
+    "items": [
+        {
+            "id": "68pp93",
+            "parentId": "c0kcrm7w0m",
+            "pathPart": "text",
+            "path": "/text",
+            "resourceMethods": {
+                "GET": {
+                    "httpMethod": "GET",
+                    "authorizationType": "NONE",
+                    "apiKeyRequired": false,
+                    "requestParameters": {},
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "AWS",
+                        "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_get_text/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "contentHandling": "CONVERT_TO_TEXT",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "68pp93",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                },
+                "OPTIONS": {
+                    "httpMethod": "OPTIONS",
+                    "authorizationType": "NONE",
+                    "apiKeyRequired": false,
+                    "requestParameters": {},
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": false,
+                                "method.response.header.Access-Control-Allow-Methods": false,
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "MOCK",
+                        "requestTemplates": {
+                            "application/json": "{\"statusCode\": 200}"
+                        },
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "68pp93",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                    "method.response.header.Access-Control-Allow-Methods": "'POST,GET,OPTIONS'",
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                },
+                "POST": {
+                    "httpMethod": "POST",
+                    "authorizationType": "COGNITO_USER_POOLS",
+                    "authorizerId": "z3qept",
+                    "apiKeyRequired": false,
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "AWS",
+                        "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_post_text/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "contentHandling": "CONVERT_TO_TEXT",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "68pp93",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                }
+            }
+        },
+        {
+            "id": "c0kcrm7w0m",
+            "path": "/",
+            "resourceMethods": {
+                "GET": {
+                    "httpMethod": "GET",
+                    "authorizationType": "NONE",
+                    "apiKeyRequired": false,
+                    "requestParameters": {},
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "AWS",
+                        "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_get_events/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "contentHandling": "CONVERT_TO_TEXT",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "c0kcrm7w0m",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                },
+                "OPTIONS": {
+                    "httpMethod": "OPTIONS",
+                    "authorizationType": "NONE",
+                    "apiKeyRequired": false,
+                    "requestParameters": {},
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": false,
+                                "method.response.header.Access-Control-Allow-Methods": false,
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "MOCK",
+                        "requestTemplates": {
+                            "application/json": "{\"statusCode\": 200}"
+                        },
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "c0kcrm7w0m",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                    "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS,POST'",
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                },
+                "POST": {
+                    "httpMethod": "POST",
+                    "authorizationType": "COGNITO_USER_POOLS",
+                    "authorizerId": "z3qept",
+                    "apiKeyRequired": false,
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "AWS",
+                        "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_post_events/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "contentHandling": "CONVERT_TO_TEXT",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "c0kcrm7w0m",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                }
+            }
+        },
+        {
+            "id": "cr154g",
+            "parentId": "c0kcrm7w0m",
+            "pathPart": "songs",
+            "path": "/songs",
+            "resourceMethods": {
+                "GET": {
+                    "httpMethod": "GET",
+                    "authorizationType": "NONE",
+                    "apiKeyRequired": false,
+                    "requestParameters": {},
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "AWS",
+                        "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_get_songs/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "contentHandling": "CONVERT_TO_TEXT",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "cr154g",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                },
+                "OPTIONS": {
+                    "httpMethod": "OPTIONS",
+                    "authorizationType": "NONE",
+                    "apiKeyRequired": false,
+                    "requestParameters": {},
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": false,
+                                "method.response.header.Access-Control-Allow-Methods": false,
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "MOCK",
+                        "requestTemplates": {
+                            "application/json": "{\"statusCode\": 200}"
+                        },
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "cr154g",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                    "method.response.header.Access-Control-Allow-Methods": "'POST,GET,OPTIONS'",
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                },
+                "POST": {
+                    "httpMethod": "POST",
+                    "authorizationType": "COGNITO_USER_POOLS",
+                    "authorizerId": "z3qept",
+                    "apiKeyRequired": false,
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "AWS",
+                        "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_post_song/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "contentHandling": "CONVERT_TO_TEXT",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "cr154g",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                }
+            }
+        },
+        {
+            "id": "ic340p",
+            "parentId": "c0kcrm7w0m",
+            "pathPart": "delete",
+            "path": "/delete",
+            "resourceMethods": {
+                "OPTIONS": {
+                    "httpMethod": "OPTIONS",
+                    "authorizationType": "NONE",
+                    "apiKeyRequired": false,
+                    "requestParameters": {},
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": false,
+                                "method.response.header.Access-Control-Allow-Methods": false,
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "MOCK",
+                        "requestTemplates": {
+                            "application/json": "{\"statusCode\": 200}"
+                        },
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "ic340p",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                    "method.response.header.Access-Control-Allow-Methods": "'POST,OPTIONS'",
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                },
+                "POST": {
+                    "httpMethod": "POST",
+                    "authorizationType": "COGNITO_USER_POOLS",
+                    "authorizerId": "z3qept",
+                    "apiKeyRequired": false,
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "AWS",
+                        "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_delete_events/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "contentHandling": "CONVERT_TO_TEXT",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "ic340p",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                }
+            }
+        },
+        {
+            "id": "jr9uig",
+            "parentId": "c0kcrm7w0m",
+            "pathPart": "access",
+            "path": "/access",
+            "resourceMethods": {
+                "GET": {
+                    "httpMethod": "GET",
+                    "authorizationType": "COGNITO_USER_POOLS",
+                    "authorizerId": "z3qept",
+                    "apiKeyRequired": false,
+                    "requestParameters": {
+                        "method.request.header.Authorization": true
+                    },
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "MOCK",
+                        "requestTemplates": {
+                            "application/json": "{\"statusCode\": 200}"
+                        },
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "jr9uig",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                },
+                "OPTIONS": {
+                    "httpMethod": "OPTIONS",
+                    "authorizationType": "NONE",
+                    "apiKeyRequired": false,
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": false,
+                                "method.response.header.Access-Control-Allow-Methods": false,
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "MOCK",
+                        "requestTemplates": {
+                            "application/json": "{\"statusCode\": 200}"
+                        },
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "jr9uig",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                    "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                }
+            }
+        },
+        {
+            "id": "jvfzo4",
+            "parentId": "c0kcrm7w0m",
+            "pathPart": "delete_song",
+            "path": "/delete_song",
+            "resourceMethods": {
+                "OPTIONS": {
+                    "httpMethod": "OPTIONS",
+                    "authorizationType": "NONE",
+                    "apiKeyRequired": false,
+                    "requestParameters": {},
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": false,
+                                "method.response.header.Access-Control-Allow-Methods": false,
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "MOCK",
+                        "requestTemplates": {
+                            "application/json": "{\"statusCode\": 200}"
+                        },
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "jvfzo4",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                    "method.response.header.Access-Control-Allow-Methods": "'POST,OPTIONS'",
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                },
+                "POST": {
+                    "httpMethod": "POST",
+                    "authorizationType": "COGNITO_USER_POOLS",
+                    "authorizerId": "z3qept",
+                    "apiKeyRequired": false,
+                    "methodResponses": {
+                        "200": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": false
+                            },
+                            "responseModels": {
+                                "application/json": "Empty"
+                            }
+                        }
+                    },
+                    "methodIntegration": {
+                        "type": "AWS",
+                        "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_delete_songs/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH",
+                        "contentHandling": "CONVERT_TO_TEXT",
+                        "timeoutInMillis": 29000,
+                        "cacheNamespace": "jvfzo4",
+                        "cacheKeyParameters": [],
+                        "integrationResponses": {
+                            "200": {
+                                "statusCode": "200",
+                                "responseParameters": {
+                                    "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                },
+                                "responseTemplates": {
+                                    "application/json": null
+                                }
+                            }
+                        },
+                        "responseTransferMode": "BUFFERED"
+                    }
+                }
+            }
+        }
+    ]
+}

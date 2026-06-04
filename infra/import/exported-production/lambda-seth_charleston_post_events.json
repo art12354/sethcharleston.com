@@ -1,0 +1,38 @@
+{
+    "FunctionName": "seth_charleston_post_events",
+    "FunctionArn": "arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_post_events",
+    "Runtime": "nodejs18.x",
+    "Role": "arn:aws:iam::305372771047:role/seth_charleston_post_events",
+    "Handler": "index.handler",
+    "CodeSize": 643,
+    "Description": "",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "LastModified": "2023-08-07T00:29:41.000+0000",
+    "CodeSha256": "GwTfCWMJTisOhoF2QgiJ2IGTZORfuDVYsEbo2dYomIg=",
+    "Version": "$LATEST",
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    },
+    "RevisionId": "7f8560ef-dc1c-4620-92fd-c862bd9287e6",
+    "State": "Active",
+    "LastUpdateStatus": "Successful",
+    "PackageType": "Zip",
+    "Architectures": [
+        "x86_64"
+    ],
+    "EphemeralStorage": {
+        "Size": 512
+    },
+    "SnapStart": {
+        "ApplyOn": "None",
+        "OptimizationStatus": "Off"
+    },
+    "RuntimeVersionConfig": {
+        "RuntimeVersionArn": "arn:aws:lambda:us-east-1::runtime:9a9659568bf79d197303268f6f12daf1b07196863769ffdfec56057ebf0b0553"
+    },
+    "LoggingConfig": {
+        "LogFormat": "Text",
+        "LogGroup": "/aws/lambda/seth_charleston_post_events"
+    }
+}

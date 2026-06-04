@@ -1,0 +1,34 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "song",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "seth_charleston_music",
+        "KeySchema": [
+            {
+                "AttributeName": "song",
+                "KeyType": "HASH"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2019-03-24T16:50:12.028000-04:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+        },
+        "TableSizeBytes": 4553,
+        "ItemCount": 12,
+        "TableArn": "arn:aws:dynamodb:us-east-1:305372771047:table/seth_charleston_music",
+        "TableId": "06a45dfd-1ae8-429a-b9d7-0193e2272496",
+        "DeletionProtectionEnabled": false,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 5,
+            "WriteUnitsPerSecond": 5,
+            "Status": "ACTIVE"
+        }
+    }
+}

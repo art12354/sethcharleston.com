@@ -1,0 +1,35 @@
+{
+    "FunctionName": "seth_charleston_post_text",
+    "FunctionArn": "arn:aws:lambda:us-east-1:305372771047:function:seth_charleston_post_text",
+    "Runtime": "nodejs14.x",
+    "Role": "arn:aws:iam::305372771047:role/service-role/seth_charleston_post_text-role-tlphcec0",
+    "Handler": "index.handler",
+    "CodeSize": 599,
+    "Description": "",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "LastModified": "2023-07-23T06:36:05.000+0000",
+    "CodeSha256": "9Q4g9wi44kRbR4Ogk2nwwMm4ZLJpOLfJIVlex8KrgX0=",
+    "Version": "$LATEST",
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    },
+    "RevisionId": "a922d5d4-b2d4-42ae-904b-b05ea4c4e76d",
+    "State": "Active",
+    "LastUpdateStatus": "Successful",
+    "PackageType": "Zip",
+    "Architectures": [
+        "x86_64"
+    ],
+    "EphemeralStorage": {
+        "Size": 512
+    },
+    "SnapStart": {
+        "ApplyOn": "None",
+        "OptimizationStatus": "Off"
+    },
+    "LoggingConfig": {
+        "LogFormat": "Text",
+        "LogGroup": "/aws/lambda/seth_charleston_post_text"
+    }
+}
