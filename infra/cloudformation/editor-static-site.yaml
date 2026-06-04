@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Existing editor static website hosting for edit.sethcharleston.com using S3, CloudFront, ACM, and Route 53.
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: edit.sethcharleston.com
+  HostedZoneId:
+    Type: String
+    Default: Z27ZS6MVE7C6ZT
+  AcmCertificateArn:
+    Type: String
+    Default: arn:aws:acm:us-east-1:305372771047:certificate/2db52ae6-5372-472a-b689-42126941926a
+  ManageDnsRecords:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+
+Conditions:
+  ManageDns: !Equals [!Ref ManageDnsRecords, "true"]
+
+Resources:
+  EditorBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Ref DomainName
+      Tags:
+        - Key: sethcharleston
+          Value: S3
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  EditorBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Bucket: !Ref EditorBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${EditorBucket.Arn}/*"
+
+  EditorDistribution:
+    Type: AWS::CloudFront::Distribution
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Aliases:
+          - !Ref DomainName
+        DefaultRootObject: index.html
+        HttpVersion: http2
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: !Sub "S3-${DomainName}"
+            DomainName: !Sub "${DomainName}.s3.amazonaws.com"
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        DefaultCacheBehavior:
+          TargetOriginId: !Sub "S3-${DomainName}"
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - HEAD
+            - GET
+          CachedMethods:
+            - HEAD
+            - GET
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+        ViewerCertificate:
+          AcmCertificateArn: !Ref AcmCertificateArn
+          MinimumProtocolVersion: TLSv1.2_2019
+          SslSupportMethod: sni-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+
+  EditorRecord:
+    Type: AWS::Route53::RecordSet
+    Condition: ManageDns
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt EditorDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+        EvaluateTargetHealth: false
+
+Outputs:
+  SiteBucketName:
+    Description: S3 bucket that stores editor files.
+    Value: !Ref EditorBucket
+  CloudFrontDistributionId:
+    Description: CloudFront distribution ID for cache invalidations.
+    Value: !Ref EditorDistribution
+  CloudFrontDomainName:
+    Description: Generated CloudFront hostname.
+    Value: !GetAtt EditorDistribution.DomainName
+  WebsiteUrl:
+    Description: Public editor URL.
+    Value: !Sub "https://${DomainName}"

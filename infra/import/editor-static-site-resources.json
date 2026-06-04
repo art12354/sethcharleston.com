@@ -1,0 +1,23 @@
+[
+  {
+    "ResourceType": "AWS::S3::Bucket",
+    "LogicalResourceId": "EditorBucket",
+    "ResourceIdentifier": {
+      "BucketName": "edit.sethcharleston.com"
+    }
+  },
+  {
+    "ResourceType": "AWS::S3::BucketPolicy",
+    "LogicalResourceId": "EditorBucketPolicy",
+    "ResourceIdentifier": {
+      "Bucket": "edit.sethcharleston.com"
+    }
+  },
+  {
+    "ResourceType": "AWS::CloudFront::Distribution",
+    "LogicalResourceId": "EditorDistribution",
+    "ResourceIdentifier": {
+      "Id": "E2XF0OI690268U"
+    }
+  }
+]

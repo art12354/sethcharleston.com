@@ -45,11 +45,6 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Ref DomainName
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -63,6 +58,8 @@ Resources:
 
   SiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       Bucket: !Ref SiteBucket
       PolicyDocument:
@@ -76,6 +73,8 @@ Resources:
 
   SiteDistribution:
     Type: AWS::CloudFront::Distribution
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       DistributionConfig:
         Enabled: true
