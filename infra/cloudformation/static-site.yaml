@@ -54,6 +54,12 @@ Resources:
         BlockPublicPolicy: false
         IgnorePublicAcls: false
         RestrictPublicBuckets: false
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireProductionBackups
+            Status: Enabled
+            Prefix: production-backups/
+            ExpirationInDays: 30
       Tags:
         - Key: sethcharleston
           Value: S3
