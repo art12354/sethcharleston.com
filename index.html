@@ -4,166 +4,194 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-  <!-- jQuery library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Dancing Script" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Adamina" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/editor.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <!-- Popper JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <!-- Latest compiled JavaScript -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <!-- angularjs -->
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
-  <!-- login script -->
   <script src="js/login.js"></script>
-  <!-- front page scripts -->
   <script src="js/send_front_page_data.js"></script>
   <script src="js/generateFrontPage.js"></script>
-  <!-- bio page scripts -->
   <script src="js/send_bio_data.js"></script>
   <script src="js/generateBio.js"></script>
-  <!-- event page scripts -->
   <script src="js/send_event_data.js"></script>
   <script src="js/generateEvents.js"></script>
   <script src="js/editEvent.js"></script>
   <script src="js/deleteEvent.js"></script>
-  <!-- song page scripts -->
   <script src="js/send_song_data.js"></script>
   <script src="js/generateSongs.js"></script>
   <script src="js/editSong.js"></script>
   <script src="js/deleteSong.js"></script>
-
-  <title>Website Editor</title>
+  <title>Seth Charleston - Website Editor</title>
 </head>
 
-<body class="container  p-3 my-3 bg-dark text-white" onload="generateFrontPage()">
-
-  <div class="row">
-    <h1 class="col">Website Editing Tool</h1>
-    <button type="button" onclick="login()" class="btn btn-warning" id="login">Sign In</button>
-  </div>
-  <p>Editing your site -- reimagined</p>
-
-  <!-- Nav tabs -->
-  <ul class="nav nav-tabs">
-    <li class="nav-item">
-      <a class="nav-link active" data-toggle="tab" href="#front_page" onclick="generateFrontPage()">Front Page</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" data-toggle="tab" href="#bio" onclick="generateBio()">Bio</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" data-toggle="tab" href="#events" onclick="generateEvents()">Events</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" data-toggle="tab" href="#music" onclick="generateSongs()">Music</a>
-    </li>
-  </ul>
-
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <!-- Front Page -->
-    <div class="tab-pane container active" id="front_page">
-      <div class="form-group">
-        <label for="front_page_header">Header For the Front Page:</label>
-        <textarea class="form-control" rows="1" id="frontPageHeader"></textarea>
-        <label for="front_page_text">Text For the Front Page:</label>
-        <textarea class="form-control" rows="10" id="frontPageText"></textarea>
-        <label for="front_page_video">Youtube embeded html for the Front Page:</label>
-        <textarea class="form-control" rows="1" id="frontPageVideo"></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary" onclick="send_front_page_data()">Submit Front Page</button>
-      <div id="frontPageAlert" class="pt-3">
-        <p>Feel free to use any of <a href="http://www.tagindex.net/html/text/index.html" target="_blank">these</a> tags!</p>
-      </div>
-
-      <div class="pt-3">
-        <p>Rendered Front Page Text:</p>
-        <div id="frontPageHeaderInfo" class="card-deck"></div>
-        <div id="frontPageTextInfo" class="card-deck"></div>
-        <div id="frontPageVideoInfo" class="card-deck"></div>
-      </div>
+<body class="editor-page" onload="generateFrontPage()">
+  <nav class="topNav" id="topNav">
+    <div id="logo">
+      <a href="https://sethcharleston.com" class="logoWrap"><img src="https://sethcharleston.com/photos/Seth_Charleston_Logo.png" class="logo" alt="Seth Charleston Logo" title="Seth Charleston"></a>
+      <a href="javascript:void(0);" class="icon" onclick="myFunction()">&#9776;</a>
     </div>
-
-    <!-- BIO -->
-    <div class="tab-pane container fade" id="bio">
-      <div class="form-group">
-        <label for="bio">Text For the Bio:</label>
-        <textarea class="form-control" rows="10" id="bioText"></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary" onclick="send_bio_data()">Submit Bio</button>
-      <div id="bioAlert" class="pt-3">
-        <p>Feel free to use any of <a href="http://www.tagindex.net/html/text/index.html" target="_blank">these</a> tags!</p>
-      </div>
-
-      <div class="pt-3">
-        <p>Rendered Bio:</p>
-        <div id="bioInfo" class="card-deck"></div>
-      </div>
+    <div id="links">
+      <a class="link" href="#front_page" data-toggle="tab" onclick="generateFrontPage()">Home</a>
+      <a class="link" href="#bio" data-toggle="tab" onclick="generateBio()">About</a>
+      <a class="link" href="#music" data-toggle="tab" onclick="generateSongs()">Music</a>
+      <a class="link" href="#events" data-toggle="tab" onclick="generateEvents()">Shows</a>
     </div>
-
-    <!-- EVENTS -->
-    <div class="tab-pane container fade" id="events">
-      <div class="form-group">
-        <label for="event">Event:</label>
-        <input type="event" class="form-control" placeholder="The Seth Charleston Band at Coachman's!" id="event">
-      </div>
-      <div class="form-group d-none">
-        <label for="key"></label>
-        <input type="event" class="form-control" placeholder="4" id="key">
-      </div>
-      <div class="form-group">
-        <label for="date">Date:</label>
-        <input type="date" class="form-control" id="date">
-      </div>
-      <div class="form-group">
-        <label for="time">Time:</label>
-        <input type="time" class="form-control" placeholder="7:00 pm" id="time">
-      </div>
-      <div class="form-group">
-        <label for="where">Where:</label>
-        <input type="where" class="form-control" placeholder="Coachman's" id="where">
-      </div>
-      <div class="form-group">
-        <label for="tickets">Tickets:</label>
-        <input type="tickets" class="form-control" placeholder="ticketmaster.com" id="tickets">
-      </div>
-      <button type="submit" onclick="send_event_data()" class="btn btn-primary">Submit Event</button>
-      <div id="eventAlert" class="pt-3">
-      </div>
-
-      <div class="pt-3">
-        <p>Events:</p>
-        <div id="eventInfo" class="card-deck d-flex flex-column-reverse"></div>
-      </div>
+    <div id="social">
+      <button type="button" onclick="login()" class="editor-login" id="login">Sign In</button>
     </div>
-    <!-- MUSIC -->
-    <div class="tab-pane container fade" id="music">
-      <div class="form-group">
-        <label for="song">Song/Album Name:</label>
-        <input type="song" class="form-control" placeholder="Jungle" id="song">
-      </div>
-      <div class="form-group">
-        <label for="link">Spotify Embeded html:</label>
-        <input type="link" class="form-control" placeholder='<iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/7MiP3CqwyVFrJvTs071xmg?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>' id="link">
-      </div>
-      <div class="form-group">
-        <label for="releaseDate">Release Date:</label>
-        <input type="date" class="form-control" placeholder="12/3/2018" id="releaseDate">
-      </div>
-      <button type="submit" onclick="send_song_data()" class="btn btn-primary">Submit Event</button>
-      <div id="songAlert" class="pt-3">
-      </div>
+  </nav>
 
-      <div class="pt-3">
-        <p>Songs:</p>
-        <div id="songInfo" class="card-deck d-flex flex-column-reverse"></div>
-      </div>
+  <header class="editor-hero">
+    <div id="aboveHeader"></div>
+    <div id="homeImage">
+      <img src="https://sethcharleston.com/photos/Mobile Homepage Header (7.22.23).png" alt="" width="100%" height="100%">
     </div>
-  </div>
+    <img class="words" src="https://sethcharleston.com/photos/Seth_Charleston.png" alt="Seth Charleston">
+    <div class="spacer">Editor</div>
+  </header>
 
+  <main class="editor-main">
+    <section class="editor-shell">
+      <div class="editor-heading">
+        <h1>Website Editor</h1>
+        <button type="button" onclick="login()" class="editor-login editor-login-inline" id="loginMobile">Sign In</button>
+      </div>
+
+      <ul class="nav nav-tabs editor-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#front_page" onclick="generateFrontPage()">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#bio" onclick="generateBio()">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#events" onclick="generateEvents()">Shows</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#music" onclick="generateSongs()">Music</a>
+        </li>
+      </ul>
+
+      <div class="tab-content editor-content">
+        <div class="tab-pane active" id="front_page">
+          <div class="editor-grid">
+            <div class="editor-panel">
+              <h2>Home Content</h2>
+              <label for="frontPageHeader">Header</label>
+              <textarea rows="1" id="frontPageHeader"></textarea>
+              <label for="frontPageText">Main Text</label>
+              <textarea rows="10" id="frontPageText"></textarea>
+              <label for="frontPageVideo">Newest Video Embed</label>
+              <textarea rows="2" id="frontPageVideo"></textarea>
+              <button type="submit" class="editor-action" onclick="send_front_page_data()">Save Home</button>
+              <div id="frontPageAlert" class="editor-alert"></div>
+            </div>
+            <div class="editor-panel editor-preview">
+              <h2>Preview</h2>
+              <div id="frontPageHeaderInfo"></div>
+              <div id="frontPageTextInfo"></div>
+              <div id="frontPageVideoInfo"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="bio">
+          <div class="editor-grid">
+            <div class="editor-panel">
+              <h2>About Content</h2>
+              <label for="bioText">Bio Text</label>
+              <textarea rows="12" id="bioText"></textarea>
+              <button type="submit" class="editor-action" onclick="send_bio_data()">Save About</button>
+              <div id="bioAlert" class="editor-alert"></div>
+            </div>
+            <div class="editor-panel editor-preview">
+              <h2>Preview</h2>
+              <div id="bioInfo"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="events">
+          <div class="editor-grid">
+            <div class="editor-panel">
+              <h2>Show Details</h2>
+              <label for="event">Event</label>
+              <input type="text" placeholder="The Seth Charleston Band at Coachman's!" id="event">
+              <input type="hidden" id="key">
+              <label for="date">Date</label>
+              <input type="date" id="date">
+              <label for="time">Time</label>
+              <input type="time" placeholder="7:00 pm" id="time">
+              <label for="where">Where</label>
+              <input type="text" placeholder="Coachman's" id="where">
+              <label for="tickets">Tickets</label>
+              <input type="url" placeholder="https://ticketmaster.com" id="tickets">
+              <button type="submit" onclick="send_event_data()" class="editor-action">Save Show</button>
+              <div id="eventAlert" class="editor-alert"></div>
+            </div>
+            <div class="editor-panel editor-preview">
+              <h2>Shows</h2>
+              <div id="eventInfo" class="editor-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="music">
+          <div class="editor-grid">
+            <div class="editor-panel">
+              <h2>Music Details</h2>
+              <label for="song">Song/Album Name</label>
+              <input type="text" placeholder="Jungle" id="song">
+              <label for="link">Spotify Embed HTML</label>
+              <input type="text" placeholder="<iframe ...></iframe>" id="link">
+              <label for="releaseDate">Release Date</label>
+              <input type="date" placeholder="12/3/2018" id="releaseDate">
+              <button type="submit" onclick="send_song_data()" class="editor-action">Save Music</button>
+              <div id="songAlert" class="editor-alert"></div>
+            </div>
+            <div class="editor-panel editor-preview">
+              <h2>Music</h2>
+              <div id="songInfo" class="editor-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <section class="title">
+      <div class="social">
+        <a href="https://twitter.com/sethcharleston" class="fa fa-twitter" target="_blank"></a>
+        <a href="https://www.facebook.com/sethcharlestonmusic/" class="fa fa-facebook" target="_blank"></a>
+        <a href="https://www.instagram.com/sethcharleston/" class="fa fa-instagram" target="_blank"></a>
+        <a href="https://open.spotify.com/artist/1A5BJhYP6UBWnqVhuJnTqy?si=9cBSwHBCSJWLlZbhqA3g2g" class="fa fa-spotify" target="_blank"></a>
+        <a href="https://www.youtube.com/channel/UC1F4-aWEuIr2PRG2BP5qZDA" class="fa fa-youtube" target="_blank"></a>
+      </div>
+      <div class="footer"><a href="mailto:seth.charleston@gmail.com">Booking</a><br><br><a href="mailto:arthur.sommer@gmail.com">Web Development By Arthur Sommer</a></div>
+    </section>
+    <section class="footerImg">
+      <img src="https://sethcharleston.com/photos/NEW Footer Photo (7.21.23).png" alt="Seth Charleston">
+    </section>
+  </footer>
+
+  <script>
+    function myFunction() {
+      var x = document.getElementById("topNav");
+      if (x.className === "topNav") {
+        x.className += " responsive";
+      } else {
+        x.className = "topNav";
+      }
+    }
+  </script>
 </body>
 
 </html>
