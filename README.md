@@ -31,7 +31,12 @@ The GitHub-to-AWS deployment path is defined in [infra/cloudformation/codepipeli
 
 The package step is important: the legacy live pipeline deploys the entire repository ZIP directly to S3. With IaC in the repo, that would publish `infra/`, `scripts/`, and docs as website files. The new pipeline deploys only `index.html`, page HTML, `sitemap.xml`, `css/`, `photos/`, and `videos/`.
 
-The live production backend currently uses nine Lambda functions instead. The live AWS inventory captured during IaC adoption is documented in [infra/import/live-inventory.md](infra/import/live-inventory.md).
+The live production backend uses the imported legacy shape and is managed by CloudFormation in two stacks:
+
+- [infra/cloudformation/live-backend-foundation.yaml](infra/cloudformation/live-backend-foundation.yaml): DynamoDB tables, Cognito user pool/client, and the nine production Lambda functions
+- [infra/cloudformation/live-api-gateway.yaml](infra/cloudformation/live-api-gateway.yaml): REST API Gateway, `test1` stage, Cognito authorizer, `api.sethcharleston.com` custom domain, and base path mapping
+
+The live AWS inventory captured during IaC adoption is documented in [infra/import/live-inventory.md](infra/import/live-inventory.md).
 
 The GitHub-to-CodeCommit mirror is defined in [infra/cloudformation/source-mirror.yaml](infra/cloudformation/source-mirror.yaml). It creates CodeCommit mirrors for this repo and the editor repo, plus a webhook endpoint that can mirror GitHub pushes into AWS-native repositories.
 
@@ -143,12 +148,14 @@ Manual deploy is still available after the stack exists:
 
 The deploy script uploads the root static files and media, excludes repo-only files, and invalidates CloudFront.
 
-For normal iteration, commits to `master` should flow through CodePipeline instead:
+For normal iteration, commits to `master` flow through the GitHub-to-CodeCommit mirror and the staging CodePipeline:
 
-1. GitHub webhook starts the CodePipeline source action.
-2. CodeBuild runs CloudFormation template validation and packages only static website files into `dist/`.
-3. CodePipeline deploys the packaged artifact to S3.
-4. CodePipeline invokes the existing invalidation Lambda for CloudFront.
+1. GitHub webhook invokes the mirror endpoint.
+2. The mirror CodeBuild project pushes GitHub refs into the CodeCommit mirror.
+3. A CodeCommit branch update EventBridge rule starts the staging CodePipeline.
+4. CodeBuild runs CloudFormation template validation and packages only static website files into `dist/`.
+5. CodePipeline deploys the packaged artifact to S3.
+6. CodePipeline invokes the existing invalidation Lambda for CloudFront.
 
 Backend/API infrastructure is intentionally not deployed on every commit by this static-site pipeline. Keep backend changes behind explicit `./scripts/deploy-backend.sh` runs or add a separate approved pipeline stage after smoke tests.
 
@@ -202,7 +209,7 @@ REPOSITORY_NAME=sethcharleston.com ./scripts/mirror-github-to-codecommit.sh
 REPOSITORY_NAME=edit.sethcharleston.com ./scripts/mirror-github-to-codecommit.sh
 ```
 
-The staging pipelines and branch-preview automation now use the CodeCommit mirrors as their AWS-native source. Keep production promotion manual.
+The staging pipelines and branch-preview automation use the CodeCommit mirrors as their AWS-native source. Production pipelines are also CodeCommit-sourced, but source-change triggers are disabled so promotion stays manual.
 
 ## End-To-End Staging
 
@@ -223,7 +230,7 @@ Create or update the full staging environment:
 ./scripts/deploy-staging.sh
 ```
 
-By default the script skips staging CodePipelines and manually packages/deploys the public site and editor content. After the GitHub CodeConnection is authorized, set `DEPLOY_PIPELINES=true` to create/update the staging pipelines. The public site staging pipeline defaults to branch `master`; override with `STAGING_BRANCH=main` if the repo moves to `main`.
+By default the script skips staging CodePipelines and manually packages/deploys the public site and editor content. Set `DEPLOY_PIPELINES=true` to create/update the staging pipelines. The public site staging pipeline defaults to branch `master`; override with `STAGING_BRANCH=main` if the repo moves to `main`.
 
 ```bash
 DEPLOY_PIPELINES=true STAGING_BRANCH=master ./scripts/deploy-staging.sh
@@ -243,6 +250,11 @@ Useful staging commands:
 ./scripts/deploy-staging-content.sh
 ./scripts/smoke-test-staging.sh
 ```
+
+Current staging automation:
+
+- `sethcharleston.com-staging` reads `master` from the `sethcharleston.com` CodeCommit mirror and is started by a CodeCommit EventBridge rule.
+- `edit.sethcharleston.com-staging` reads `master` from the `edit.sethcharleston.com` CodeCommit mirror and is started by a CodeCommit EventBridge rule.
 
 When staging is accepted, cut production DNS to a fresh CloudFront distribution:
 
@@ -290,35 +302,48 @@ The EventBridge/Lambda starter excludes `main` and `master`; those branches depl
 
 ## Production Promotion
 
-The existing production pipeline `sethcharleston.com` has been locked so pushes no longer transition automatically into the production `Deploy` stage:
+Production uses separate CodeCommit-sourced pipelines with source-change triggers disabled and manual approval enabled:
+
+- `sethcharleston.com-production`
+- `edit.sethcharleston.com-production`
+
+Create or update those production pipelines with:
+
+```bash
+./scripts/deploy-production-pipelines.sh
+```
+
+Production promotion is manual. Start the appropriate production pipeline only after staging has passed smoke tests, then approve the deploy stage in CodePipeline.
+
+The older lock/unlock scripts are kept for the legacy production pipeline path:
 
 ```bash
 ./scripts/lock-production-pipeline.sh
-```
-
-Production promotion is manual. For the legacy pipeline path, unlock it only when you intentionally want that pipeline to deploy:
-
-```bash
 ./scripts/unlock-production-pipeline.sh
 ```
 
-For the fresh-stack path, validate staging first, create the production-shaped fresh stack, then run:
+For the fresh-stack DNS cutover path, validate staging first, create the production-shaped fresh stack, then run:
 
 ```bash
 TARGET_STACK_NAME=sethcharleston-fresh-prod-site ./scripts/cutover-production-dns.sh
 ```
 
-## Existing Backend Adoption
+## Production Backend
 
-The live backend uses REST API Gateway plus nine Lambda functions. The extracted Lambda handlers are now in [backend/lambda](backend/lambda), but the current backend CloudFormation template is still the clean rebuild path, not a one-click import of every live backend resource. The admin UI that exercises the authenticated routes is the sibling repo at `/home/art12354/Projects/edit.sethcharleston.com`.
+The live backend uses REST API Gateway plus nine Lambda functions. It has been imported into CloudFormation and is managed by these production stacks:
 
-Before putting the live backend fully under CloudFormation, use [infra/import/live-inventory.md](infra/import/live-inventory.md) as the adoption checklist:
+- `sethcharleston-prod-backend-foundation`
+- `sethcharleston-prod-live-api-gateway`
 
-- Import or recreate the three DynamoDB tables.
-- Import or recreate the Cognito user pool and app client.
-- Import or recreate the REST API Gateway resources, methods, authorizer, custom domain, and base path mapping.
-- Import or recreate each Lambda function and IAM role.
-- Modernize `nodejs8.10` and `nodejs14.x` functions only after they are under source control and a dev stage has passed smoke tests.
+The imported-production templates are [infra/cloudformation/live-backend-foundation.yaml](infra/cloudformation/live-backend-foundation.yaml) and [infra/cloudformation/live-api-gateway.yaml](infra/cloudformation/live-api-gateway.yaml). The clean rebuild template, [infra/cloudformation/backend-api.yaml](infra/cloudformation/backend-api.yaml), is still useful for fresh environments and modernization work, but it is not the template currently backing production.
+
+The extracted Lambda handlers are in [backend/lambda](backend/lambda). The admin UI that exercises the authenticated routes is the sibling repo at `/home/art12354/Projects/edit.sethcharleston.com`.
+
+Before changing production backend resources:
+
+- Confirm stack drift for `sethcharleston-prod-backend-foundation` and `sethcharleston-prod-live-api-gateway`.
+- Smoke-test a non-production environment first when changing Lambda runtime behavior, API Gateway integrations, or Cognito settings.
+- Modernize the remaining legacy Lambda runtimes only after the equivalent staging or branch environment has passed smoke tests.
 
 The current production API endpoints should be smoke-tested after every backend IaC change:
 
@@ -355,7 +380,7 @@ This repository only contains the static frontend. The pages also depend on serv
 - `https://store.sethcharleston.com`
 - Third-party scripts and embeds from Google Analytics, Facebook, Mailchimp, Spotify, Font Awesome, and Google Fonts
 
-The clean rebuild API infrastructure is represented in this repo. The live production backend still needs a deliberate import/migration pass before CloudFormation owns every existing API resource. DynamoDB tables in a new environment start empty; migrate or seed content if you need that environment to show the same events, music embeds, and editable text as production.
+Both the imported live production backend and the clean rebuild API infrastructure are represented in this repo. DynamoDB tables in a new environment start empty; migrate or seed content if you need that environment to show the same events, music embeds, and editable text as production.
 
 ## Teardown
 
