@@ -12,6 +12,8 @@ BACKEND_STACK_NAME="${BACKEND_STACK_NAME:-sethcharleston-staging-backend}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EDITOR_ROOT="${EDITOR_ROOT:-/home/art12354/Projects/edit.sethcharleston.com}"
+EDITOR_REPOSITORY_NAME="${EDITOR_REPOSITORY_NAME:-edit.sethcharleston.com}"
+EDITOR_BRANCH_NAME="${EDITOR_BRANCH_NAME:-${BRANCH_NAME:-master}}"
 WORK_DIR="$(mktemp -d)"
 
 stack_output() {
@@ -29,6 +31,16 @@ EDITOR_DISTRIBUTION_ID="$(stack_output "$EDITOR_STACK_NAME" CloudFrontDistributi
 COGNITO_CLIENT_ID="$(stack_output "$BACKEND_STACK_NAME" UserPoolClientId)"
 
 mkdir -p "$WORK_DIR/site" "$WORK_DIR/editor"
+
+if [[ ! -f "$EDITOR_ROOT/index.html" ]]; then
+  EDITOR_ROOT="$WORK_DIR/editor-source"
+  git config --global credential.helper '!aws codecommit credential-helper $@'
+  git config --global credential.UseHttpPath true
+  git clone \
+    --branch "$EDITOR_BRANCH_NAME" \
+    "https://git-codecommit.${AWS_REGION}.amazonaws.com/v1/repos/${EDITOR_REPOSITORY_NAME}" \
+    "$EDITOR_ROOT"
+fi
 
 cp "$ROOT_DIR"/index.html "$ROOT_DIR"/about.html "$ROOT_DIR"/music.html "$ROOT_DIR"/shows.html "$ROOT_DIR"/sitemap.xml "$WORK_DIR/site/"
 cp -R "$ROOT_DIR"/css "$ROOT_DIR"/photos "$ROOT_DIR"/videos "$WORK_DIR/site/"
