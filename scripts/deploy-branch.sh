@@ -71,6 +71,7 @@ AWS_REGION="$AWS_REGION" \
 EVENTS_TABLE_NAME="seth_charleston_${table_slug}_events" \
 MUSIC_TABLE_NAME="seth_charleston_${table_slug}_music" \
 TEXT_TABLE_NAME="seth_charleston_${table_slug}_text" \
+SEED_DATA_LABEL=Preview \
 ./scripts/seed-staging-data.sh
 
 AWS_REGION="$AWS_REGION" \

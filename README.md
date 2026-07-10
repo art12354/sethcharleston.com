@@ -300,6 +300,110 @@ Feature branch automation now follows the same source path as staging:
 
 The EventBridge/Lambda starter excludes `main` and `master`; those branches deploy through staging instead. To start a branch preview build manually from CodeBuild, set `BRANCH_NAME` to the branch and `PREVIEW_ACTION` to `deploy` or `destroy`.
 
+### Playwright preview evaluation
+
+Use this when an agent needs a quick browser-level check of the current feature branch deployment. The preview host convention is:
+
+```bash
+branch="$(git branch --show-current)"
+base_url="https://${branch}.sethcharleston.com"
+```
+
+First confirm CloudFront is serving the branch preview:
+
+```bash
+curl -I -L --max-time 20 "$base_url"
+```
+
+Run Playwright from the repo's Nix shell. The base environment does not necessarily have `node` or `npm` on `PATH`, and the Nix shell provides the pinned Chromium executable through `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+
+```bash
+nix-shell --run 'tmpdir=$(mktemp -d /tmp/seth-pw.XXXXXX) && npm --prefix "$tmpdir" install playwright@latest >/dev/null && NODE_PATH="$tmpdir/node_modules" node <<'"'"'NODE'"'"'
+const { chromium } = require("playwright");
+const branch = process.env.BRANCH_NAME || require("child_process").execSync("git branch --show-current", { encoding: "utf8" }).trim();
+const base = `https://${branch}.sethcharleston.com`;
+const paths = ["/", "/about.html", "/music.html", "/shows.html"];
+const viewports = [
+  { name: "mobile", width: 390, height: 844 },
+  { name: "tablet", width: 768, height: 1024 },
+  { name: "desktop", width: 1440, height: 1000 }
+];
+
+(async () => {
+  const browser = await chromium.launch({
+    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+    headless: true
+  });
+  const results = [];
+
+  for (const viewport of viewports) {
+    const context = await browser.newContext({ viewport });
+    for (const path of paths) {
+      const page = await context.newPage();
+      const consoleMessages = [];
+      const failedRequests = [];
+      const badResponses = [];
+
+      page.on("console", msg => {
+        if (["error", "warning"].includes(msg.type())) consoleMessages.push(`${msg.type()}: ${msg.text()}`);
+      });
+      page.on("requestfailed", req => failedRequests.push(`${req.method()} ${req.url()} -> ${req.failure()?.errorText || "failed"}`));
+      page.on("response", res => {
+        if (res.status() >= 400) badResponses.push(`${res.status()} ${res.url()}`);
+      });
+
+      const response = await page.goto(new URL(path, base).href, { waitUntil: "networkidle", timeout: 30000 });
+      const metrics = await page.evaluate(() => {
+        const doc = document.documentElement;
+        const body = document.body;
+        const images = Array.from(document.images).map(img => ({
+          src: img.currentSrc || img.src,
+          complete: img.complete,
+          naturalWidth: img.naturalWidth,
+          naturalHeight: img.naturalHeight
+        }));
+        const overflowing = Array.from(document.querySelectorAll("body *")).filter(el => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0 && (r.right > window.innerWidth + 1 || r.left < -1);
+        }).slice(0, 10).map(el => ({
+          tag: el.tagName,
+          className: el.className,
+          text: el.textContent.trim().slice(0, 80),
+          rect: el.getBoundingClientRect()
+        }));
+
+        return {
+          title: document.title,
+          bodyChars: body.innerText.trim().length,
+          scrollWidth: Math.max(doc.scrollWidth, body.scrollWidth),
+          innerWidth: window.innerWidth,
+          brokenImages: images.filter(img => !img.complete || img.naturalWidth === 0 || img.naturalHeight === 0),
+          overflowing
+        };
+      });
+
+      results.push({
+        viewport: viewport.name,
+        path,
+        status: response?.status(),
+        ...metrics,
+        consoleMessages,
+        failedRequests,
+        badResponses
+      });
+      await page.close();
+    }
+    await context.close();
+  }
+
+  await browser.close();
+  console.log(JSON.stringify(results, null, 2));
+})();
+NODE'
+```
+
+Review the output for non-200 statuses, empty `bodyChars`, `badResponses`, `failedRequests`, `brokenImages`, and real layout overflow. Google Tag Manager failures can appear as `net::ERR_CONNECTION_REFUSED` in restricted agent environments; treat that as an environment note unless the same failure reproduces from a normal browser.
+
 ## Production Promotion
 
 Production uses separate CodeCommit-sourced pipelines with source-change triggers disabled and manual approval enabled:
