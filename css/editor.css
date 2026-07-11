@@ -40,12 +40,21 @@
 }
 
 .editor-hero {
+  height: calc(60px + 56.25vw);
   overflow: hidden;
   position: relative;
 }
 
 .editor-page #aboveHeader {
   height: 60px;
+}
+
+.editor-hero #homeImage,
+.editor-hero video {
+  left: 0;
+  position: absolute;
+  top: 60px;
+  width: 100%;
 }
 
 .editor-main {
@@ -186,8 +195,16 @@
 }
 
 @media screen and (min-width: 750px) {
+  .editor-hero {
+    height: calc(83px + 56.25vw);
+  }
+
   .editor-page #aboveHeader {
     height: 83px;
+  }
+
+  .editor-hero video {
+    top: 83px;
   }
 
   .editor-grid {
@@ -196,8 +213,16 @@
 }
 
 @media screen and (min-width: 1000px) {
+  .editor-hero {
+    height: calc(100px + 56.25vw);
+  }
+
   .editor-page #aboveHeader {
     height: 100px;
+  }
+
+  .editor-hero video {
+    top: 100px;
   }
 }
 
