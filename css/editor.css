@@ -8,10 +8,6 @@
   opacity: 0.96;
 }
 
-.editor-page #social {
-  align-items: center;
-}
-
 .editor-login {
   background: whitesmoke;
   border: 1px solid whitesmoke;
@@ -44,31 +40,8 @@
 }
 
 .editor-hero {
-  min-height: 320px;
   overflow: hidden;
   position: relative;
-}
-
-.editor-hero #homeImage {
-  display: block;
-}
-
-.editor-hero .words {
-  display: none;
-}
-
-.editor-hero .spacer {
-  align-items: center;
-  color: whitesmoke;
-  display: flex;
-  font-family: "Dancing Script", cursive;
-  font-size: 5rem;
-  justify-content: center;
-  left: 0;
-  position: absolute;
-  right: 0;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-  top: 48%;
 }
 
 .editor-main {
@@ -209,39 +182,12 @@
 }
 
 @media screen and (min-width: 750px) {
-  .editor-hero {
-    background-image: url("https://sethcharleston.com/photos/Homepage2.jpeg");
-    background-position: center;
-    background-size: cover;
-    min-height: 520px;
-  }
-
-  .editor-hero #homeImage {
-    display: none;
-  }
-
-  .editor-hero .words {
-    display: block;
-  }
-
-  .editor-hero .spacer {
-    display: none;
-  }
-
   .editor-grid {
     grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
   }
 }
 
 @media screen and (max-width: 749px) {
-  .editor-page #social {
-    justify-content: center;
-  }
-
-  .editor-page #social .editor-login {
-    display: none;
-  }
-
   .editor-heading {
     align-items: flex-start;
     flex-direction: column;
@@ -249,9 +195,5 @@
 
   .editor-heading h1 {
     font-size: 2.8rem;
-  }
-
-  .editor-hero .spacer {
-    font-size: 4rem;
   }
 }
