@@ -38,10 +38,10 @@
       <a href="javascript:void(0);" class="icon" onclick="myFunction()">&#9776;</a>
     </div>
     <div id="links">
-      <a class="link" href="#front_page" data-toggle="tab" onclick="generateFrontPage()">Home</a>
-      <a class="link" href="#bio" data-toggle="tab" onclick="generateBio()">About</a>
-      <a class="link" href="#music" data-toggle="tab" onclick="generateSongs()">Music</a>
-      <a class="link" href="#events" data-toggle="tab" onclick="generateEvents()">Shows</a>
+      <a class="link active" href="#front_page" onclick="showEditorPane('front_page', generateFrontPage); return false;">Home</a>
+      <a class="link" href="#bio" onclick="showEditorPane('bio', generateBio); return false;">About</a>
+      <a class="link" href="#music" onclick="showEditorPane('music', generateSongs); return false;">Music</a>
+      <a class="link" href="#events" onclick="showEditorPane('events', generateEvents); return false;">Shows</a>
     </div>
     <div id="social">
       <a href="https://twitter.com/sethcharleston" class="fa fa-twitter link" target="_blank"></a>
@@ -69,21 +69,6 @@
         <h1>Website Editor</h1>
         <button type="button" onclick="login()" class="editor-login editor-login-inline" id="loginMobile">Sign In</button>
       </div>
-
-      <ul class="nav nav-tabs editor-tabs">
-        <li class="nav-item">
-          <a class="nav-link active" data-toggle="tab" href="#front_page" onclick="generateFrontPage()">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#bio" onclick="generateBio()">About</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#events" onclick="generateEvents()">Shows</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#music" onclick="generateSongs()">Music</a>
-        </li>
-      </ul>
 
       <div class="tab-content editor-content">
         <div class="tab-pane active" id="front_page">
@@ -189,6 +174,29 @@
   </footer>
 
   <script>
+    function showEditorPane(paneId, generator) {
+      document.querySelectorAll("#links .link").forEach(function(link) {
+        link.classList.toggle("active", link.getAttribute("href") === "#" + paneId);
+      });
+      document.querySelectorAll(".tab-pane").forEach(function(pane) {
+        pane.classList.remove("active", "show");
+      });
+      var pane = document.getElementById(paneId);
+      if (pane) {
+        pane.classList.add("active", "show");
+      }
+      if (typeof generator === "function") {
+        generator();
+      }
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, "", "#" + paneId);
+      }
+      var nav = document.getElementById("topNav");
+      if (nav && nav.className.indexOf("responsive") !== -1) {
+        nav.className = "topNav";
+      }
+    }
+
     function myFunction() {
       var x = document.getElementById("topNav");
       if (x.className === "topNav") {
