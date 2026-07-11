@@ -44,6 +44,10 @@
   position: relative;
 }
 
+.editor-page #aboveHeader {
+  height: 60px;
+}
+
 .editor-main {
   display: block;
   padding: 48px 16px;
@@ -182,8 +186,18 @@
 }
 
 @media screen and (min-width: 750px) {
+  .editor-page #aboveHeader {
+    height: 83px;
+  }
+
   .editor-grid {
     grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  }
+}
+
+@media screen and (min-width: 1000px) {
+  .editor-page #aboveHeader {
+    height: 100px;
   }
 }
 
