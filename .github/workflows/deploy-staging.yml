@@ -1,0 +1,53 @@
+name: Deploy staging
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: staging
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+  SITE_BUCKET: staging.sethcharleston.com
+  CLOUDFRONT_DISTRIBUTION_ID: E1GQMQPCSCC703
+
+jobs:
+  deploy:
+    name: Publish website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package website for staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir dist
+          cp index.html about.html music.html shows.html sitemap.xml dist/
+          cp -R css photos videos dist/
+          find dist -type f -name "*.html" -print0 \
+            | xargs -0 sed -i 's#https://api.sethcharleston.com#https://api-staging.sethcharleston.com#g'
+
+      - name: Publish and invalidate
+        run: ./scripts/publish-static-site.sh dist "$SITE_BUCKET" "$CLOUDFRONT_DISTRIBUTION_ID"
+
+      - name: Smoke test
+        run: |
+          curl --fail --silent --show-error --head https://staging.sethcharleston.com
+          curl --fail --silent --show-error https://api-staging.sethcharleston.com/test1/ >/dev/null
+
