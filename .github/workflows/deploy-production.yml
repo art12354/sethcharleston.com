@@ -1,0 +1,46 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+  SITE_BUCKET: sethcharleston.com
+  CLOUDFRONT_DISTRIBUTION_ID: E3FWVWV0D2QOJ4
+
+jobs:
+  deploy:
+    name: Publish website
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package website
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir dist
+          cp index.html about.html music.html shows.html sitemap.xml dist/
+          cp -R css photos videos dist/
+
+      - name: Publish and invalidate
+        run: ./scripts/publish-static-site.sh dist "$SITE_BUCKET" "$CLOUDFRONT_DISTRIBUTION_ID"
+
+      - name: Smoke test
+        run: curl --fail --silent --show-error --head https://sethcharleston.com

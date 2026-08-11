@@ -1,0 +1,52 @@
+name: Deploy branch preview
+
+on:
+  push:
+    branches-ignore:
+      - master
+  delete:
+  workflow_dispatch:
+
+concurrency:
+  group: preview-${{ github.event.ref || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  preview:
+    name: ${{ github.event_name == 'delete' && 'Delete preview' || 'Deploy preview' }}
+    if: github.event_name != 'delete' || github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ vars.AWS_PREVIEW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve branch name
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "delete" ]]; then
+            echo "BRANCH_NAME=${{ github.event.ref }}" >> "$GITHUB_ENV"
+          else
+            echo "BRANCH_NAME=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Deploy preview
+        if: github.event_name != 'delete'
+        run: ./scripts/deploy-preview-site.sh
+
+      - name: Delete preview
+        if: github.event_name == 'delete'
+        run: ./scripts/destroy-preview-site.sh
+
