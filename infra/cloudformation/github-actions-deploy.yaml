@@ -171,7 +171,9 @@ Resources:
                 Resource: "*"
               - Sid: ManagePreviewDns
                 Effect: Allow
-                Action: route53:ChangeResourceRecordSets
+                Action:
+                  - route53:ChangeResourceRecordSets
+                  - route53:GetHostedZone
                 Resource: !Sub "arn:${AWS::Partition}:route53:::hostedzone/${HostedZoneId}"
               - Sid: ReadDnsChanges
                 Effect: Allow
