@@ -19,7 +19,7 @@ if [[ -z "$slug" || "$slug" == "master" || "$slug" == "main" ]]; then
   exit 1
 fi
 
-stack_name="sethcharleston-preview-${slug}"
+stack_name="sethcharleston-branch-${slug}-site"
 domain_name="${slug}.sethcharleston.com"
 
 aws cloudformation deploy \
@@ -46,4 +46,3 @@ find "$work_dir/site" -type f -name "*.html" -print0 \
 "$ROOT_DIR/scripts/publish-static-site.sh" "$work_dir/site" "$bucket" "$distribution"
 curl --fail --silent --show-error --retry 5 --retry-delay 10 --head "https://${domain_name}"
 echo "Preview deployed to https://${domain_name}"
-

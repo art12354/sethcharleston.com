@@ -127,11 +127,11 @@ Resources:
                   - cloudformation:DescribeStacks
                   - cloudformation:ExecuteChangeSet
                   - cloudformation:GetTemplateSummary
-                Resource: !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/sethcharleston-preview-*/*"
+                Resource: !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/sethcharleston-branch-*-site/*"
               - Sid: CreatePreviewStacks
                 Effect: Allow
                 Action: cloudformation:CreateChangeSet
-                Resource: !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/sethcharleston-preview-*/*"
+                Resource: !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/sethcharleston-branch-*-site/*"
               - Sid: ManagePreviewBuckets
                 Effect: Allow
                 Action:

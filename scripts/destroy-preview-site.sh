@@ -16,7 +16,7 @@ if [[ -z "$slug" || "$slug" == "master" || "$slug" == "main" ]]; then
   exit 1
 fi
 
-stack_name="sethcharleston-preview-${slug}"
+stack_name="sethcharleston-branch-${slug}-site"
 if ! aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" >/dev/null 2>&1; then
   echo "Preview stack '$stack_name' does not exist."
   exit 0

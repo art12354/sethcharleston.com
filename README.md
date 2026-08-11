@@ -25,7 +25,7 @@ GitHub authenticates to AWS with short-lived OIDC credentials. No AWS access key
 - `AWS_DEPLOY_ROLE_ARN` for staging and production uploads.
 - `AWS_PREVIEW_ROLE_ARN` for disposable preview infrastructure.
 
-The deploy role can write only the staging and production website buckets and invalidate their two CloudFront distributions. The preview role is separate and limited to `sethcharleston-preview-*` CloudFormation stacks, preview buckets under `*.sethcharleston.com`, CloudFront, and the site's Route 53 zone.
+The deploy role can write only the staging and production website buckets and invalidate their two CloudFront distributions. The preview role is separate and limited to `sethcharleston-branch-*-site` CloudFormation stacks, preview buckets under `*.sethcharleston.com`, CloudFront, and the site's Route 53 zone.
 
 Bootstrap or update the roles and repository variables with:
 
@@ -102,4 +102,3 @@ Useful operational scripts include:
 - `scripts/backup-production.sh` for production data backups.
 - `scripts/create-admin-user.sh` for Cognito administrators.
 - `scripts/smoke-test-staging.sh` for staging endpoint checks.
-
