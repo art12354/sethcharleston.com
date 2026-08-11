@@ -147,7 +147,7 @@ Resources:
                   - s3:GetEncryptionConfiguration
                   - s3:GetObject
                   - s3:ListBucket
-                  - s3:PutBucketEncryption
+                  - s3:PutEncryptionConfiguration
                   - s3:PutBucketPolicy
                   - s3:PutBucketPublicAccessBlock
                   - s3:PutBucketTagging
