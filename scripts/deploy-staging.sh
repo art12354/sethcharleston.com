@@ -15,16 +15,6 @@ API_BASE_URL="https://${API_DOMAIN}"
 LOGIN_BASE_URL="https://${LOGIN_DOMAIN}"
 EDITOR_CALLBACK_URL="https://${EDITOR_DOMAIN}"
 
-stack_output() {
-  local stack="$1"
-  local key="$2"
-  aws cloudformation describe-stacks \
-    --stack-name "$stack" \
-    --region "$AWS_REGION" \
-    --query "Stacks[0].Outputs[?OutputKey=='${key}'].OutputValue | [0]" \
-    --output text
-}
-
 STACK_NAME=sethcharleston-staging-backend \
 AWS_REGION="$AWS_REGION" \
 PROJECT_NAME=sethcharleston \
@@ -57,47 +47,6 @@ ACM_CERTIFICATE_ARN="$ACM_CERTIFICATE_ARN" \
 MANAGE_DNS_RECORDS=true \
 INCLUDE_WWW_ALIAS=false \
 ./scripts/deploy-infra.sh
-
-if [[ "${DEPLOY_PIPELINES:-false}" == "true" ]]; then
-  SITE_DISTRIBUTION_ID="$(stack_output sethcharleston-staging-site CloudFrontDistributionId)"
-  EDITOR_DISTRIBUTION_ID="$(stack_output sethcharleston-staging-editor-site CloudFrontDistributionId)"
-  COGNITO_CLIENT_ID="$(stack_output sethcharleston-staging-backend UserPoolClientId)"
-  PIPELINE_SOURCE_PROVIDER="${PIPELINE_SOURCE_PROVIDER:-CodeCommit}"
-  STAGING_BRANCH="${STAGING_BRANCH:-master}"
-
-  STACK_NAME=sethcharleston-staging-site-pipeline \
-  PIPELINE_NAME=sethcharleston.com-staging \
-  BUILD_PROJECT_NAME=sethcharleston-com-staging-package \
-  SOURCE_PROVIDER="$PIPELINE_SOURCE_PROVIDER" \
-  GITHUB_BRANCH="$STAGING_BRANCH" \
-  CODECOMMIT_REPOSITORY_NAME=sethcharleston.com \
-  CODECOMMIT_BRANCH="$STAGING_BRANCH" \
-  WEBSITE_BUCKET_NAME="$SITE_DOMAIN" \
-  CLOUDFRONT_DISTRIBUTION_ID="$SITE_DISTRIBUTION_ID" \
-  API_BASE_URL="$API_BASE_URL" \
-  LOGIN_BASE_URL="$LOGIN_BASE_URL" \
-  COGNITO_CLIENT_ID="$COGNITO_CLIENT_ID" \
-  EDITOR_CALLBACK_URL="$EDITOR_CALLBACK_URL" \
-  ./scripts/deploy-pipeline.sh
-
-  STACK_NAME=sethcharleston-staging-editor-pipeline \
-  PIPELINE_NAME=edit.sethcharleston.com-staging \
-  BUILD_PROJECT_NAME=edit-sethcharleston-com-staging-package \
-  SOURCE_PROVIDER="$PIPELINE_SOURCE_PROVIDER" \
-  GITHUB_REPO=edit.sethcharleston.com \
-  GITHUB_BRANCH=master \
-  CODECOMMIT_REPOSITORY_NAME=edit.sethcharleston.com \
-  CODECOMMIT_BRANCH=master \
-  WEBSITE_BUCKET_NAME="$EDITOR_DOMAIN" \
-  CLOUDFRONT_DISTRIBUTION_ID="$EDITOR_DISTRIBUTION_ID" \
-  API_BASE_URL="$API_BASE_URL" \
-  LOGIN_BASE_URL="$LOGIN_BASE_URL" \
-  COGNITO_CLIENT_ID="$COGNITO_CLIENT_ID" \
-  EDITOR_CALLBACK_URL="$EDITOR_CALLBACK_URL" \
-  ./scripts/deploy-pipeline.sh
-else
-  echo "Skipped staging pipelines. Set DEPLOY_PIPELINES=true after authorizing the GitHub CodeConnection."
-fi
 
 ./scripts/seed-staging-data.sh
 ./scripts/deploy-staging-content.sh
