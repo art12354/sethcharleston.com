@@ -1,6 +1,6 @@
 # sethcharleston.com
 
-Static website for `sethcharleston.com`, hosted in AWS and deployed by GitHub Actions.
+Public website and private editor for `sethcharleston.com`, hosted in AWS and deployed by GitHub Actions. The editor source lives in [`editor/`](editor/).
 
 ## Environments
 
@@ -76,7 +76,7 @@ The production static site is managed by [static-site.yaml](infra/cloudformation
 
 The production backend currently uses nine Lambda functions. Its adopted infrastructure and inventory are documented in [live-inventory.md](infra/import/live-inventory.md), [live-backend-foundation.yaml](infra/cloudformation/live-backend-foundation.yaml), and [live-api-gateway.yaml](infra/cloudformation/live-api-gateway.yaml).
 
-The separate private `edit.sethcharleston.com` repository still uses shared AWS mirror/pipeline resources. Those editor resources are intentionally outside this public-site CI migration and should be moved from their owning repository.
+The former `edit.sethcharleston.com` repository has been merged into [`editor/`](editor/). Staging and production workflows publish the public site and editor together from this repository.
 
 ## Manual infrastructure commands
 

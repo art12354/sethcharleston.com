@@ -18,6 +18,8 @@ env:
   AWS_REGION: us-east-1
   SITE_BUCKET: staging.sethcharleston.com
   CLOUDFRONT_DISTRIBUTION_ID: E1GQMQPCSCC703
+  EDITOR_BUCKET: edit-staging.sethcharleston.com
+  EDITOR_CLOUDFRONT_DISTRIBUTION_ID: E2P2D54FH2LQA3
 
 jobs:
   deploy:
@@ -46,8 +48,25 @@ jobs:
       - name: Publish and invalidate
         run: ./scripts/publish-static-site.sh dist "$SITE_BUCKET" "$CLOUDFRONT_DISTRIBUTION_ID"
 
+      - name: Package editor for staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir editor-dist
+          cp editor/index.html editor-dist/
+          cp -R editor/js editor-dist/
+          find editor-dist -type f \( -name "*.html" -o -name "*.js" \) -print0 \
+            | xargs -0 sed -i \
+                -e 's#https://api.sethcharleston.com#https://api-staging.sethcharleston.com#g' \
+                -e 's#https://login.sethcharleston.com#https://login-staging.sethcharleston.com#g' \
+                -e 's#client_id=76g2um3ps3ri68ac30agopcmc9#client_id=7a118ln1gis1tl3b646l1cr1c6#g' \
+                -e 's#redirect_uri=https://edit.sethcharleston.com#redirect_uri=https://edit-staging.sethcharleston.com#g'
+
+      - name: Publish editor and invalidate
+        run: ./scripts/publish-static-site.sh editor-dist "$EDITOR_BUCKET" "$EDITOR_CLOUDFRONT_DISTRIBUTION_ID"
+
       - name: Smoke test
         run: |
           curl --fail --silent --show-error --head https://staging.sethcharleston.com
+          curl --fail --silent --show-error --head https://edit-staging.sethcharleston.com
           curl --fail --silent --show-error https://api-staging.sethcharleston.com/test1/ >/dev/null
-

@@ -20,13 +20,14 @@ aws s3 sync "$SOURCE_DIR/" "s3://$SITE_BUCKET/" \
   --content-type "text/html; charset=utf-8" \
   --only-show-errors
 
-aws s3 cp "$SOURCE_DIR/sitemap.xml" "s3://$SITE_BUCKET/sitemap.xml" \
-  --cache-control "public,max-age=300,must-revalidate" \
-  --content-type "application/xml; charset=utf-8" \
-  --only-show-errors
+if [[ -f "$SOURCE_DIR/sitemap.xml" ]]; then
+  aws s3 cp "$SOURCE_DIR/sitemap.xml" "s3://$SITE_BUCKET/sitemap.xml" \
+    --cache-control "public,max-age=300,must-revalidate" \
+    --content-type "application/xml; charset=utf-8" \
+    --only-show-errors
+fi
 
 aws cloudfront create-invalidation \
   --distribution-id "$DISTRIBUTION_ID" \
   --paths "/*" \
   --output json
-

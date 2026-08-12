@@ -23,6 +23,18 @@ Parameters:
   StagingCloudFrontDistributionId:
     Type: String
     Default: E1GQMQPCSCC703
+  EditorBucketName:
+    Type: String
+    Default: edit.sethcharleston.com
+  EditorCloudFrontDistributionId:
+    Type: String
+    Default: E2XF0OI690268U
+  StagingEditorBucketName:
+    Type: String
+    Default: edit-staging.sethcharleston.com
+  StagingEditorCloudFrontDistributionId:
+    Type: String
+    Default: E2P2D54FH2LQA3
   HostedZoneId:
     Type: String
     Default: Z27ZS6MVE7C6ZT
@@ -69,6 +81,14 @@ Resources:
                   - s3:GetBucketLocation
                   - s3:ListBucket
                 Resource: !Sub "arn:${AWS::Partition}:s3:::${StagingWebsiteBucketName}"
+              - Sid: ListEditorBuckets
+                Effect: Allow
+                Action:
+                  - s3:GetBucketLocation
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${EditorBucketName}"
+                  - !Sub "arn:${AWS::Partition}:s3:::${StagingEditorBucketName}"
               - Sid: WriteWebsiteObjects
                 Effect: Allow
                 Action:
@@ -83,6 +103,15 @@ Resources:
                   - s3:GetObject
                   - s3:PutObject
                 Resource: !Sub "arn:${AWS::Partition}:s3:::${StagingWebsiteBucketName}/*"
+              - Sid: WriteEditorObjects
+                Effect: Allow
+                Action:
+                  - s3:DeleteObject
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${EditorBucketName}/*"
+                  - !Sub "arn:${AWS::Partition}:s3:::${StagingEditorBucketName}/*"
               - Sid: InvalidateWebsiteDistribution
                 Effect: Allow
                 Action: cloudfront:CreateInvalidation
@@ -91,6 +120,12 @@ Resources:
                 Effect: Allow
                 Action: cloudfront:CreateInvalidation
                 Resource: !Sub "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${StagingCloudFrontDistributionId}"
+              - Sid: InvalidateEditorDistributions
+                Effect: Allow
+                Action: cloudfront:CreateInvalidation
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${EditorCloudFrontDistributionId}"
+                  - !Sub "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${StagingEditorCloudFrontDistributionId}"
 
   GitHubActionsPreviewRole:
     Type: AWS::IAM::Role

@@ -11,7 +11,7 @@ EDITOR_STACK_NAME="${EDITOR_STACK_NAME:-sethcharleston-staging-editor-site}"
 BACKEND_STACK_NAME="${BACKEND_STACK_NAME:-sethcharleston-staging-backend}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EDITOR_ROOT="${EDITOR_ROOT:-/home/art12354/Projects/edit.sethcharleston.com}"
+EDITOR_ROOT="${EDITOR_ROOT:-${ROOT_DIR}/editor}"
 WORK_DIR="$(mktemp -d)"
 
 stack_output() {

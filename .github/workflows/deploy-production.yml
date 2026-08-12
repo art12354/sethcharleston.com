@@ -15,6 +15,8 @@ env:
   AWS_REGION: us-east-1
   SITE_BUCKET: sethcharleston.com
   CLOUDFRONT_DISTRIBUTION_ID: E3FWVWV0D2QOJ4
+  EDITOR_BUCKET: edit.sethcharleston.com
+  EDITOR_CLOUDFRONT_DISTRIBUTION_ID: E2XF0OI690268U
 
 jobs:
   deploy:
@@ -42,5 +44,18 @@ jobs:
       - name: Publish and invalidate
         run: ./scripts/publish-static-site.sh dist "$SITE_BUCKET" "$CLOUDFRONT_DISTRIBUTION_ID"
 
+      - name: Package editor
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir editor-dist
+          cp editor/index.html editor-dist/
+          cp -R editor/js editor-dist/
+
+      - name: Publish editor and invalidate
+        run: ./scripts/publish-static-site.sh editor-dist "$EDITOR_BUCKET" "$EDITOR_CLOUDFRONT_DISTRIBUTION_ID"
+
       - name: Smoke test
-        run: curl --fail --silent --show-error --head https://sethcharleston.com
+        run: |
+          curl --fail --silent --show-error --head https://sethcharleston.com
+          curl --fail --silent --show-error --head https://edit.sethcharleston.com
