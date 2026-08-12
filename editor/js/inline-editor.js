@@ -3,6 +3,7 @@
 
   var API = "https://api.sethcharleston.com/test1";
   var LOGIN = "https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com";
+  var LIVE_SITE = "https://sethcharleston.com";
   var page = location.pathname.split("/").pop() || "index.html";
   var token = readToken();
   var signedIn = false;
@@ -313,7 +314,7 @@
 
   function enableEditor() {
     setStatus("Signed in", "success");
-    button("View live site", function () { location.href = "https://sethcharleston.com/" + (page === "index.html" ? "" : page); });
+    button("View live site", function () { location.href = LIVE_SITE + "/" + (page === "index.html" ? "" : page); });
     if (page === "index.html") {
       editableText({ fields: [
       { id: "frontPageHeader", location: "frontPageHeader", label: "Home page heading" },
@@ -349,7 +350,7 @@
         sessionStorage.setItem("editor_return_page", page);
         location.href = LOGIN;
       }, true);
-      button("View live site", function () { location.href = "https://sethcharleston.com/" + (page === "index.html" ? "" : page); });
+      button("View live site", function () { location.href = LIVE_SITE + "/" + (page === "index.html" ? "" : page); });
     }
   });
 }());

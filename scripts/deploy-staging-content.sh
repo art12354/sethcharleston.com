@@ -46,6 +46,8 @@ find "$WORK_DIR/editor" -type f \( -name "*.html" -o -name "*.js" \) -print0 \
   | xargs -0 sed -i "s#client_id=76g2um3ps3ri68ac30agopcmc9#client_id=${COGNITO_CLIENT_ID}#g"
 find "$WORK_DIR/editor" -type f \( -name "*.html" -o -name "*.js" \) -print0 \
   | xargs -0 sed -i "s#redirect_uri=https://edit.sethcharleston.com#redirect_uri=https://${EDITOR_DOMAIN}#g"
+find "$WORK_DIR/editor" -type f -name "*.js" -print0 \
+  | xargs -0 sed -i "s#https://sethcharleston.com#https://${SITE_DOMAIN}#g"
 
 aws s3 sync "$WORK_DIR/editor/" "s3://${EDITOR_DOMAIN}/" --delete
 aws cloudfront create-invalidation --distribution-id "$EDITOR_DISTRIBUTION_ID" --paths "/*" >/dev/null

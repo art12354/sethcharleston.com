@@ -58,7 +58,8 @@ jobs:
                 -e 's#https://api.sethcharleston.com#https://api-staging.sethcharleston.com#g' \
                 -e 's#https://login.sethcharleston.com#https://login-staging.sethcharleston.com#g' \
                 -e 's#client_id=76g2um3ps3ri68ac30agopcmc9#client_id=7a118ln1gis1tl3b646l1cr1c6#g' \
-                -e 's#redirect_uri=https://edit.sethcharleston.com#redirect_uri=https://edit-staging.sethcharleston.com#g'
+                -e 's#redirect_uri=https://edit.sethcharleston.com#redirect_uri=https://edit-staging.sethcharleston.com#g' \
+                -e 's#https://sethcharleston.com#https://staging.sethcharleston.com#g'
 
       - name: Publish editor and invalidate
         run: ./scripts/publish-static-site.sh editor-dist "$EDITOR_BUCKET" "$EDITOR_CLOUDFRONT_DISTRIBUTION_ID"
