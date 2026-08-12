@@ -223,6 +223,12 @@ Resources:
                   - apigateway:POST
                   - apigateway:PUT
                 Resource: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}::/*"
+              - Sid: TagPreviewApi
+                Effect: Allow
+                Action:
+                  - apigateway:TagResource
+                  - apigateway:UntagResource
+                Resource: "*"
               - Sid: ManagePreviewFunctions
                 Effect: Allow
                 Action:
