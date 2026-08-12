@@ -112,7 +112,7 @@
       var input = field.multiline ? document.createElement("textarea") : document.createElement("input");
       input.id = "edit-" + field.name;
       input.name = field.name;
-      input.type = field.type || "text";
+      if (!field.multiline) input.type = field.type || "text";
       input.value = field.value || "";
       input.required = field.required !== false;
       modal.appendChild(label);
@@ -122,7 +122,15 @@
     var cancel = document.createElement("button");
     cancel.type = "button";
     cancel.textContent = "Cancel";
-    cancel.addEventListener("click", function () { modal.close(); });
+    function closeModal() {
+      if (typeof modal.close === "function") modal.close();
+      else {
+        modal.removeAttribute("open");
+        modal.dispatchEvent(new Event("close"));
+      }
+    }
+    modal.closeEditor = closeModal;
+    cancel.addEventListener("click", closeModal);
     var save = document.createElement("button");
     save.type = "button";
     save.className = "edit-primary";
@@ -138,7 +146,8 @@
     modal.appendChild(menu);
     document.body.appendChild(modal);
     modal.addEventListener("close", function () { modal.remove(); });
-    modal.showModal();
+    if (typeof modal.showModal === "function") modal.showModal();
+    else modal.setAttribute("open", "");
   }
 
   function controls(item, onEdit, onDelete) {
@@ -185,7 +194,7 @@
           if (song.song && song.song !== values.song) {
             return request("/delete_song", { method: "POST", body: JSON.stringify({ song: song.song }) });
           }
-        }).then(function () { modal.close(); render(); }).catch(function (error) { setStatus(error.message, "error"); });
+        }).then(function () { modal.closeEditor(); render(); }).catch(function (error) { setStatus(error.message, "error"); });
       });
     }
     function removeMusic(song) {
@@ -229,8 +238,9 @@
         { name: "where", label: "Venue", value: event.where },
         { name: "tickets", label: "Ticket URL", type: "url", value: event.tickets }
       ], function (values, modal) {
-        var payload = { event: event.event || "", name: values.name, when: new Date(values.date + "T" + values.time).toString(), where: values.where, tickets: values.tickets };
-        request("", { method: "POST", body: JSON.stringify(payload) }).then(function () { modal.close(); render(); }).catch(function (error) { setStatus(error.message, "error"); });
+        var payload = { name: values.name, when: new Date(values.date + "T" + values.time).toString(), where: values.where, tickets: values.tickets };
+        if (event.event) payload.event = event.event;
+        request("", { method: "POST", body: JSON.stringify(payload) }).then(function () { modal.closeEditor(); render(); }).catch(function (error) { setStatus(error.message, "error"); });
       });
     }
     function removeShow(event) {
@@ -257,7 +267,7 @@
         dialog("Edit newest video", [{ name: "video", label: "YouTube embed HTML", value: clone.innerHTML.trim(), multiline: true }], function (values, modal) {
           request("/text/", { method: "POST", body: JSON.stringify([{ location: "frontPageVideo", text: values.video }]) }).then(function () {
             video.innerHTML = "<h1>Newest Video</h1>" + values.video;
-            modal.close();
+            modal.closeEditor();
             setStatus("Saved", "success");
           }).catch(function (error) { setStatus(error.message, "error"); });
         });
