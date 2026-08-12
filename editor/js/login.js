@@ -31,9 +31,16 @@ fetch(url, {
   })
   .then(res => {
     if (res.ok) {
-      document.getElementById("login").innerHTML = "Signed In";
-      document.getElementById("login").className = "btn btn-success";
-      document.getElementById("login").disabled = true;
+      var loginButtons = [
+        document.getElementById("login"),
+        document.getElementById("loginMobile")
+      ];
+      loginButtons.forEach(function(button) {
+        if (button) {
+          button.innerHTML = "Signed In";
+          button.disabled = true;
+        }
+      });
       signedIn = true;
     }
   })

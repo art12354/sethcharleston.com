@@ -286,7 +286,9 @@ Resources:
                   if method == "POST" and path == "/songs":
                       mu.put_item(Item=item); return out(item)
                   if method == "POST" and path == "/text":
-                      tx.put_item(Item=item); return out(item)
+                      items = item if isinstance(item, list) else [item]
+                      for text_item in items: tx.put_item(Item=text_item)
+                      return out(items)
                   if method == "POST" and path == "/delete":
                       k = key(item, ["event", "name"])
                       ev.delete_item(Key={"event": k}); return out({"deleted": k})
