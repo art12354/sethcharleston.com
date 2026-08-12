@@ -53,7 +53,7 @@ mkdir -p "$work_dir/site"
 cp "$ROOT_DIR"/index.html "$ROOT_DIR"/about.html "$ROOT_DIR"/music.html "$ROOT_DIR"/shows.html "$ROOT_DIR"/sitemap.xml "$work_dir/site/"
 cp -R "$ROOT_DIR"/css "$ROOT_DIR"/photos "$ROOT_DIR"/videos "$work_dir/site/"
 find "$work_dir/site" -type f -name "*.html" -print0 \
-  | xargs -0 sed -i "s#https://api.sethcharleston.com#${api_url}#g"
+  | xargs -0 sed -i "s#https://api.sethcharleston.com/test1#${api_url}#g"
 
 "$ROOT_DIR/scripts/publish-static-site.sh" "$work_dir/site" "$bucket" "$distribution"
 curl --fail --silent --show-error --retry 5 --retry-delay 5 -H 'HX-Request: true' "${api_url}/text?view=home" >/dev/null
