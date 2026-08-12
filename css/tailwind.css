@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { @apply scroll-smooth bg-stone-100; }
+  body { @apply min-h-screen font-body text-stone-800 antialiased; }
+  iframe { @apply w-full; }
+}
+
+@layer utilities {
+  .htmx-indicator { opacity: 0; transition: opacity 200ms ease-in; }
+  .htmx-request .htmx-indicator,
+  .htmx-request.htmx-indicator { opacity: 1; }
+}

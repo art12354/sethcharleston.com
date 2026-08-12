@@ -72,6 +72,19 @@ The public site requires:
 
 The application backend additionally uses API Gateway, Lambda, DynamoDB, and Cognito. These runtime services remain in AWS; CI services are not required for the public site.
 
+## Frontend development
+
+The public pages use semantic HTML, compiled Tailwind CSS, and HTMX. Dynamic API reads return HTML fragments when the request includes `HX-Request: true` (or accepts `text/html`) and retain JSON responses for compatibility with existing clients.
+
+Build the stylesheet after changing Tailwind classes:
+
+```bash
+npm install
+npm run build:css
+```
+
+The compiled `css/site.css` is committed so the static-site deployment has no runtime build dependency. The legacy editor continues to use the JSON representation while its authenticated write flows are migrated to HTMX.
+
 The production static site is managed by [static-site.yaml](infra/cloudformation/static-site.yaml). Disposable previews use [preview-static-site.yaml](infra/cloudformation/preview-static-site.yaml), which deliberately does not retain branch resources on deletion.
 
 The production backend currently uses nine Lambda functions. Its adopted infrastructure and inventory are documented in [live-inventory.md](infra/import/live-inventory.md), [live-backend-foundation.yaml](infra/cloudformation/live-backend-foundation.yaml), and [live-api-gateway.yaml](infra/cloudformation/live-api-gateway.yaml).

@@ -70,6 +70,16 @@
     });
   }
 
+  function hydrateTextPage() {
+    if (page !== "index.html" && page !== "about.html") return Promise.resolve();
+    return fetch(API + "/text").then(function (response) { return response.json(); }).then(function (items) {
+      items.forEach(function (item) {
+        var element = document.getElementById(item.location);
+        if (element) element.innerHTML = item.text;
+      });
+    });
+  }
+
   function editableText(config) {
     var dirty = false;
     config.fields.forEach(function (field) {
@@ -343,7 +353,7 @@
   createToolbar();
   authenticate().then(function (valid) {
     signedIn = valid;
-    if (signedIn) enableEditor();
+    if (signedIn) return hydrateTextPage().then(enableEditor);
     else {
       setStatus("Sign in to edit");
       button("Sign in", function () {
