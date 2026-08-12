@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - rm -rf dist
+      - mkdir -p dist
+      - cp index.html dist/
+      - cp -R js dist/
+      - find dist -type f \( -name "*.html" -o -name "*.js" \) -print0 | xargs -0 sed -i "s#https://api.sethcharleston.com#${API_BASE_URL:-https://api.sethcharleston.com}#g"
+      - find dist -type f \( -name "*.html" -o -name "*.js" \) -print0 | xargs -0 sed -i "s#https://login.sethcharleston.com#${LOGIN_BASE_URL:-https://login.sethcharleston.com}#g"
+      - find dist -type f \( -name "*.html" -o -name "*.js" \) -print0 | xargs -0 sed -i "s#client_id=76g2um3ps3ri68ac30agopcmc9#client_id=${COGNITO_CLIENT_ID:-76g2um3ps3ri68ac30agopcmc9}#g"
+      - find dist -type f \( -name "*.html" -o -name "*.js" \) -print0 | xargs -0 sed -i "s#redirect_uri=https://edit.sethcharleston.com#redirect_uri=${EDITOR_CALLBACK_URL:-https://edit.sethcharleston.com}#g"
+      - find dist -type f -print
+
+artifacts:
+  base-directory: dist
+  files:
+    - "**/*"

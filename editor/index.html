@@ -1,0 +1,169 @@
+<!-- login: https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <!-- angularjs -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+  <!-- login script -->
+  <script src="js/login.js"></script>
+  <!-- front page scripts -->
+  <script src="js/send_front_page_data.js"></script>
+  <script src="js/generateFrontPage.js"></script>
+  <!-- bio page scripts -->
+  <script src="js/send_bio_data.js"></script>
+  <script src="js/generateBio.js"></script>
+  <!-- event page scripts -->
+  <script src="js/send_event_data.js"></script>
+  <script src="js/generateEvents.js"></script>
+  <script src="js/editEvent.js"></script>
+  <script src="js/deleteEvent.js"></script>
+  <!-- song page scripts -->
+  <script src="js/send_song_data.js"></script>
+  <script src="js/generateSongs.js"></script>
+  <script src="js/editSong.js"></script>
+  <script src="js/deleteSong.js"></script>
+
+  <title>Website Editor</title>
+</head>
+
+<body class="container  p-3 my-3 bg-dark text-white" onload="generateFrontPage()">
+
+  <div class="row">
+    <h1 class="col">Website Editing Tool</h1>
+    <button type="button" onclick="login()" class="btn btn-warning" id="login">Sign In</button>
+  </div>
+  <p>Editing your site -- reimagined</p>
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" data-toggle="tab" href="#front_page" onclick="generateFrontPage()">Front Page</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#bio" onclick="generateBio()">Bio</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#events" onclick="generateEvents()">Events</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#music" onclick="generateSongs()">Music</a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <!-- Front Page -->
+    <div class="tab-pane container active" id="front_page">
+      <div class="form-group">
+        <label for="front_page_header">Header For the Front Page:</label>
+        <textarea class="form-control" rows="1" id="frontPageHeader"></textarea>
+        <label for="front_page_text">Text For the Front Page:</label>
+        <textarea class="form-control" rows="10" id="frontPageText"></textarea>
+        <label for="front_page_video">Youtube embeded html for the Front Page:</label>
+        <textarea class="form-control" rows="1" id="frontPageVideo"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" onclick="send_front_page_data()">Submit Front Page</button>
+      <div id="frontPageAlert" class="pt-3">
+        <p>Feel free to use any of <a href="http://www.tagindex.net/html/text/index.html" target="_blank">these</a> tags!</p>
+      </div>
+
+      <div class="pt-3">
+        <p>Rendered Front Page Text:</p>
+        <div id="frontPageHeaderInfo" class="card-deck"></div>
+        <div id="frontPageTextInfo" class="card-deck"></div>
+        <div id="frontPageVideoInfo" class="card-deck"></div>
+      </div>
+    </div>
+
+    <!-- BIO -->
+    <div class="tab-pane container fade" id="bio">
+      <div class="form-group">
+        <label for="bio">Text For the Bio:</label>
+        <textarea class="form-control" rows="10" id="bioText"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" onclick="send_bio_data()">Submit Bio</button>
+      <div id="bioAlert" class="pt-3">
+        <p>Feel free to use any of <a href="http://www.tagindex.net/html/text/index.html" target="_blank">these</a> tags!</p>
+      </div>
+
+      <div class="pt-3">
+        <p>Rendered Bio:</p>
+        <div id="bioInfo" class="card-deck"></div>
+      </div>
+    </div>
+
+    <!-- EVENTS -->
+    <div class="tab-pane container fade" id="events">
+      <div class="form-group">
+        <label for="event">Event:</label>
+        <input type="event" class="form-control" placeholder="The Seth Charleston Band at Coachman's!" id="event">
+      </div>
+      <div class="form-group d-none">
+        <label for="key"></label>
+        <input type="event" class="form-control" placeholder="4" id="key">
+      </div>
+      <div class="form-group">
+        <label for="date">Date:</label>
+        <input type="date" class="form-control" id="date">
+      </div>
+      <div class="form-group">
+        <label for="time">Time:</label>
+        <input type="time" class="form-control" placeholder="7:00 pm" id="time">
+      </div>
+      <div class="form-group">
+        <label for="where">Where:</label>
+        <input type="where" class="form-control" placeholder="Coachman's" id="where">
+      </div>
+      <div class="form-group">
+        <label for="tickets">Tickets:</label>
+        <input type="tickets" class="form-control" placeholder="ticketmaster.com" id="tickets">
+      </div>
+      <button type="submit" onclick="send_event_data()" class="btn btn-primary">Submit Event</button>
+      <div id="eventAlert" class="pt-3">
+      </div>
+
+      <div class="pt-3">
+        <p>Events:</p>
+        <div id="eventInfo" class="card-deck d-flex flex-column-reverse"></div>
+      </div>
+    </div>
+    <!-- MUSIC -->
+    <div class="tab-pane container fade" id="music">
+      <div class="form-group">
+        <label for="song">Song/Album Name:</label>
+        <input type="song" class="form-control" placeholder="Jungle" id="song">
+      </div>
+      <div class="form-group">
+        <label for="link">Spotify Embeded html:</label>
+        <input type="link" class="form-control" placeholder='<iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/7MiP3CqwyVFrJvTs071xmg?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>' id="link">
+      </div>
+      <div class="form-group">
+        <label for="releaseDate">Release Date:</label>
+        <input type="date" class="form-control" placeholder="12/3/2018" id="releaseDate">
+      </div>
+      <button type="submit" onclick="send_song_data()" class="btn btn-primary">Submit Event</button>
+      <div id="songAlert" class="pt-3">
+      </div>
+
+      <div class="pt-3">
+        <p>Songs:</p>
+        <div id="songInfo" class="card-deck d-flex flex-column-reverse"></div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
