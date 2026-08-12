@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="css/site.css">
   <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js" integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V" crossorigin="anonymous"></script>
 </head>
-<body class="flex min-h-screen flex-col">
+<body hx-config='{"selfRequestsOnly":false}' class="flex min-h-screen flex-col">
   <nav class="site-nav" aria-label="Main navigation">
     <div class="mx-auto flex min-h-[68px] max-w-[1500px] items-center justify-between px-5 py-3 md:grid md:min-h-[88px] md:grid-cols-3 md:py-5">
       <div class="hidden items-stretch justify-center md:flex">
