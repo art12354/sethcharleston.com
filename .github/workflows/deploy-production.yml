@@ -38,7 +38,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir dist
-          cp index.html about.html music.html shows.html sitemap.xml dist/
+          cp index.html about.html music.html shows.html services.html sitemap.xml dist/
           cp -R css photos videos dist/
 
       - name: Publish and invalidate
@@ -48,9 +48,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir editor-dist
-          cp editor/index.html editor-dist/
-          cp -R editor/js editor-dist/
+          ./scripts/package-editor.sh editor-dist
 
       - name: Publish editor and invalidate
         run: ./scripts/publish-static-site.sh editor-dist "$EDITOR_BUCKET" "$EDITOR_CLOUDFRONT_DISTRIBUTION_ID"
