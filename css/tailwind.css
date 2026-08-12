@@ -3,9 +3,17 @@
 @tailwind utilities;
 
 @layer base {
-  html { @apply scroll-smooth bg-stone-100; }
-  body { @apply min-h-screen font-body text-stone-800 antialiased; }
+  html { @apply scroll-smooth bg-[#f5f5f5]; }
+  body { @apply min-h-screen bg-[#f5f5f5] font-body text-[#393939] antialiased; }
   iframe { @apply w-full; }
+}
+
+@layer components {
+  .site-nav { @apply fixed inset-x-0 top-0 z-50 bg-[#393939]/95 text-white shadow-lg; }
+  .nav-link { @apply font-display text-2xl transition-colors hover:bg-[#f5f5f5] hover:text-[#393939] lg:text-3xl; }
+  .social-link { @apply inline-flex h-11 w-11 items-center justify-center rounded-full text-xl text-[#b6b6b6] transition hover:bg-white/10 hover:text-white; }
+  .page-title { @apply py-8 text-center font-display text-[clamp(5rem,16vw,11rem)] leading-none text-[#393939] md:py-12; }
+  .content-card { @apply rounded-xl bg-[#f5f5f5] shadow-[0_16px_32px_rgba(0,0,0,0.35)]; }
 }
 
 @layer utilities {
