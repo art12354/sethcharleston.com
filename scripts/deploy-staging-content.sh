@@ -29,7 +29,7 @@ COGNITO_CLIENT_ID="$(stack_output "$BACKEND_STACK_NAME" UserPoolClientId)"
 
 mkdir -p "$WORK_DIR/site" "$WORK_DIR/editor"
 
-cp "$ROOT_DIR"/index.html "$ROOT_DIR"/about.html "$ROOT_DIR"/music.html "$ROOT_DIR"/shows.html "$ROOT_DIR"/sitemap.xml "$WORK_DIR/site/"
+cp "$ROOT_DIR"/index.html "$ROOT_DIR"/about.html "$ROOT_DIR"/music.html "$ROOT_DIR"/shows.html "$ROOT_DIR"/services.html "$ROOT_DIR"/sitemap.xml "$WORK_DIR/site/"
 cp -R "$ROOT_DIR"/css "$ROOT_DIR"/photos "$ROOT_DIR"/videos "$WORK_DIR/site/"
 find "$WORK_DIR/site" -type f -name "*.html" -print0 \
   | xargs -0 sed -i "s#https://api.sethcharleston.com#https://${API_DOMAIN}#g"

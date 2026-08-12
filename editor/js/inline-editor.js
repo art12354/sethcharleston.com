@@ -251,6 +251,66 @@
     render();
   }
 
+  function servicesEditor() {
+    var root = document.getElementById("servicesList");
+    var services = [];
+    function save() {
+      setStatus("Saving…");
+      return request("/text/", { method: "POST", body: JSON.stringify([{ location: "services", text: JSON.stringify(services) }]) })
+        .then(function () { render(); setStatus("Saved", "success"); })
+        .catch(function (error) { setStatus(error.message, "error"); });
+    }
+    function serviceDialog(service, index) {
+      service = service || {};
+      dialog(index == null ? "Add service" : "Edit service", [
+        { name: "title", label: "Service name", value: service.title },
+        { name: "description", label: "Description", value: service.description, multiline: true }
+      ], function (values, modal) {
+        var updated = { title: values.title.trim(), description: values.description.trim() };
+        if (index == null) services.push(updated);
+        else services[index] = updated;
+        modal.closeEditor();
+        save();
+      });
+    }
+    function render() {
+      root.innerHTML = "";
+      services.forEach(function (service, index) {
+        var card = document.createElement("article");
+        card.className = "service-card edit-item";
+        var title = document.createElement("h2");
+        title.textContent = service.title;
+        var description = document.createElement("p");
+        description.textContent = service.description;
+        var actions = document.createElement("span");
+        actions.className = "edit-item-controls";
+        [
+          ["Edit", function () { serviceDialog(service, index); }],
+          ["Earlier", function () { if (index > 0) { services.splice(index - 1, 0, services.splice(index, 1)[0]); save(); } }],
+          ["Later", function () { if (index < services.length - 1) { services.splice(index + 1, 0, services.splice(index, 1)[0]); save(); } }],
+          ["Delete", function () { if (confirm("Delete “" + service.title + "”?")) { services.splice(index, 1); save(); } }]
+        ].forEach(function (entry) {
+          var action = document.createElement("button");
+          action.type = "button";
+          action.className = "edit-control";
+          action.textContent = entry[0];
+          action.addEventListener("click", entry[1]);
+          actions.appendChild(action);
+        });
+        card.append(title, description, actions);
+        root.appendChild(card);
+      });
+    }
+    button("Add service", function () { serviceDialog(); }, true);
+    setStatus("Loading…");
+    fetch(API + "/text").then(function (response) { return response.json(); }).then(function (items) {
+      var stored = items.find(function (item) { return item.location === "services"; });
+      services = stored ? JSON.parse(stored.text) : (window.defaultServices || []).slice();
+      render();
+      setStatus("Ready", "success");
+    }).catch(function (error) { setStatus(error.message, "error"); });
+  }
+
   function enableEditor() {
     setStatus("Signed in", "success");
     button("View live site", function () { location.href = "https://sethcharleston.com/" + (page === "index.html" ? "" : page); });
@@ -276,6 +336,7 @@
     else if (page === "about.html") editableText({ fields: [{ id: "bio", location: "bio", label: "Biography" }] });
     else if (page === "music.html") musicEditor();
     else if (page === "shows.html") showsEditor();
+    else if (page === "services.html") servicesEditor();
   }
 
   createToolbar();

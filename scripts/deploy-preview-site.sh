@@ -38,7 +38,7 @@ distribution="$(aws cloudformation describe-stacks --stack-name "$stack_name" --
 
 work_dir="$(mktemp -d)"
 mkdir -p "$work_dir/site"
-cp "$ROOT_DIR"/index.html "$ROOT_DIR"/about.html "$ROOT_DIR"/music.html "$ROOT_DIR"/shows.html "$ROOT_DIR"/sitemap.xml "$work_dir/site/"
+cp "$ROOT_DIR"/index.html "$ROOT_DIR"/about.html "$ROOT_DIR"/music.html "$ROOT_DIR"/shows.html "$ROOT_DIR"/services.html "$ROOT_DIR"/sitemap.xml "$work_dir/site/"
 cp -R "$ROOT_DIR"/css "$ROOT_DIR"/photos "$ROOT_DIR"/videos "$work_dir/site/"
 find "$work_dir/site" -type f -name "*.html" -print0 \
   | xargs -0 sed -i 's#https://api.sethcharleston.com#https://api-staging.sethcharleston.com#g'

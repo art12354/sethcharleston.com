@@ -38,7 +38,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir dist
-          cp index.html about.html music.html shows.html sitemap.xml dist/
+          cp index.html about.html music.html shows.html services.html sitemap.xml dist/
           cp -R css photos videos dist/
 
       - name: Publish and invalidate

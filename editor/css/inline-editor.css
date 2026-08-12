@@ -65,6 +65,8 @@
 }
 
 .edit-item-controls {
+  flex-wrap: wrap;
+  justify-content: flex-end;
   display: flex;
   gap: 7px;
   position: absolute;
