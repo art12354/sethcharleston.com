@@ -21,3 +21,12 @@
   .htmx-request .htmx-indicator,
   .htmx-request.htmx-indicator { opacity: 1; }
 }
+
+/* Exact legacy palette; these selectors cover remaining utility aliases. */
+[class*="bg-stone-900"], [class*="bg-stone-800"] { background-color: #393939 !important; }
+[class*="bg-stone-100"], [class*="bg-white"] { background-color: #f5f5f5 !important; }
+[class*="text-stone-900"], [class*="text-stone-800"], [class*="text-stone-700"], [class*="text-stone-600"] { color: #393939 !important; }
+[class*="text-stone-500"], [class*="text-stone-200"], [class*="text-amber"] { color: #b6b6b6 !important; }
+[class*="bg-amber"] { background-color: #f5f5f5 !important; color: #393939 !important; }
+[class*="hover:bg-amber"]:hover { background-color: #b6b6b6 !important; color: #393939 !important; }
+[class*="hover:text-amber"]:hover { background-color: #f5f5f5 !important; color: #393939 !important; }
