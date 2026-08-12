@@ -6,11 +6,11 @@ Public website and private editor for `sethcharleston.com`, hosted in AWS and de
 
 | Environment | Trigger | URL | API |
 | --- | --- | --- | --- |
-| Branch preview | Push to any feature branch | `https://<branch-slug>.sethcharleston.com` | Staging |
+| Branch preview | Push to any feature branch | `https://<branch-slug>.sethcharleston.com` | Isolated per branch |
 | Staging | Push or merge to `master` | `https://staging.sethcharleston.com` | Staging |
 | Production | Manual GitHub Actions promotion from `master` | `https://sethcharleston.com` | Production |
 
-Feature branch names are lowercased, converted to DNS-safe slugs, and limited to 42 characters. Deleting a branch automatically deletes its preview stack, bucket, CloudFront distribution, and DNS record.
+Feature branch names are lowercased, converted to DNS-safe slugs, and limited to 42 characters. Deleting a branch empties its bucket and deletes the complete preview stack, including the website, API, Lambda, log group, execution role, and DynamoDB tables.
 
 ## CI/CD
 
@@ -25,7 +25,7 @@ GitHub authenticates to AWS with short-lived OIDC credentials. No AWS access key
 - `AWS_DEPLOY_ROLE_ARN` for staging and production uploads.
 - `AWS_PREVIEW_ROLE_ARN` for disposable preview infrastructure.
 
-The deploy role can write only the staging and production website buckets and invalidate their two CloudFront distributions. The preview role is separate and limited to `sethcharleston-branch-*-site` CloudFormation stacks, preview buckets under `*.sethcharleston.com`, CloudFront, and the site's Route 53 zone.
+The deploy role can write only the staging and production website buckets and invalidate their distributions. The preview role is separate and limited to `sethcharleston-branch-*-site` stacks and their scoped S3, CloudFront, Route 53, API Gateway, Lambda, IAM, CloudWatch Logs, and DynamoDB resources.
 
 Bootstrap or update the roles and repository variables with:
 
@@ -46,7 +46,7 @@ Only these website files are published:
 
 HTML and the sitemap use a five-minute cache policy. Static assets use a one-day cache policy. Each deployment invalidates the relevant CloudFront distribution.
 
-Branch and staging builds replace the production API origin in HTML with `https://api-staging.sethcharleston.com`. Production keeps `https://api.sethcharleston.com`.
+Branch builds replace the production API origin with the disposable API URL emitted by their preview stack. Each branch owns separate Lambda, API Gateway, and DynamoDB resources. Staging uses `https://api-staging.sethcharleston.com`, while production keeps `https://api.sethcharleston.com`.
 
 To manually start a production promotion:
 
