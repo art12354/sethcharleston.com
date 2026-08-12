@@ -48,10 +48,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir editor-dist
-          cp editor/index.html editor-dist/
-          cp -R editor/css editor-dist/
-          cp -R editor/js editor-dist/
+          ./scripts/package-editor.sh editor-dist
 
       - name: Publish editor and invalidate
         run: ./scripts/publish-static-site.sh editor-dist "$EDITOR_BUCKET" "$EDITOR_CLOUDFRONT_DISTRIBUTION_ID"

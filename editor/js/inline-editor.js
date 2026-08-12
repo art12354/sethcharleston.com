@@ -1,0 +1,284 @@
+(function () {
+  "use strict";
+
+  var API = "https://api.sethcharleston.com/test1";
+  var LOGIN = "https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com";
+  var page = location.pathname.split("/").pop() || "index.html";
+  var token = readToken();
+  var signedIn = false;
+  var toolbar;
+  var status;
+
+  function readToken() {
+    var hash = new URLSearchParams(location.hash.slice(1));
+    var received = hash.get("id_token");
+    if (received) {
+      sessionStorage.setItem("editor_id_token", received);
+      history.replaceState(null, "", location.pathname + location.search);
+      var returnPage = sessionStorage.getItem("editor_return_page");
+      sessionStorage.removeItem("editor_return_page");
+      if (returnPage && !location.pathname.endsWith(returnPage)) location.replace(returnPage);
+    }
+    return received || sessionStorage.getItem("editor_id_token") || "";
+  }
+
+  function setStatus(message, state) {
+    status.textContent = message;
+    status.dataset.state = state || "";
+  }
+
+  function request(path, options) {
+    options = options || {};
+    options.headers = Object.assign({ "Content-Type": "application/json", Authorization: token }, options.headers || {});
+    document.body.classList.add("edit-busy");
+    return fetch(API + path, options).then(function (response) {
+      if (!response.ok) throw new Error("Request failed (" + response.status + ")");
+      return response.text().then(function (text) {
+        try { return JSON.parse(text); } catch (_) { return text; }
+      });
+    }).finally(function () { document.body.classList.remove("edit-busy"); });
+  }
+
+  function createToolbar() {
+    toolbar = document.createElement("aside");
+    toolbar.className = "edit-toolbar";
+    toolbar.setAttribute("aria-label", "Page editing controls");
+    status = document.createElement("span");
+    status.className = "edit-status";
+    status.setAttribute("aria-live", "polite");
+    toolbar.appendChild(status);
+    document.body.appendChild(toolbar);
+  }
+
+  function button(label, action, primary) {
+    var element = document.createElement("button");
+    element.type = "button";
+    element.textContent = label;
+    if (primary) element.className = "edit-primary";
+    element.addEventListener("click", action);
+    toolbar.appendChild(element);
+    return element;
+  }
+
+  function authenticate() {
+    if (!token) return Promise.resolve(false);
+    return request("/access").then(function () { return true; }).catch(function () {
+      sessionStorage.removeItem("editor_id_token");
+      token = "";
+      return false;
+    });
+  }
+
+  function editableText(config) {
+    var dirty = false;
+    config.fields.forEach(function (field) {
+      var element = document.getElementById(field.id);
+      if (!element) return;
+      element.contentEditable = "true";
+      element.dataset.inlineEditable = "true";
+      element.setAttribute("role", "textbox");
+      element.setAttribute("aria-label", field.label);
+      element.addEventListener("input", function () {
+        dirty = true;
+        setStatus("Unsaved changes");
+      });
+    });
+    button("Save changes", function () {
+      var data = config.fields.map(function (field) {
+        var element = document.getElementById(field.id);
+        return { location: field.location, text: element.innerHTML.trim() };
+      });
+      setStatus("Saving…");
+      request("/text/", { method: "POST", body: JSON.stringify(data) }).then(function () {
+        dirty = false;
+        setStatus("Saved", "success");
+      }).catch(function (error) { setStatus(error.message, "error"); });
+    }, true);
+    window.addEventListener("beforeunload", function (event) {
+      if (dirty) { event.preventDefault(); event.returnValue = ""; }
+    });
+  }
+
+  function dialog(title, fields, onSave) {
+    var modal = document.createElement("dialog");
+    modal.className = "edit-dialog";
+    var heading = document.createElement("h2");
+    heading.textContent = title;
+    modal.appendChild(heading);
+    fields.forEach(function (field) {
+      var label = document.createElement("label");
+      label.textContent = field.label;
+      label.htmlFor = "edit-" + field.name;
+      var input = field.multiline ? document.createElement("textarea") : document.createElement("input");
+      input.id = "edit-" + field.name;
+      input.name = field.name;
+      input.type = field.type || "text";
+      input.value = field.value || "";
+      input.required = field.required !== false;
+      modal.appendChild(label);
+      modal.appendChild(input);
+    });
+    var menu = document.createElement("menu");
+    var cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", function () { modal.close(); });
+    var save = document.createElement("button");
+    save.type = "button";
+    save.className = "edit-primary";
+    save.textContent = "Save";
+    save.addEventListener("click", function () {
+      var invalid = Array.from(modal.querySelectorAll("input, textarea")).find(function (input) { return !input.checkValidity(); });
+      if (invalid) { invalid.reportValidity(); return; }
+      var values = {};
+      fields.forEach(function (field) { values[field.name] = modal.querySelector('[name="' + field.name + '"]').value; });
+      onSave(values, modal);
+    });
+    menu.append(cancel, save);
+    modal.appendChild(menu);
+    document.body.appendChild(modal);
+    modal.addEventListener("close", function () { modal.remove(); });
+    modal.showModal();
+  }
+
+  function controls(item, onEdit, onDelete) {
+    item.classList.add("edit-item");
+    var wrap = document.createElement("span");
+    wrap.className = "edit-item-controls";
+    [["Edit", onEdit], ["Delete", onDelete]].forEach(function (entry) {
+      var control = document.createElement("button");
+      control.type = "button";
+      control.className = "edit-control";
+      control.textContent = entry[0];
+      control.addEventListener("click", entry[1]);
+      wrap.appendChild(control);
+    });
+    item.appendChild(wrap);
+  }
+
+  function musicEditor() {
+    var root = document.getElementById("info");
+    function render() {
+      setStatus("Loading…");
+      fetch(API + "/songs").then(function (r) { return r.json(); }).then(function (songs) {
+        songs.sort(function (a, b) { return new Date(b.release) - new Date(a.release); });
+        root.innerHTML = "";
+        songs.forEach(function (song) {
+          var item = document.createElement("section");
+          item.className = "album";
+          item.innerHTML = song.link;
+          controls(item, function () { musicDialog(song); }, function () { removeMusic(song); });
+          root.appendChild(item);
+        });
+        setStatus("Ready", "success");
+      }).catch(function (error) { setStatus(error.message, "error"); });
+    }
+    function musicDialog(song) {
+      song = song || {};
+      dialog(song.song ? "Edit music" : "Add music", [
+        { name: "song", label: "Song or album name", value: song.song },
+        { name: "link", label: "Spotify embed HTML", value: song.link, multiline: true },
+        { name: "release", label: "Release date", type: "date", value: song.release ? new Date(song.release).toISOString().slice(0, 10) : "" }
+      ], function (values, modal) {
+        var payload = { song: values.song, link: values.link, release: new Date(values.release + "T00:00:00").toString() };
+        request("/songs", { method: "POST", body: JSON.stringify(payload) }).then(function () {
+          if (song.song && song.song !== values.song) {
+            return request("/delete_song", { method: "POST", body: JSON.stringify({ song: song.song }) });
+          }
+        }).then(function () { modal.close(); render(); }).catch(function (error) { setStatus(error.message, "error"); });
+      });
+    }
+    function removeMusic(song) {
+      if (!confirm("Delete “" + song.song + "”?")) return;
+      request("/delete_song", { method: "POST", body: JSON.stringify({ song: song.song }) }).then(render).catch(function (e) { setStatus(e.message, "error"); });
+    }
+    button("Add music", function () { musicDialog(); }, true);
+    render();
+  }
+
+  function showsEditor() {
+    var root = document.getElementById("info");
+    function render() {
+      setStatus("Loading…");
+      fetch(API + "/").then(function (r) { return r.json(); }).then(function (response) {
+        var events = response.Items || response;
+        events.sort(function (a, b) { return new Date(a.when) - new Date(b.when); });
+        root.innerHTML = "";
+        events.forEach(function (event) {
+          var when = new Date(event.when);
+          var item = document.createElement("div");
+          item.className = "events";
+          item.innerHTML = "<h1></h1><p></p><p></p><button class=\"ticket-button\"><a target=\"_blank\">Tickets</a></button>";
+          item.querySelector("h1").textContent = event.name;
+          item.querySelectorAll("p")[0].textContent = when.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+          item.querySelectorAll("p")[1].textContent = event.where;
+          item.querySelector("a").href = event.tickets;
+          controls(item, function () { showDialog(event); }, function () { removeShow(event); });
+          root.appendChild(item);
+        });
+        setStatus("Ready", "success");
+      }).catch(function (error) { setStatus(error.message, "error"); });
+    }
+    function showDialog(event) {
+      event = event || {};
+      var when = event.when ? new Date(event.when) : null;
+      dialog(event.event ? "Edit show" : "Add show", [
+        { name: "name", label: "Event name", value: event.name },
+        { name: "date", label: "Date", type: "date", value: when ? when.toISOString().slice(0, 10) : "" },
+        { name: "time", label: "Time", type: "time", value: when ? when.toTimeString().slice(0, 5) : "" },
+        { name: "where", label: "Venue", value: event.where },
+        { name: "tickets", label: "Ticket URL", type: "url", value: event.tickets }
+      ], function (values, modal) {
+        var payload = { event: event.event || "", name: values.name, when: new Date(values.date + "T" + values.time).toString(), where: values.where, tickets: values.tickets };
+        request("", { method: "POST", body: JSON.stringify(payload) }).then(function () { modal.close(); render(); }).catch(function (error) { setStatus(error.message, "error"); });
+      });
+    }
+    function removeShow(event) {
+      if (!confirm("Delete “" + event.name + "”?")) return;
+      request("/delete", { method: "POST", body: JSON.stringify({ event: event.event }) }).then(render).catch(function (e) { setStatus(e.message, "error"); });
+    }
+    button("Add show", function () { showDialog(); }, true);
+    render();
+  }
+
+  function enableEditor() {
+    setStatus("Signed in", "success");
+    button("View live site", function () { location.href = "https://sethcharleston.com/" + (page === "index.html" ? "" : page); });
+    if (page === "index.html") {
+      editableText({ fields: [
+      { id: "frontPageHeader", location: "frontPageHeader", label: "Home page heading" },
+      { id: "frontPageText", location: "frontPageText", label: "Home page text" }
+      ] });
+      button("Edit newest video", function () {
+        var video = document.getElementById("frontPageVideo");
+        var clone = video.cloneNode(true);
+        var heading = clone.querySelector("h1");
+        if (heading) heading.remove();
+        dialog("Edit newest video", [{ name: "video", label: "YouTube embed HTML", value: clone.innerHTML.trim(), multiline: true }], function (values, modal) {
+          request("/text/", { method: "POST", body: JSON.stringify([{ location: "frontPageVideo", text: values.video }]) }).then(function () {
+            video.innerHTML = "<h1>Newest Video</h1>" + values.video;
+            modal.close();
+            setStatus("Saved", "success");
+          }).catch(function (error) { setStatus(error.message, "error"); });
+        });
+      });
+    }
+    else if (page === "about.html") editableText({ fields: [{ id: "bio", location: "bio", label: "Biography" }] });
+    else if (page === "music.html") musicEditor();
+    else if (page === "shows.html") showsEditor();
+  }
+
+  createToolbar();
+  authenticate().then(function (valid) {
+    signedIn = valid;
+    if (signedIn) enableEditor();
+    else {
+      setStatus("Sign in to edit");
+      button("Sign in", function () {
+        sessionStorage.setItem("editor_return_page", page);
+        location.href = LOGIN;
+      }, true);
+      button("View live site", function () { location.href = "https://sethcharleston.com/" + (page === "index.html" ? "" : page); });
+    }
+  });
+}());

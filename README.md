@@ -78,6 +78,8 @@ The production backend currently uses nine Lambda functions. Its adopted infrast
 
 The former `edit.sethcharleston.com` repository has been merged into [`editor/`](editor/). Staging and production workflows publish the public site and editor together from this repository.
 
+The editor is packaged from the same `index.html`, `about.html`, `music.html`, `shows.html`, `css/`, and media files as the public site. [`package-editor.sh`](scripts/package-editor.sh) adds only the authenticated inline-editing controls, keeping the editor presentation synchronized with the live pages.
+
 ## Manual infrastructure commands
 
 Use `us-east-1`; CloudFront custom-domain certificates must be in that region.

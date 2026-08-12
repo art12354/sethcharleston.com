@@ -11,7 +11,6 @@ EDITOR_STACK_NAME="${EDITOR_STACK_NAME:-sethcharleston-staging-editor-site}"
 BACKEND_STACK_NAME="${BACKEND_STACK_NAME:-sethcharleston-staging-backend}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EDITOR_ROOT="${EDITOR_ROOT:-${ROOT_DIR}/editor}"
 WORK_DIR="$(mktemp -d)"
 
 stack_output() {
@@ -38,9 +37,7 @@ find "$WORK_DIR/site" -type f -name "*.html" -print0 \
 aws s3 sync "$WORK_DIR/site/" "s3://${SITE_DOMAIN}/" --delete
 aws cloudfront create-invalidation --distribution-id "$SITE_DISTRIBUTION_ID" --paths "/*" >/dev/null
 
-cp "$EDITOR_ROOT"/index.html "$WORK_DIR/editor/"
-cp -R "$EDITOR_ROOT"/css "$WORK_DIR/editor/"
-cp -R "$EDITOR_ROOT"/js "$WORK_DIR/editor/"
+"$ROOT_DIR/scripts/package-editor.sh" "$WORK_DIR/editor"
 find "$WORK_DIR/editor" -type f \( -name "*.html" -o -name "*.js" \) -print0 \
   | xargs -0 sed -i "s#https://api.sethcharleston.com#https://${API_DOMAIN}#g"
 find "$WORK_DIR/editor" -type f \( -name "*.html" -o -name "*.js" \) -print0 \
