@@ -1,9 +1,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Disposable S3 and CloudFront hosting for a feature-branch preview.
+Description: Disposable website, API, and data store for a feature-branch preview.
 
 Parameters:
   DomainName:
     Type: String
+  PreviewId:
+    Type: String
+    AllowedPattern: "^[a-z0-9-]{1,42}$"
   HostedZoneId:
     Type: String
   AcmCertificateArn:
@@ -17,6 +20,210 @@ Parameters:
       - PriceClass_All
 
 Resources:
+  EventsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "sc-${PreviewId}-events"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: event
+          AttributeType: S
+      KeySchema:
+        - AttributeName: event
+          KeyType: HASH
+
+  MusicTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "sc-${PreviewId}-music"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: song
+          AttributeType: S
+      KeySchema:
+        - AttributeName: song
+          KeyType: HASH
+
+  TextTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "sc-${PreviewId}-text"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: location
+          AttributeType: S
+      KeySchema:
+        - AttributeName: location
+          KeyType: HASH
+
+  ApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "sc-${PreviewId}-api-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: PreviewTableAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DeleteItem
+                  - dynamodb:PutItem
+                  - dynamodb:Scan
+                Resource:
+                  - !GetAtt EventsTable.Arn
+                  - !GetAtt MusicTable.Arn
+                  - !GetAtt TextTable.Arn
+
+  ApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "sc-${PreviewId}-api"
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt ApiRole.Arn
+      MemorySize: 128
+      Timeout: 5
+      Environment:
+        Variables:
+          EVENTS_TABLE: !Ref EventsTable
+          MUSIC_TABLE: !Ref MusicTable
+          TEXT_TABLE: !Ref TextTable
+      Code:
+        ZipFile: |
+          import base64, hashlib, html, json, os
+          from datetime import datetime
+          from email.utils import parsedate_to_datetime
+          from urllib.parse import parse_qs, urlparse
+          import boto3
+          db = boto3.resource("dynamodb")
+          ev = db.Table(os.environ["EVENTS_TABLE"])
+          mu = db.Table(os.environ["MUSIC_TABLE"])
+          tx = db.Table(os.environ["TEXT_TABLE"])
+          cors = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Content-Type,HX-Request,HX-Trigger,HX-Trigger-Name,HX-Target,HX-Current-URL,Authorization","Access-Control-Allow-Methods":"GET,POST,OPTIONS","Vary":"Accept,HX-Request"}
+          def out(data, code=200, content_type="application/json; charset=utf-8"):
+              headers = dict(cors); headers["Content-Type"] = content_type
+              return {"statusCode":code,"headers":headers,"body":data if isinstance(data,str) else json.dumps(data,default=str)}
+          def esc(value): return html.escape(str(value or ""), quote=True)
+          def wants_html(e):
+              headers = {k.lower():v for k,v in (e.get("headers") or {}).items()}
+              return headers.get("hx-request","").lower() == "true" or "text/html" in headers.get("accept","") or (e.get("queryStringParameters") or {}).get("format") == "html"
+          def safe_url(value):
+              value = str(value or "")
+              return value if urlparse(value).scheme in ("http","https") else "#"
+          def display_date(value):
+              try: parsed = datetime.fromisoformat(str(value).replace("Z","+00:00"))
+              except Exception:
+                  try: parsed = parsedate_to_datetime(str(value))
+                  except Exception: return str(value or "")
+              return parsed.strftime("%A, %B %-d, %Y")
+          def render_events(items):
+              items = sorted(items,key=lambda item:item.get("when",""))
+              if not items: return '<p class="col-span-full text-center text-stone-500">No shows are scheduled right now. Check back soon.</p>'
+              return "".join(f'<article class="rounded-sm border border-stone-200 bg-white p-8 text-center shadow-sm"><h2 class="font-display text-3xl text-stone-800">{esc(i.get("name"))}</h2><p class="mt-3 text-sm uppercase tracking-[0.18em] text-stone-500">{esc(display_date(i.get("when")))}</p><p class="mt-2 text-stone-700">{esc(i.get("where"))}</p><a class="mt-6 inline-block bg-stone-800 px-6 py-3 text-sm font-bold uppercase tracking-widest text-white hover:bg-amber-700" href="{esc(safe_url(i.get("tickets")))}" target="_blank" rel="noopener">Tickets</a></article>' for i in items)
+          def render_songs(items):
+              items = sorted(items,key=lambda item:item.get("release",""),reverse=True)
+              if not items: return '<p class="col-span-full text-center text-stone-500">New music is on the way.</p>'
+              return "".join(f'<article class="overflow-hidden rounded-sm bg-white p-3 shadow-lg" aria-label="{esc(i.get("song"))}">{i.get("link","")}</article>' for i in items)
+          def render_services(raw):
+              defaults = [{"title":"Production","description":"Full-service music production shaped around your sound."},{"title":"Mixing","description":"Detailed, musical mixes with clarity, depth, balance, and energy."},{"title":"Mastering","description":"Release-ready masters with polish, consistency, and impact."}]
+              try: services = json.loads(raw) if raw else defaults
+              except Exception: services = defaults
+              return "".join(f'<article class="border-t border-stone-300 py-8"><h2 class="font-display text-3xl text-stone-800">{esc(i.get("title"))}</h2><p class="mx-auto mt-3 max-w-2xl leading-8 text-stone-600">{esc(i.get("description"))}</p></article>' for i in services)
+          def render_text(items, view):
+              values = {i.get("location"):i.get("text","") for i in items}
+              if view == "home": return f'<div><h1 id="frontPageHeader" class="font-display text-4xl text-stone-800">{values.get("frontPageHeader","Preview")}</h1><div id="frontPageText" class="mt-5 leading-8 text-stone-600">{values.get("frontPageText","")}</div></div><div id="frontPageVideo" class="mt-12"><h2 class="font-display text-3xl text-stone-800">Newest Video</h2><div class="mt-5 overflow-hidden rounded-sm shadow-xl">{values.get("frontPageVideo","")}</div></div>'
+              if view == "bio": return values.get("bio","")
+              if view == "services": return render_services(values.get("services"))
+              return "".join(i.get("text","") for i in items)
+          def body(e):
+              raw = e.get("body") or "{}"
+              if e.get("isBase64Encoded"): raw = base64.b64decode(raw).decode()
+              if isinstance(raw,(dict,list)): return raw
+              content_type = next((v for k,v in (e.get("headers") or {}).items() if k.lower() == "content-type"),"")
+              if "application/x-www-form-urlencoded" in content_type:
+                  parsed = parse_qs(raw,keep_blank_values=True); return {k:v[-1] for k,v in parsed.items()}
+              return json.loads(raw)
+          def handler(e,c):
+              path = e.get("rawPath") or e.get("path") or "/"
+              if len(path) > 1 and path.endswith("/"): path = path[:-1]
+              method = (e.get("requestContext",{}).get("http",{}).get("method") or e.get("httpMethod") or "GET").upper()
+              if method == "OPTIONS": return out({})
+              try:
+                  if method == "GET" and path == "/":
+                      items=ev.scan().get("Items",[]); return out(render_events(items),content_type="text/html; charset=utf-8") if wants_html(e) else out({"Items":items})
+                  if method == "GET" and path == "/songs":
+                      items=mu.scan().get("Items",[]); return out(render_songs(items),content_type="text/html; charset=utf-8") if wants_html(e) else out(items)
+                  if method == "GET" and path == "/text":
+                      items=tx.scan().get("Items",[]); view=(e.get("queryStringParameters") or {}).get("view",""); return out(render_text(items,view),content_type="text/html; charset=utf-8") if wants_html(e) else out(items)
+                  item=body(e)
+                  if method == "POST" and path == "/":
+                      item.setdefault("event",hashlib.sha256((item.get("name","")+item.get("when","")+item.get("where","")).encode()).hexdigest()); ev.put_item(Item=item); return out(item)
+                  if method == "POST" and path == "/songs": mu.put_item(Item=item); return out(item)
+                  if method == "POST" and path == "/text":
+                      items=item if isinstance(item,list) else [item]
+                      for text_item in items: tx.put_item(Item=text_item)
+                      return out(items)
+                  if method == "POST" and path == "/delete": ev.delete_item(Key={"event":item.get("event")}); return out({"deleted":item.get("event")})
+                  if method == "POST" and path == "/delete_song": mu.delete_item(Key={"song":item.get("song")}); return out({"deleted":item.get("song")})
+                  return out({"message":"not found"},404)
+              except Exception as ex: return out({"message":str(ex)},500)
+
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/sc-${PreviewId}-api"
+      RetentionInDays: 7
+
+  PreviewApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub "sc-${PreviewId}-api"
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins: ["*"]
+        AllowMethods: [GET, POST, OPTIONS]
+        AllowHeaders: [Content-Type, HX-Request, HX-Trigger, HX-Trigger-Name, HX-Target, HX-Current-URL, Authorization]
+
+  ApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref PreviewApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt ApiFunction.Arn
+      PayloadFormatVersion: "2.0"
+
+  ApiDefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PreviewApi
+      RouteKey: "$default"
+      Target: !Sub "integrations/${ApiIntegration}"
+
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref PreviewApi
+      StageName: "$default"
+      AutoDeploy: true
+
+  ApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ApiFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PreviewApi}/*"
+
   SiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -128,4 +335,11 @@ Outputs:
     Value: !Ref SiteDistribution
   WebsiteUrl:
     Value: !Sub "https://${DomainName}"
-
+  ApiUrl:
+    Value: !GetAtt PreviewApi.ApiEndpoint
+  EventsTableName:
+    Value: !Ref EventsTable
+  MusicTableName:
+    Value: !Ref MusicTable
+  TextTableName:
+    Value: !Ref TextTable
