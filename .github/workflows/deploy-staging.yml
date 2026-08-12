@@ -54,6 +54,7 @@ jobs:
           set -euo pipefail
           mkdir editor-dist
           cp editor/index.html editor-dist/
+          cp -R editor/css editor-dist/
           cp -R editor/js editor-dist/
           find editor-dist -type f \( -name "*.html" -o -name "*.js" \) -print0 \
             | xargs -0 sed -i \

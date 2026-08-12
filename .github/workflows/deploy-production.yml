@@ -50,6 +50,7 @@ jobs:
           set -euo pipefail
           mkdir editor-dist
           cp editor/index.html editor-dist/
+          cp -R editor/css editor-dist/
           cp -R editor/js editor-dist/
 
       - name: Publish editor and invalidate
