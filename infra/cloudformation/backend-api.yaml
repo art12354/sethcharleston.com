@@ -300,11 +300,41 @@ Resources:
               return '<div class="grid gap-7 md:grid-cols-3">' + "".join(f'<article class="rounded-xl bg-[#f5f5f5] p-8 shadow-[0_16px_32px_rgba(0,0,0,0.35)]"><h2 class="font-display text-4xl text-[#393939]">{esc(service.get("title"))}</h2><p class="mt-4 leading-7 text-stone-600">{esc(service.get("description"))}</p></article>' for service in services) + '</div>'
           def render_text(items, view):
               values = {item.get("location"): item.get("text", "") for item in items}
+              if view.startswith("editor-"): return render_editor(view[7:], values)
               if view == "home":
                   return f'<div><h1 id="frontPageHeader" class="font-display text-4xl text-stone-800">{values.get("frontPageHeader", "New music is coming!")}</h1><div id="frontPageText" class="mt-5 leading-8 text-stone-600">{values.get("frontPageText", "")}</div></div><div id="frontPageVideo" class="mt-12"><h2 class="font-display text-3xl text-stone-800">Newest Video</h2><div class="mt-5 overflow-hidden rounded-sm shadow-xl">{values.get("frontPageVideo", "")}</div></div>'
               if view == "bio": return values.get("bio", "")
               if view == "services": return render_services(values.get("services"))
               return "".join(item.get("text", "") for item in items)
+          def field(label, name, value="", kind="input", type="text"):
+              classes = "w-full rounded-none border-0 bg-[#f5f5f5] p-3 font-body text-[#393939]"
+              control = f'<textarea class="{classes} min-h-28 resize-y" name="{name}" required>{esc(value)}</textarea>' if kind == "textarea" else f'<input class="{classes}" name="{name}" type="{type}" value="{esc(value)}" required>'
+              return f'<label class="grid gap-1 text-xs">{label}{control}</label>'
+          def form(action, title, fields, submit="Save", extra=""):
+              return f'<section><form data-editor-form class="grid gap-3 border-t border-[#6b6b6b] py-4" hx-post="{action}" hx-swap="none"><h2 class="font-display text-3xl">{title}</h2>{fields}<button class="justify-self-start bg-[#6b6b6b] px-4 py-3 text-sm uppercase text-white hover:bg-[#4f4f4f]" type="submit">{submit}</button><span class="htmx-indicator text-xs">Saving…</span></form>{extra}</section>'
+          def delete_form(action, key_name, key_value, label):
+              return f'<form data-editor-form class="inline" hx-post="{action}" hx-swap="none" hx-confirm="Delete {esc(label)}?"><input type="hidden" name="{key_name}" value="{esc(key_value)}"><button class="border border-[#b6b6b6] bg-transparent px-4 py-3 text-sm text-[#f5f5f5] hover:border-[#f5f5f5]" type="submit">Delete</button></form>'
+          def edit_datetime(value):
+              try: return datetime.fromisoformat(str(value).replace("Z", "+00:00")).strftime("%Y-%m-%dT%H:%M")
+              except Exception: return str(value or "")[:16]
+          def render_editor(view, values, events=None, songs=None):
+              text_action = "__API_URL__/text"
+              if view == "home":
+                  return form(text_action,"Home heading",field("Heading","text",values.get("frontPageHeader"))+'<input type="hidden" name="location" value="frontPageHeader">',"Save heading") + form(text_action,"Home text",field("Text","text",values.get("frontPageText"),"textarea")+'<input type="hidden" name="location" value="frontPageText">',"Save text") + form(text_action,"Newest video",field("Embed HTML","text",values.get("frontPageVideo"),"textarea")+'<input type="hidden" name="location" value="frontPageVideo">',"Save video")
+              if view == "about": return form(text_action,"Biography",field("Biography","text",values.get("bio"),"textarea")+'<input type="hidden" name="location" value="bio">',"Save biography")
+              if view == "services": return form(text_action,"Services JSON",field("Services","text",values.get("services"),"textarea")+'<input type="hidden" name="location" value="services">',"Save services")
+              if view == "shows":
+                  add = form("__API_URL__/","Add show",field("Name","name")+field("Date and time","when",type="datetime-local")+field("Venue","where")+field("Ticket URL","tickets",type="url"),"Add show")
+                  return add+"".join(form("__API_URL__/",f'Edit {esc(i.get("name"))}',field("Name","name",i.get("name"))+field("Date and time","when",edit_datetime(i.get("when")),type="datetime-local")+field("Venue","where",i.get("where"))+field("Ticket URL","tickets",i.get("tickets"),type="url")+f'<input type="hidden" name="event" value="{esc(i.get("event"))}">',"Save show",delete_form("__API_URL__/delete","event",i.get("event"),i.get("name"))) for i in (events or []))
+              if view == "music":
+                  add = form("__API_URL__/songs","Add music",field("Name","song")+field("Release date","release",type="date")+field("Spotify embed HTML","link","","textarea"),"Add music")
+                  return add+"".join(form("__API_URL__/songs",f'Edit {esc(i.get("song"))}',field("Name","song",i.get("song"))+field("Release date","release",str(i.get("release") or "")[:10],type="date")+field("Spotify embed HTML","link",i.get("link"),"textarea"),"Save music",delete_form("__API_URL__/delete_song","song",i.get("song"),i.get("song"))) for i in (songs or []))
+              return '<p>No editor is available for this page.</p>'
+          def api_url(e):
+              context = e.get("requestContext", {})
+              domain = context.get("domainName", "")
+              stage = context.get("stage", "")
+              return f'https://{domain}' + (f'/{stage}' if stage and stage != "$default" else "")
           def body(e):
               raw = e.get("body") or "{}"
               if e.get("isBase64Encoded"): raw = base64.b64decode(raw).decode()
@@ -333,7 +363,9 @@ Resources:
                   if method == "GET" and path == "/text":
                       items = tx.scan().get("Items", [])
                       view = (e.get("queryStringParameters") or {}).get("view", "")
-                      return out(render_text(items, view), content_type="text/html; charset=utf-8") if wants_html(e) else out(items)
+                      values = {i.get("location"):i.get("text","") for i in items}
+                      rendered = render_editor(view[7:], values, ev.scan().get("Items",[]), mu.scan().get("Items",[])) if view.startswith("editor-") else render_text(items, view)
+                      return out(rendered.replace("__API_URL__", api_url(e)), content_type="text/html; charset=utf-8") if wants_html(e) else out(items)
                   if method == "GET" and path == "/access": return out({"ok": True})
                   item = body(e)
                   if method == "POST" and path == "/":
