@@ -84,18 +84,22 @@
 
   function editableText(config) {
     var dirty = false;
-    config.fields.forEach(function (field) {
-      var element = document.getElementById(field.id);
-      if (!element) return;
-      element.contentEditable = "true";
-      element.dataset.inlineEditable = "true";
-      element.setAttribute("role", "textbox");
-      element.setAttribute("aria-label", field.label);
-      element.addEventListener("input", function () {
-        dirty = true;
-        setStatus("Unsaved changes");
+    function markEditable() {
+      config.fields.forEach(function (field) {
+        var element = document.getElementById(field.id);
+        if (!element || element.dataset.inlineEditable === "true") return;
+        element.contentEditable = "true";
+        element.dataset.inlineEditable = "true";
+        element.setAttribute("role", "textbox");
+        element.setAttribute("aria-label", field.label);
+        element.addEventListener("input", function () {
+          dirty = true;
+          setStatus("Unsaved changes");
+        });
       });
-    });
+    }
+    markEditable();
+    document.body.addEventListener("htmx:afterSettle", markEditable);
     button("Save changes", function () {
       var data = config.fields.map(function (field) {
         var element = document.getElementById(field.id);
