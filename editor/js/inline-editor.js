@@ -182,8 +182,8 @@
     item.appendChild(wrap);
   }
 
-  function mediaUpload(slot, label, accept) {
-    button(label, function () {
+  function chooseMedia(slot, accept) {
+    return function () {
       var input = document.createElement("input");
       input.type = "file";
       input.accept = accept;
@@ -213,7 +213,24 @@
           .catch(function (error) { setStatus(error.message, "error"); });
       });
       input.click();
-    });
+    };
+  }
+
+  function contextualMedia(slot, label, accept, container, visibility) {
+    function attach() {
+      var target = document.querySelector(container);
+      if (!target || target.querySelector('[data-media-control="' + slot + '"]')) return;
+      target.classList.add("edit-media-container");
+      var control = document.createElement("button");
+      control.type = "button";
+      control.className = "edit-media-control" + (visibility ? " " + visibility : "");
+      control.dataset.mediaControl = slot;
+      control.textContent = label;
+      control.addEventListener("click", chooseMedia(slot, accept));
+      target.appendChild(control);
+    }
+    attach();
+    document.body.addEventListener("htmx:afterSettle", attach);
   }
 
   function musicEditor() {
@@ -372,13 +389,12 @@
     setStatus("Signed in", "success");
     button("View live site", function () { location.href = LIVE_SITE + "/" + (page === "index.html" ? "" : page); });
     if (page === "index.html") {
-      mediaUpload("home-video", "Change header video", "video/mp4,video/webm");
-      mediaUpload("home-mobile", "Change mobile header", "image/jpeg,image/png,image/webp,image/gif");
-      mediaUpload("home-logo", "Change mobile logo", "image/jpeg,image/png,image/webp,image/gif");
+      contextualMedia("home-video", "Change video", "video/mp4,video/webm", "body > header", "edit-media-desktop");
+      contextualMedia("home-mobile", "Change photo", "image/jpeg,image/png,image/webp,image/gif", "body > header", "edit-media-mobile");
     } else {
-      mediaUpload(page.replace(".html", "") + "-header", "Change header photo", "image/jpeg,image/png,image/webp,image/gif");
+      contextualMedia(page.replace(".html", "") + "-header", "Change photo", "image/jpeg,image/png,image/webp,image/gif", "body > header");
     }
-    mediaUpload("footer-photo", "Change footer photo", "image/jpeg,image/png,image/webp,image/gif");
+    contextualMedia("footer-photo", "Change photo", "image/jpeg,image/png,image/webp,image/gif", ".legacy-footer-image");
     if (page === "index.html") {
       editableText({ fields: [
       { id: "frontPageHeader", location: "frontPageHeader", label: "Home page heading" },
