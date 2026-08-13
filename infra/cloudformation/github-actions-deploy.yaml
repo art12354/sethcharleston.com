@@ -259,6 +259,7 @@ Resources:
                   - dynamodb:PutItem
                   - dynamodb:TagResource
                   - dynamodb:UntagResource
+                  - dynamodb:UpdateItem
                   - dynamodb:UpdateTable
                   - dynamodb:UpdateTimeToLive
                 Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/sc-*"
