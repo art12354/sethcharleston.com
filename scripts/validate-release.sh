@@ -18,7 +18,14 @@ fi
 for page in index about music shows services; do
   grep -q 'partials/nav.html' "$ROOT_DIR/$page.html"
   grep -q 'partials/footer.html' "$ROOT_DIR/$page.html"
+  grep -q 'src="js/htmx.min.js?v=2.0.10"' "$ROOT_DIR/$page.html"
 done
+
+test -s "$ROOT_DIR/js/htmx.min.js"
+if grep -R -q 'cdn.jsdelivr.net/npm/htmx' "$ROOT_DIR"/*.html; then
+  echo "HTMX must be served from the site, not a CDN." >&2
+  exit 1
+fi
 
 grep -q '/media/library' "$ROOT_DIR/infra/cloudformation/backend-api.yaml"
 grep -q 'AuthorizationType: COGNITO_USER_POOLS' "$ROOT_DIR/infra/cloudformation/backend-api.yaml"

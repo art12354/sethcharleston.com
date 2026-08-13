@@ -56,7 +56,7 @@ PREVIEW_NAME="Preview: $BRANCH_NAME" \
 work_dir="$(mktemp -d)"
 mkdir -p "$work_dir/site"
 cp "$ROOT_DIR"/index.html "$ROOT_DIR"/about.html "$ROOT_DIR"/music.html "$ROOT_DIR"/shows.html "$ROOT_DIR"/services.html "$ROOT_DIR"/sitemap.xml "$work_dir/site/"
-cp -R "$ROOT_DIR"/css "$ROOT_DIR"/partials "$ROOT_DIR"/photos "$ROOT_DIR"/videos "$work_dir/site/"
+cp -R "$ROOT_DIR"/css "$ROOT_DIR"/js "$ROOT_DIR"/partials "$ROOT_DIR"/photos "$ROOT_DIR"/videos "$work_dir/site/"
 find "$work_dir/site" -type f -name "*.html" -print0 \
   | xargs -0 sed -i "s#https://api.sethcharleston.com/test1#${api_url}#g"
 

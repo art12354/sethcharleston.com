@@ -36,6 +36,7 @@ jobs:
       - name: Build and validate
         run: |
           npm ci
+          npm run build:vendor
           npm run build:css
           git diff --exit-code -- css/site.css
           npm test
@@ -55,7 +56,7 @@ jobs:
           set -euo pipefail
           mkdir dist
           cp index.html about.html music.html shows.html services.html sitemap.xml dist/
-          cp -R css partials photos videos dist/
+          cp -R css js partials photos videos dist/
 
       - name: Publish and invalidate
         run: ./scripts/publish-static-site.sh dist "$SITE_BUCKET" "$CLOUDFRONT_DISTRIBUTION_ID"
