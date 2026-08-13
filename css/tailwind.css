@@ -39,6 +39,45 @@
   .content-card {
     @apply rounded-xl bg-[#f5f5f5] shadow-[0_16px_32px_rgba(0,0,0,0.35)];
   }
+  .legacy-footer {
+    @apply flex min-h-[402px] w-full justify-center bg-[#393939] pt-8 text-[#f5f5f5] md:min-h-0 md:justify-around xl:justify-center;
+  }
+  .legacy-footer-content {
+    @apply flex flex-col items-center text-center text-[48px] md:w-2/5 md:max-w-[400px];
+  }
+  .legacy-footer-social {
+    @apply whitespace-nowrap text-[36px];
+  }
+  .legacy-footer-social .fa {
+    @apply mx-0.5 my-[5px] w-[50px] p-[10px] text-center text-[#b6b6b6] no-underline hover:opacity-70;
+  }
+  .legacy-footer-signup {
+    @apply px-[5%];
+  }
+  .legacy-footer-signup h2 {
+    @apply mb-5 whitespace-nowrap font-display text-[29px] font-normal;
+  }
+  .legacy-footer-signup form {
+    @apply flex flex-col items-center;
+  }
+  .legacy-footer-signup input:not(.absolute) {
+    @apply m-[10px] h-6 w-[90%] rounded-[5px] border-0 bg-[#f5f5f5] p-0.5 font-body text-[14px] text-[#393939];
+  }
+  .legacy-footer-signup button {
+    @apply mt-[31px] h-[30px] w-[120px] rounded-[5px] border-0 bg-[#f5f5f5] font-body text-[16px] normal-case text-[#393939] hover:opacity-40;
+  }
+  .legacy-footer-links {
+    @apply m-5 whitespace-nowrap font-body text-[14px];
+  }
+  .legacy-footer-links a {
+    @apply text-[#f5f5f5] no-underline;
+  }
+  .legacy-footer-image {
+    @apply hidden items-center justify-center md:flex md:w-2/5 md:max-w-[400px];
+  }
+  .legacy-footer-image img {
+    @apply mb-5 max-w-full shadow-[0_16px_32px_rgba(0,0,0,0.8)];
+  }
 }
 
 @layer utilities {
