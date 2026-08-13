@@ -41,6 +41,13 @@ put_method "$upload_id" POST COGNITO_USER_POOLS
 put_method "$commit_id" POST COGNITO_USER_POOLS
 put_method "$delete_id" POST COGNITO_USER_POOLS
 
+# The public HTMX pages need HTML fragments, while the editor still requests
+# JSON from these same read routes. Route only GET through the compatible
+# production function; the legacy authenticated write methods stay untouched.
+songs_id="$(aws apigateway get-resources --rest-api-id "$REST_API_ID" --limit 100 --query 'items[?path==`/songs`].id' --output text)"
+put_method "$root_id" GET NONE
+put_method "$songs_id" GET NONE
+
 put_options() {
   local resource="$1" methods="$2"
   local response_parameters

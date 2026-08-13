@@ -6,6 +6,8 @@ Parameters:
   SiteBucketName: {Type: String, Default: sethcharleston.com}
   SiteDomainName: {Type: String, Default: sethcharleston.com}
   TextTableName: {Type: String, Default: seth_charleston_text}
+  EventsTableName: {Type: String, Default: seth_charleston_events}
+  MusicTableName: {Type: String, Default: seth_charleston_music}
 
 Resources:
   MediaRole:
@@ -24,8 +26,13 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action: [dynamodb:GetItem, dynamodb:PutItem]
+                Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:Scan]
                 Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${TextTableName}"
+              - Effect: Allow
+                Action: dynamodb:Scan
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${EventsTableName}"
+                  - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${MusicTableName}"
               - Effect: Allow
                 Action: [s3:DeleteObject, s3:GetObject, s3:PutObject]
                 Resource: !Sub "arn:${AWS::Partition}:s3:::${SiteBucketName}/uploads/*"
@@ -46,23 +53,53 @@ Resources:
           SITE_BUCKET: !Ref SiteBucketName
           SITE_DOMAIN: !Ref SiteDomainName
           TEXT_TABLE: !Ref TextTableName
+          EVENTS_TABLE: !Ref EventsTableName
+          MUSIC_TABLE: !Ref MusicTableName
       Code:
         ZipFile: |
-          import json, os, re
+          import html, json, os, re
           from datetime import datetime
+          from email.utils import parsedate_to_datetime
+          from urllib.parse import urlparse
           import boto3
-          s3=boto3.client("s3"); tx=boto3.resource("dynamodb").Table(os.environ["TEXT_TABLE"])
+          db=boto3.resource("dynamodb"); s3=boto3.client("s3")
+          tx=db.Table(os.environ["TEXT_TABLE"]); ev=db.Table(os.environ["EVENTS_TABLE"]); mu=db.Table(os.environ["MUSIC_TABLE"])
           defaults={"home-video":"videos/Take a Seat (Website Header).mp4","home-mobile":"photos/Mobile Homepage Header (7.22.23).png","about-header":"photos/Bio Page (7.21.23).png","music-header":"photos/Music Page (7.21.23).png","shows-header":"photos/Events Page (7.21.23).png","services-header":"photos/Music Page (7.21.23).png","footer-photo":"photos/NEW Footer Photo (7.21.23).png"}
           cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Content-Type,Authorization","Access-Control-Allow-Methods":"GET,POST,OPTIONS"}
           def out(data,code=200,extra=None):
               headers=dict(cors); headers.update(extra or {})
               return {"statusCode":code,"headers":headers,"body":json.dumps(data,default=str)}
+          def fragment(value): return {"statusCode":200,"headers":dict(cors,**{"Content-Type":"text/html; charset=utf-8"}),"body":value}
+          def esc(value): return html.escape(str(value or ""),quote=True)
+          def wants_html(e):
+              headers={k.lower():v for k,v in (e.get("headers") or {}).items()}; query=e.get("queryStringParameters") or {}
+              return headers.get("hx-request","").lower()=="true" or "text/html" in headers.get("accept","") or query.get("format")=="html"
+          def safe_url(value):
+              value=str(value or ""); return value if urlparse(value).scheme in ("http","https") else "#"
+          def display_date(value):
+              try: parsed=datetime.fromisoformat(str(value).replace("Z","+00:00"))
+              except Exception:
+                  try: parsed=parsedate_to_datetime(str(value))
+                  except Exception: return str(value or "")
+              return parsed.strftime("%A, %B %-d, %Y")
+          def render_events(items):
+              items=sorted(items,key=lambda item:item.get("when",""))
+              if not items: return '<p class="col-span-full text-center text-stone-500">No shows are scheduled right now. Check back soon.</p>'
+              return "".join(f'''<article class="col-span-full mx-auto w-full max-w-4xl rounded-xl bg-[#f5f5f5] p-8 text-center shadow-[0_16px_32px_rgba(0,0,0,0.35)]"><h2 class="font-display text-3xl text-stone-800">{esc(item.get("name"))}</h2><p class="mt-3 text-sm uppercase tracking-[0.18em] text-stone-500">{esc(display_date(item.get("when")))}</p><p class="mt-2 text-stone-700">{esc(item.get("where"))}</p><a class="mt-6 inline-block bg-[#6b6b6b] px-6 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-md transition-colors hover:bg-[#4f4f4f]" href="{esc(safe_url(item.get("tickets")))}" target="_blank" rel="noopener">Tickets</a></article>''' for item in items)
+          def render_songs(items):
+              items=sorted(items,key=lambda item:item.get("release",""),reverse=True)
+              if not items: return '<p class="col-span-full text-center text-stone-500">New music is on the way.</p>'
+              return "".join(f'<article class="col-span-full mx-auto w-full max-w-4xl overflow-hidden rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.8)]" aria-label="{esc(item.get("song"))}">{item.get("link","")}</article>' for item in items)
           def body(e): return json.loads(e.get("body") or "{}")
           def active(slot): return tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text") or defaults[slot]
           def handler(e,c):
               path=e.get("path",""); method=e.get("httpMethod","GET")
               if path.startswith("/test1/"): path=path[6:]
               try:
+                  if method=="GET" and path in ("/", "/test1"):
+                      items=ev.scan().get("Items",[]); return fragment(render_events(items)) if wants_html(e) else out({"Items":items})
+                  if method=="GET" and path=="/songs":
+                      items=mu.scan().get("Items",[]); return fragment(render_songs(items)) if wants_html(e) else out(items)
                   if method=="GET" and path=="/media/library":
                       slot=(e.get("queryStringParameters") or {}).get("slot","")
                       if slot not in defaults: return out({"message":"unknown media slot"},400)
@@ -99,7 +136,7 @@ Resources:
       FunctionName: !Ref MediaFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApiId}/*/*/media/*"
+      SourceArn: !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApiId}/*/*/*"
 
 Outputs:
   FunctionArn: {Value: !GetAtt MediaFunction.Arn}
