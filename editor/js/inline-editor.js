@@ -182,8 +182,81 @@
     item.appendChild(wrap);
   }
 
-  function chooseMedia(slot, accept) {
+  function refreshMedia(slot) {
+    var mediaUrl = API + "/media/" + slot + "?v=" + Date.now();
+    document.querySelectorAll('[src*="/media/' + slot + '"]').forEach(function (element) {
+      element.src = mediaUrl;
+      if (element.tagName === "SOURCE") element.parentElement.load();
+    });
+    document.querySelectorAll('[poster*="/media/' + slot + '"]').forEach(function (element) { element.poster = mediaUrl; });
+  }
+
+  function openMediaLibrary(slot, label, accept) {
     return function () {
+      var modal = document.createElement("dialog");
+      modal.className = "edit-dialog edit-media-dialog";
+      var heading = document.createElement("h2");
+      heading.textContent = label;
+      var list = document.createElement("div");
+      list.className = "edit-media-library";
+      var actions = document.createElement("menu");
+      var uploadButton = document.createElement("button");
+      uploadButton.type = "button";
+      uploadButton.className = "edit-primary";
+      uploadButton.textContent = "Upload new";
+      var closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.textContent = "Close";
+      closeButton.addEventListener("click", function () { modal.close(); });
+      actions.append(closeButton, uploadButton);
+      modal.append(heading, list, actions);
+      document.body.appendChild(modal);
+      modal.addEventListener("close", function () { modal.remove(); });
+
+      function loadFiles() {
+        list.textContent = "Loading…";
+        request("/media/library?slot=" + encodeURIComponent(slot)).then(function (library) {
+          list.innerHTML = "";
+          library.files.forEach(function (file) {
+            var item = document.createElement("article");
+            item.className = "edit-media-library-item" + (file.active ? " is-active" : "");
+            var preview = slot === "home-video" ? document.createElement("video") : document.createElement("img");
+            preview.src = file.url;
+            preview.muted = true;
+            preview.playsInline = true;
+            if (preview.tagName === "VIDEO") preview.controls = true;
+            var name = document.createElement("span");
+            name.textContent = file.name + (file.active ? " — active" : "");
+            var itemActions = document.createElement("div");
+            if (!file.active) {
+              var useButton = document.createElement("button");
+              useButton.type = "button";
+              useButton.textContent = "Use this";
+              useButton.addEventListener("click", function () {
+                request("/media/commit", { method: "POST", body: JSON.stringify({ slot: slot, key: file.key }) }).then(function () {
+                  refreshMedia(slot); setStatus("Media updated", "success"); loadFiles();
+                }).catch(function (error) { setStatus(error.message, "error"); });
+              });
+              itemActions.appendChild(useButton);
+            }
+            if (!file.original && !file.active) {
+              var deleteButton = document.createElement("button");
+              deleteButton.type = "button";
+              deleteButton.textContent = "Delete";
+              deleteButton.addEventListener("click", function () {
+                if (!confirm("Delete “" + file.name + "”?")) return;
+                request("/media/delete", { method: "POST", body: JSON.stringify({ slot: slot, key: file.key }) }).then(loadFiles)
+                  .catch(function (error) { setStatus(error.message, "error"); });
+              });
+              itemActions.appendChild(deleteButton);
+            }
+            item.append(preview, name, itemActions);
+            list.appendChild(item);
+          });
+        }).catch(function (error) { list.textContent = error.message; });
+      }
+
+      uploadButton.addEventListener("click", function () {
       var input = document.createElement("input");
       input.type = "file";
       input.accept = accept;
@@ -202,17 +275,14 @@
               });
           })
           .then(function () {
-            var mediaUrl = API + "/media/" + slot + "?v=" + Date.now();
-            document.querySelectorAll('[src*="/media/' + slot + '"]').forEach(function (element) {
-              element.src = mediaUrl;
-              if (element.tagName === "SOURCE") element.parentElement.load();
-            });
-            document.querySelectorAll('[poster*="/media/' + slot + '"]').forEach(function (element) { element.poster = mediaUrl; });
-            setStatus("Media updated", "success");
+            refreshMedia(slot); setStatus("Media updated", "success"); loadFiles();
           })
           .catch(function (error) { setStatus(error.message, "error"); });
       });
       input.click();
+      });
+      loadFiles();
+      modal.showModal();
     };
   }
 
@@ -226,7 +296,7 @@
       control.className = "edit-media-control" + (visibility ? " " + visibility : "");
       control.dataset.mediaControl = slot;
       control.textContent = label;
-      control.addEventListener("click", chooseMedia(slot, accept));
+      control.addEventListener("click", openMediaLibrary(slot, label, accept));
       target.appendChild(control);
     }
     attach();

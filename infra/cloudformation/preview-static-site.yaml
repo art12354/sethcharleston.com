@@ -87,8 +87,13 @@ Resources:
                   - !GetAtt MusicTable.Arn
                   - !GetAtt TextTable.Arn
               - Effect: Allow
-                Action: s3:PutObject
+                Action:
+                  - s3:DeleteObject
+                  - s3:PutObject
                 Resource: !Sub "${SiteBucket.Arn}/uploads/*"
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt SiteBucket.Arn
 
   ApiFunction:
     Type: AWS::Lambda::Function
@@ -169,6 +174,14 @@ Resources:
               method = (e.get("requestContext",{}).get("http",{}).get("method") or e.get("httpMethod") or "GET").upper()
               if method == "OPTIONS": return out({})
               try:
+                  if method == "GET" and path == "/media/library":
+                      slot=(e.get("queryStringParameters") or {}).get("slot", "")
+                      if slot not in media_defaults: return out({"message":"unknown media slot"},400)
+                      active=tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text") or media_defaults[slot]
+                      objects=s3.list_objects_v2(Bucket=os.environ["SITE_BUCKET"],Prefix="uploads/"+slot+"-").get("Contents",[])
+                      files=[{"key":media_defaults[slot],"name":"Original","url":"https://"+os.environ["SITE_DOMAIN"]+"/"+media_defaults[slot],"active":active==media_defaults[slot],"original":True}]
+                      files += [{"key":obj["Key"],"name":obj["Key"].split("/")[-1],"url":"https://"+os.environ["SITE_DOMAIN"]+"/"+obj["Key"],"active":active==obj["Key"],"size":obj.get("Size",0),"modified":str(obj.get("LastModified",""))} for obj in sorted(objects,key=lambda value:value.get("LastModified",datetime.min),reverse=True)]
+                      return out({"slot":slot,"files":files})
                   if method == "GET" and path.startswith("/media/"):
                       slot=path.split("/",2)[2]
                       if slot not in media_defaults: return out({"message":"unknown media slot"},404)
@@ -187,9 +200,17 @@ Resources:
                       return out({"uploadUrl":upload_url,"key":key,"mediaUrl":f'/media/{slot}'})
                   if method == "POST" and path == "/media/commit":
                       upload=body(e); slot=str(upload.get("slot", "")); key=str(upload.get("key", ""))
-                      if slot not in media_defaults or not key.startswith("uploads/"+slot+"-"): return out({"message":"invalid media upload"},400)
+                      if slot not in media_defaults or (key != media_defaults[slot] and not key.startswith("uploads/"+slot+"-")): return out({"message":"invalid media selection"},400)
+                      if key != media_defaults[slot]: s3.head_object(Bucket=os.environ["SITE_BUCKET"],Key=key)
                       tx.put_item(Item={"location":"media:"+slot,"text":key})
                       return out({"mediaUrl":f'/media/{slot}'})
+                  if method == "POST" and path == "/media/delete":
+                      upload=body(e); slot=str(upload.get("slot", "")); key=str(upload.get("key", ""))
+                      if slot not in media_defaults or not key.startswith("uploads/"+slot+"-"): return out({"message":"invalid media file"},400)
+                      active=tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text") or media_defaults[slot]
+                      if key == active: return out({"message":"select another file before deleting this one"},409)
+                      s3.delete_object(Bucket=os.environ["SITE_BUCKET"],Key=key)
+                      return out({"deleted":key})
                   if method == "GET" and path == "/":
                       items=ev.scan().get("Items",[]); return out(render_events(items),content_type="text/html; charset=utf-8") if wants_html(e) else out({"Items":items})
                   if method == "GET" and path == "/songs":

@@ -140,6 +140,33 @@
 .edit-dialog textarea { min-height: 120px; resize: vertical; }
 .edit-dialog menu { display: flex; gap: 10px; justify-content: flex-end; margin: 20px 0 0; padding: 0; }
 
+.edit-media-dialog {
+  max-height: calc(100vh - 40px);
+  max-width: 760px;
+  overflow: auto;
+}
+
+.edit-media-library {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.edit-media-library-item {
+  border: 2px solid #d6d3d1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.edit-media-library-item.is-active { border-color: #b98c42; }
+.edit-media-library-item img,
+.edit-media-library-item video { aspect-ratio: 16 / 9; background: #393939; object-fit: cover; width: 100%; }
+.edit-media-library-item span { font-size: 12px; overflow-wrap: anywhere; }
+.edit-media-library-item div { display: flex; gap: 6px; margin-top: auto; }
+.edit-media-library-item button { flex: 1; font-size: 12px; padding: 6px; }
+
 body.edit-busy::after {
   background: rgba(255, 255, 255, .5);
   content: "";
