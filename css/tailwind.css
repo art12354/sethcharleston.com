@@ -28,7 +28,7 @@
     @apply mx-auto flex min-h-[68px] max-w-[1500px] items-center justify-between px-5 py-3 md:grid md:h-[88px] md:min-h-[88px] md:grid-cols-3 md:py-0;
   }
   .nav-link {
-    @apply font-display text-2xl transition-colors hover:bg-[#f5f5f5] hover:text-[#393939] md:text-[40px] md:leading-none;
+    @apply font-display text-2xl transition-colors hover:bg-[#f5f5f5] hover:text-[#393939] md:flex md:h-[88px] md:items-center md:text-[40px] md:leading-none;
   }
   .page-about .nav-about,
   .page-music .nav-music,
