@@ -40,6 +40,15 @@ jobs:
           git diff --exit-code -- css/site.css
           npm test
 
+      - name: Verify production media API is ready
+        run: |
+          curl --fail --silent --show-error -D - -o /dev/null \
+            https://api.sethcharleston.com/test1/media/about-header | grep -qi '^location:'
+          test "$(curl --silent --show-error -o /dev/null -w '%{http_code}' \
+            'https://api.sethcharleston.com/test1/media/library?slot=about-header')" = "401"
+          aws s3api get-bucket-cors --bucket "$SITE_BUCKET" \
+            --query 'CORSRules[?contains(AllowedMethods, `PUT`)] | length(@)' --output text | grep -qv '^0$'
+
       - name: Package website
         shell: bash
         run: |

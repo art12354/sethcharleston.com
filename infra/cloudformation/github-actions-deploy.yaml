@@ -69,6 +69,10 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              - Sid: ValidateInfrastructureTemplates
+                Effect: Allow
+                Action: cloudformation:ValidateTemplate
+                Resource: "*"
               - Sid: ListWebsiteBucket
                 Effect: Allow
                 Action:
@@ -80,6 +84,7 @@ Resources:
                 Effect: Allow
                 Action:
                   - s3:GetBucketLocation
+                  - s3:GetBucketCORS
                   - s3:ListBucket
                 Resource: !Sub "arn:${AWS::Partition}:s3:::${StagingWebsiteBucketName}"
               - Sid: ListEditorBuckets
