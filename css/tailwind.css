@@ -72,7 +72,7 @@
     @apply m-[10px] h-6 w-[90%] rounded-[5px] border-0 bg-[#f5f5f5] p-0.5 font-body text-[14px] text-[#393939];
   }
   .legacy-footer-signup button {
-    @apply mt-[31px] h-[30px] w-[120px] rounded-[5px] border-0 bg-[#f5f5f5] font-body text-[13.3333px] font-normal normal-case text-[#393939] hover:opacity-40;
+    @apply mt-[31px] h-[30px] w-[120px] rounded-none border-0 bg-[#f5f5f5] font-body text-[13.3333px] font-normal normal-case text-[#393939] hover:opacity-40;
     line-height: normal;
   }
   .legacy-footer-links {
