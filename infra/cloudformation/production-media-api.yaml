@@ -90,6 +90,17 @@ Resources:
               items=sorted(items,key=lambda item:item.get("release",""),reverse=True)
               if not items: return '<p class="col-span-full text-center text-stone-500">New music is on the way.</p>'
               return "".join(f'<article class="col-span-full mx-auto w-full max-w-4xl overflow-hidden rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.8)]" aria-label="{esc(item.get("song"))}">{item.get("link","")}</article>' for item in items)
+          def render_services(raw):
+              defaults=[{"title":"Production","description":"Full-service music production shaped around your sound, from arrangement and tracking through the final creative details."},{"title":"Mixing","description":"Detailed, musical mixes that bring clarity, depth, balance, and energy to every element of your song."},{"title":"Mastering","description":"Release-ready masters with polish, consistency, and impact across streaming platforms and playback systems."}]
+              try: services=json.loads(raw) if raw else defaults
+              except Exception: services=defaults
+              return '<div class="grid gap-7 lg:grid-cols-3">'+"".join(f'<article class="rounded-xl bg-[#f5f5f5] p-8 shadow-[0_16px_32px_rgba(0,0,0,0.35)]"><h2 class="font-display text-4xl text-[#393939]">{esc(service.get("title"))}</h2><p class="mt-4 leading-7 text-stone-600">{esc(service.get("description"))}</p></article>' for service in services)+'</div>'
+          def render_text(items,view):
+              values={item.get("location"):item.get("text","") for item in items}
+              if view=="home": return f'<div><h1 id="frontPageHeader" class="font-display text-4xl text-stone-800">{values.get("frontPageHeader","New music is coming!")}</h1><div id="frontPageText" class="mt-5 leading-8 text-stone-600">{values.get("frontPageText","")}</div></div><div id="frontPageVideo" class="mt-12"><h2 class="font-display text-3xl text-stone-800">Newest Video</h2><div class="mt-5 overflow-hidden rounded-sm shadow-xl">{values.get("frontPageVideo","")}</div></div>'
+              if view=="bio": return values.get("bio","")
+              if view=="services": return render_services(values.get("services"))
+              return "".join(item.get("text","") for item in items)
           def body(e): return json.loads(e.get("body") or "{}")
           def active(slot): return tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text") or defaults[slot]
           def handler(e,c):
@@ -100,6 +111,9 @@ Resources:
                       items=ev.scan().get("Items",[]); return fragment(render_events(items)) if wants_html(e) else out({"Items":items})
                   if method=="GET" and path=="/songs":
                       items=mu.scan().get("Items",[]); return fragment(render_songs(items)) if wants_html(e) else out(items)
+                  if method=="GET" and path=="/text":
+                      items=tx.scan().get("Items",[]); view=(e.get("queryStringParameters") or {}).get("view","")
+                      return fragment(render_text(items,view)) if wants_html(e) else out(items)
                   if method=="GET" and path=="/media/library":
                       slot=(e.get("queryStringParameters") or {}).get("slot","")
                       if slot not in defaults: return out({"message":"unknown media slot"},400)

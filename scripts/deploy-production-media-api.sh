@@ -45,8 +45,10 @@ put_method "$delete_id" POST COGNITO_USER_POOLS
 # JSON from these same read routes. Route only GET through the compatible
 # production function; the legacy authenticated write methods stay untouched.
 songs_id="$(aws apigateway get-resources --rest-api-id "$REST_API_ID" --limit 100 --query 'items[?path==`/songs`].id' --output text)"
+text_id="$(aws apigateway get-resources --rest-api-id "$REST_API_ID" --limit 100 --query 'items[?path==`/text`].id' --output text)"
 put_method "$root_id" GET NONE
 put_method "$songs_id" GET NONE
+put_method "$text_id" GET NONE
 
 put_options() {
   local resource="$1" methods="$2"
@@ -64,6 +66,7 @@ put_options "$commit_id" POST
 put_options "$delete_id" POST
 put_options "$root_id" GET
 put_options "$songs_id" GET
+put_options "$text_id" GET
 
 deployment="$(aws apigateway create-deployment --rest-api-id "$REST_API_ID" --description "Media library release $(git -C "$ROOT_DIR" rev-parse --short HEAD)" --query id --output text)"
 aws apigateway update-stage --rest-api-id "$REST_API_ID" --stage-name test1 --patch-operations op=replace,path=/deploymentId,value="$deployment" >/dev/null
