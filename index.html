@@ -19,79 +19,28 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
-    <link rel="stylesheet" href="css/site.css?v=6" />
+    <link rel="stylesheet" href="css/site.css?v=7" />
     <script
       src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"
       integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
       crossorigin="anonymous"
     ></script>
   </head>
-  <body class="flex min-h-screen flex-col">
-    <nav class="site-nav" aria-label="Main navigation">
-      <div class="nav-shell">
-        <div class="hidden items-stretch justify-center md:flex">
-          <a class="nav-link px-4 py-2" href="about.html">About</a
-          ><a class="nav-link px-4 py-2" href="music.html">Music</a
-          ><a class="nav-link px-4 py-2" href="shows.html">Shows</a
-          ><a class="nav-link px-4 py-2" href="services.html">Services</a>
-        </div>
-        <a class="justify-self-center" href="index.html"
-          ><img
-            class="h-9 w-auto md:h-11"
-            src="photos/Seth_Charleston_Logo.png"
-            alt="Seth Charleston"
-        /></a>
-        <div class="hidden justify-center md:flex">
-          <a
-            class="social-link fa fa-twitter"
-            aria-label="Twitter"
-            href="https://twitter.com/sethcharleston"
-            target="_blank"
-            rel="noopener"
-          ></a
-          ><a
-            class="social-link fa fa-facebook"
-            aria-label="Facebook"
-            href="https://www.facebook.com/sethcharlestonmusic/"
-            target="_blank"
-            rel="noopener"
-          ></a
-          ><a
-            class="social-link fa fa-instagram"
-            aria-label="Instagram"
-            href="https://www.instagram.com/sethcharleston/"
-            target="_blank"
-            rel="noopener"
-          ></a
-          ><a
-            class="social-link fa fa-spotify"
-            aria-label="Spotify"
-            href="https://open.spotify.com/artist/1A5BJhYP6UBWnqVhuJnTqy"
-            target="_blank"
-            rel="noopener"
-          ></a
-          ><a
-            class="social-link fa fa-youtube"
-            aria-label="YouTube"
-            href="https://www.youtube.com/channel/UC1F4-aWEuIr2PRG2BP5qZDA"
-            target="_blank"
-            rel="noopener"
-          ></a>
-        </div>
-        <details class="group md:hidden">
-          <summary
-            class="cursor-pointer list-none text-3xl"
-            aria-label="Open menu"
-          >
-            ☰
-          </summary>
-          <div
-            class="absolute left-0 top-full flex w-full flex-col gap-4 bg-stone-900 px-6 py-6 text-center font-display text-3xl"
-          >
-            <a href="about.html">About</a><a href="music.html">Music</a
-            ><a href="shows.html">Shows</a><a href="services.html">Services</a>
-          </div>
-        </details>
+  <body class="page-home flex min-h-screen flex-col">
+    <nav
+      class="site-nav"
+      aria-label="Main navigation"
+      aria-busy="true"
+      hx-get="partials/nav.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    >
+      <div class="nav-shell animate-pulse">
+        <div class="hidden h-10 w-80 rounded bg-white/10 md:block"></div>
+        <div
+          class="h-9 w-16 justify-self-center rounded bg-white/10 md:h-11"
+        ></div>
+        <div class="h-8 w-8 rounded bg-white/10 md:h-10 md:w-56"></div>
       </div>
     </nav>
     <header
@@ -147,8 +96,17 @@
         </p>
       </section>
     </main>
-    <footer hx-get="partials/footer.html" hx-trigger="load" hx-swap="outerHTML">
-      <p class="bg-[#393939] px-6 py-10 text-center text-stone-200">Loading footer…</p>
+    <footer
+      class="grid min-h-[324px] animate-pulse bg-[#393939] p-8 md:min-h-[448px] md:grid-cols-2"
+      aria-busy="true"
+      hx-get="partials/footer.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    >
+      <div class="m-auto h-52 w-full max-w-md rounded bg-white/10"></div>
+      <div
+        class="m-auto hidden h-80 w-full max-w-md rounded bg-white/10 md:block"
+      ></div>
     </footer>
   </body>
 </html>

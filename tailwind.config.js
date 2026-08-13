@@ -1,13 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./*.html", "./editor/**/*.html", "./backend/**/*.{js,mjs,py}", "./infra/cloudformation/*.yaml"],
+  content: [
+    "./*.html",
+    "./partials/*.html",
+    "./editor/**/*.html",
+    "./backend/**/*.{js,mjs,py}",
+    "./infra/cloudformation/*.yaml",
+  ],
   theme: {
     extend: {
       fontFamily: {
         display: ['"Dancing Script"', "cursive"],
-        body: ["Adamina", "serif"]
-      }
-    }
+        body: ["Adamina", "serif"],
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 };

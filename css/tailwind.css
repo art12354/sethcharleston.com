@@ -24,6 +24,12 @@
   .nav-link {
     @apply font-display text-2xl transition-colors hover:bg-[#f5f5f5] hover:text-[#393939] lg:text-3xl;
   }
+  .page-about .nav-about,
+  .page-music .nav-music,
+  .page-shows .nav-shows,
+  .page-services .nav-services {
+    @apply text-[#b6b6b6];
+  }
   .social-link {
     @apply inline-flex h-11 w-11 items-center justify-center rounded-full text-xl text-[#b6b6b6] transition hover:bg-white/10 hover:text-white;
   }
