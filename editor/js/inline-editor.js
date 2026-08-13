@@ -227,6 +227,17 @@
             if (preview.tagName === "VIDEO") preview.controls = true;
             var name = document.createElement("span");
             name.textContent = file.name + (file.active ? " — active" : "");
+            var dimensions = document.createElement("span");
+            dimensions.className = "edit-media-dimensions";
+            dimensions.textContent = "Reading dimensions…";
+            function showDimensions() {
+              var width = preview.naturalWidth || preview.videoWidth;
+              var height = preview.naturalHeight || preview.videoHeight;
+              dimensions.textContent = width && height ? width + " × " + height + " px" : "Dimensions unavailable";
+            }
+            preview.addEventListener(preview.tagName === "VIDEO" ? "loadedmetadata" : "load", showDimensions);
+            preview.addEventListener("error", function () { dimensions.textContent = "Dimensions unavailable"; });
+            if ((preview.naturalWidth && preview.naturalHeight) || (preview.videoWidth && preview.videoHeight)) showDimensions();
             var itemActions = document.createElement("div");
             if (!file.active) {
               var useButton = document.createElement("button");
@@ -250,7 +261,7 @@
               });
               itemActions.appendChild(deleteButton);
             }
-            item.append(preview, name, itemActions);
+            item.append(preview, name, dimensions, itemActions);
             list.appendChild(item);
           });
         }).catch(function (error) { list.textContent = error.message; });

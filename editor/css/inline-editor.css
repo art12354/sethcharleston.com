@@ -164,6 +164,7 @@
 .edit-media-library-item img,
 .edit-media-library-item video { aspect-ratio: 16 / 9; background: #393939; object-fit: cover; width: 100%; }
 .edit-media-library-item span { font-size: 12px; overflow-wrap: anywhere; }
+.edit-media-library-item .edit-media-dimensions { color: #78716c; }
 .edit-media-library-item div { display: flex; gap: 6px; margin-top: auto; }
 .edit-media-library-item button { flex: 1; font-size: 12px; padding: 6px; }
 
