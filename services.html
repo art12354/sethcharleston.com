@@ -7,7 +7,7 @@
       name="description"
       content="Music production, mixing, and mastering by Seth Charleston."
     />
-    <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
+    <meta name="htmx-config" content='{"selfRequestsOnly":false}' />
     <title>Seth Charleston — Services</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,10 +23,7 @@
     ></script>
   </head>
   <body class="flex min-h-screen flex-col">
-    <nav
-      class="fixed inset-x-0 top-0 z-50 bg-stone-900/95 text-white shadow-lg"
-      aria-label="Main navigation"
-    >
+    <nav class="site-nav" aria-label="Main navigation">
       <div
         class="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 md:grid md:grid-cols-3"
       >
@@ -82,15 +79,15 @@
         </details>
       </div>
     </nav>
-    <header class="mt-[68px] bg-[#f5f5f5]">
+    <header class="mt-[54px] bg-[#f5f5f5] md:mt-[88px]">
       <img
-        class="h-auto max-h-[calc(100vh-68px)] w-full object-cover"
+        class="h-[300px] w-full object-cover md:h-auto md:max-h-[calc(100vh-88px)]"
         src="photos/Music Page (7.21.23).png"
         alt="Seth Charleston in the studio"
       />
       <h1 class="page-title">Services</h1>
     </header>
-    <main class="flex-1 bg-stone-100 px-6 py-16 text-center">
+    <main class="flex-1 bg-stone-100 px-6 pb-16 text-center">
       <section class="mx-auto max-w-4xl">
         <h2 class="font-display text-5xl">Bring Your Music to Life</h2>
         <p class="mt-4 text-stone-600">

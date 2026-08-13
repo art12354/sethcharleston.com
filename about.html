@@ -7,7 +7,7 @@
       name="description"
       content="About indie rock artist Seth Charleston."
     />
-    <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
+    <meta name="htmx-config" content='{"selfRequestsOnly":false}' />
     <title>Seth Charleston — About</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,10 +23,7 @@
     ></script>
   </head>
   <body class="flex min-h-screen flex-col">
-    <nav
-      class="fixed inset-x-0 top-0 z-50 bg-stone-900/95 text-white shadow-lg"
-      aria-label="Main navigation"
-    >
+    <nav class="site-nav" aria-label="Main navigation">
       <div
         class="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 md:grid md:grid-cols-3"
       >
@@ -82,9 +79,9 @@
         </details>
       </div>
     </nav>
-    <header class="mt-[68px] bg-[#f5f5f5]">
+    <header class="mt-[54px] bg-[#f5f5f5] md:mt-[88px]">
       <img
-        class="h-auto max-h-[calc(100vh-68px)] w-full object-cover"
+        class="h-[189px] w-full object-cover md:h-auto md:max-h-[calc(100vh-88px)]"
         src="photos/Bio Page (7.21.23).png"
         alt="Seth Charleston portrait"
       />

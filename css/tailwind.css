@@ -3,30 +3,75 @@
 @tailwind utilities;
 
 @layer base {
-  html { @apply scroll-smooth bg-[#f5f5f5]; }
-  body { @apply min-h-screen bg-[#f5f5f5] font-body text-[#393939] antialiased; }
-  iframe { @apply w-full; }
+  html {
+    @apply scroll-smooth bg-[#f5f5f5];
+  }
+  body {
+    @apply min-h-screen bg-[#f5f5f5] font-body text-[#393939] antialiased;
+  }
+  iframe {
+    @apply w-full;
+  }
 }
 
 @layer components {
-  .site-nav { @apply fixed inset-x-0 top-0 z-50 min-h-[68px] bg-[#393939] text-white shadow-lg; }
-  .nav-link { @apply font-display text-2xl transition-colors hover:bg-[#f5f5f5] hover:text-[#393939] lg:text-3xl; }
-  .social-link { @apply inline-flex h-11 w-11 items-center justify-center rounded-full text-xl text-[#b6b6b6] transition hover:bg-white/10 hover:text-white; }
-  .page-title { @apply py-12 text-center font-display text-[clamp(5rem,16vw,11rem)] leading-none text-[#393939] md:py-16; }
-  .content-card { @apply rounded-xl bg-[#f5f5f5] shadow-[0_16px_32px_rgba(0,0,0,0.35)]; }
+  .site-nav {
+    @apply fixed inset-x-0 top-0 z-50 min-h-[68px] bg-[#393939] text-white shadow-lg;
+  }
+  .nav-link {
+    @apply font-display text-2xl transition-colors hover:bg-[#f5f5f5] hover:text-[#393939] lg:text-3xl;
+  }
+  .social-link {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-full text-xl text-[#b6b6b6] transition hover:bg-white/10 hover:text-white;
+  }
+  .page-title {
+    @apply my-0 mb-10 mt-[30px] text-center font-display text-[80px] leading-[1.2] text-[#393939] md:mb-16 md:mt-12 md:text-[clamp(6rem,10vw,11rem)];
+  }
+  .content-card {
+    @apply rounded-xl bg-[#f5f5f5] shadow-[0_16px_32px_rgba(0,0,0,0.35)];
+  }
 }
 
 @layer utilities {
-  .htmx-indicator { opacity: 0; transition: opacity 200ms ease-in; }
+  .htmx-indicator {
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+  }
   .htmx-request .htmx-indicator,
-  .htmx-request.htmx-indicator { opacity: 1; }
+  .htmx-request.htmx-indicator {
+    opacity: 1;
+  }
 }
 
 /* Exact legacy palette; these selectors cover remaining utility aliases. */
-[class*="bg-stone-900"], [class*="bg-stone-800"] { background-color: #393939 !important; }
-[class*="bg-stone-100"], [class*="bg-white"] { background-color: #f5f5f5 !important; }
-[class*="text-stone-900"], [class*="text-stone-800"], [class*="text-stone-700"], [class*="text-stone-600"] { color: #393939 !important; }
-[class*="text-stone-500"], [class*="text-stone-200"], [class*="text-amber"] { color: #b6b6b6 !important; }
-[class*="bg-amber"] { background-color: #f5f5f5 !important; color: #393939 !important; }
-[class*="hover:bg-amber"]:hover { background-color: #b6b6b6 !important; color: #393939 !important; }
-[class*="hover:text-amber"]:hover { background-color: #f5f5f5 !important; color: #393939 !important; }
+[class*="bg-stone-900"],
+[class*="bg-stone-800"] {
+  background-color: #393939 !important;
+}
+[class*="bg-stone-100"],
+[class*="bg-white"] {
+  background-color: #f5f5f5 !important;
+}
+[class*="text-stone-900"],
+[class*="text-stone-800"],
+[class*="text-stone-700"],
+[class*="text-stone-600"] {
+  color: #393939 !important;
+}
+[class*="text-stone-500"],
+[class*="text-stone-200"],
+[class*="text-amber"] {
+  color: #b6b6b6 !important;
+}
+[class*="bg-amber"] {
+  background-color: #f5f5f5 !important;
+  color: #393939 !important;
+}
+[class*="hover:bg-amber"]:hover {
+  background-color: #b6b6b6 !important;
+  color: #393939 !important;
+}
+[class*="hover:text-amber"]:hover {
+  background-color: #f5f5f5 !important;
+  color: #393939 !important;
+}
