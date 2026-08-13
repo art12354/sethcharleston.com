@@ -302,7 +302,7 @@
         events.forEach(function (event) {
           var when = new Date(event.when);
           var item = document.createElement("article");
-          item.className = "col-span-full rounded-xl bg-[#f5f5f5] p-8 text-center shadow-[0_16px_32px_rgba(0,0,0,0.35)]";
+          item.className = "col-span-full mx-auto w-full max-w-4xl rounded-xl bg-[#f5f5f5] p-8 text-center shadow-[0_16px_32px_rgba(0,0,0,0.35)]";
           item.innerHTML = "<h2 class=\"font-display text-3xl text-stone-800\"></h2><p class=\"mt-3 text-sm uppercase tracking-[0.18em] text-stone-500\"></p><p class=\"mt-2 text-stone-700\"></p><a class=\"mt-6 inline-block bg-[#6b6b6b] px-6 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-md transition-colors hover:bg-[#4f4f4f]\" target=\"_blank\" rel=\"noopener\">Tickets</a>";
           item.querySelector("h2").textContent = event.name;
           item.querySelectorAll("p")[0].textContent = when.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
