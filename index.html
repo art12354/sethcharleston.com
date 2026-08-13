@@ -69,7 +69,8 @@
     <main class="flex-1 bg-[#f5f5f5] px-6 py-16 md:py-24">
       <section
         class="mx-auto max-w-4xl text-center text-lg md:text-2xl"
-        hx-get="https://api.sethcharleston.com/test1/text?view=home"
+        hx-get="https://api.sethcharleston.com/test1/text?view=home&amp;format=html"
+        hx-request='{"noHeaders":true}'
         hx-trigger="load"
         hx-swap="innerHTML"
         aria-live="polite"

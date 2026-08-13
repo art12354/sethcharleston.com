@@ -57,7 +57,8 @@
         <div
           id="servicesList"
           class="mt-12"
-          hx-get="https://api.sethcharleston.com/test1/text?view=services"
+          hx-get="https://api.sethcharleston.com/test1/text?view=services&amp;format=html"
+          hx-request='{"noHeaders":true}'
           hx-trigger="load"
           hx-swap="innerHTML"
           aria-live="polite"

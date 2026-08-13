@@ -21,6 +21,10 @@ for page in index about music shows services; do
   grep -q 'src="js/htmx.min.js?v=2.0.10"' "$ROOT_DIR/$page.html"
 done
 
+for page in index about music shows services; do
+  grep -q 'hx-request='"'"'{"noHeaders":true}'"'"'' "$ROOT_DIR/$page.html"
+done
+
 test -s "$ROOT_DIR/js/htmx.min.js"
 if grep -R -q 'cdn.jsdelivr.net/npm/htmx' "$ROOT_DIR"/*.html; then
   echo "HTMX must be served from the site, not a CDN." >&2

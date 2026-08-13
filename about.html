@@ -51,7 +51,8 @@
       <article
         id="bio"
         class="mx-auto max-w-3xl text-center text-base leading-8 text-[#393939] md:text-xl md:leading-9"
-        hx-get="https://api.sethcharleston.com/test1/text?view=bio"
+        hx-get="https://api.sethcharleston.com/test1/text?view=bio&amp;format=html"
+        hx-request='{"noHeaders":true}'
         hx-trigger="load"
         hx-swap="innerHTML"
         aria-live="polite"
