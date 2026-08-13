@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Additive media library Lambda for the existing production API.
+
+Parameters:
+  RestApiId: {Type: String}
+  SiteBucketName: {Type: String, Default: sethcharleston.com}
+  SiteDomainName: {Type: String, Default: sethcharleston.com}
+  TextTableName: {Type: String, Default: seth_charleston_text}
+
+Resources:
+  MediaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns: [arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole]
+      Policies:
+        - PolicyName: MediaAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem]
+                Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${TextTableName}"
+              - Effect: Allow
+                Action: [s3:DeleteObject, s3:GetObject, s3:PutObject]
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${SiteBucketName}/uploads/*"
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${SiteBucketName}"
+
+  MediaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: sethcharleston-prod-media-api
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt MediaRole.Arn
+      Timeout: 10
+      Environment:
+        Variables:
+          SITE_BUCKET: !Ref SiteBucketName
+          SITE_DOMAIN: !Ref SiteDomainName
+          TEXT_TABLE: !Ref TextTableName
+      Code:
+        ZipFile: |
+          import json, os, re
+          from datetime import datetime
+          import boto3
+          s3=boto3.client("s3"); tx=boto3.resource("dynamodb").Table(os.environ["TEXT_TABLE"])
+          defaults={"home-video":"videos/Take a Seat (Website Header).mp4","home-mobile":"photos/Mobile Homepage Header (7.22.23).png","about-header":"photos/Bio Page (7.21.23).png","music-header":"photos/Music Page (7.21.23).png","shows-header":"photos/Events Page (7.21.23).png","services-header":"photos/Music Page (7.21.23).png","footer-photo":"photos/NEW Footer Photo (7.21.23).png"}
+          cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Content-Type,Authorization","Access-Control-Allow-Methods":"GET,POST,OPTIONS"}
+          def out(data,code=200,extra=None):
+              headers=dict(cors); headers.update(extra or {})
+              return {"statusCode":code,"headers":headers,"body":json.dumps(data,default=str)}
+          def body(e): return json.loads(e.get("body") or "{}")
+          def active(slot): return tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text") or defaults[slot]
+          def handler(e,c):
+              path=e.get("path",""); method=e.get("httpMethod","GET")
+              if path.startswith("/test1/"): path=path[6:]
+              try:
+                  if method=="GET" and path=="/media/library":
+                      slot=(e.get("queryStringParameters") or {}).get("slot","")
+                      if slot not in defaults: return out({"message":"unknown media slot"},400)
+                      current=active(slot); pages=s3.get_paginator("list_objects_v2").paginate(Bucket=os.environ["SITE_BUCKET"],Prefix="uploads/"+slot+"-"); objects=[o for p in pages for o in p.get("Contents",[])]
+                      files=[{"key":defaults[slot],"name":"Original","url":"https://"+os.environ["SITE_DOMAIN"]+"/"+defaults[slot],"active":current==defaults[slot],"original":True}]
+                      files += [{"key":o["Key"],"name":o["Key"].split("/")[-1],"url":"https://"+os.environ["SITE_DOMAIN"]+"/"+o["Key"],"active":current==o["Key"],"size":o.get("Size",0),"modified":str(o.get("LastModified",""))} for o in sorted(objects,key=lambda v:v.get("LastModified",datetime.min),reverse=True)]
+                      return out({"slot":slot,"files":files})
+                  if method=="GET" and path.startswith("/media/"):
+                      slot=path.split("/",2)[2]
+                      if slot not in defaults: return out({"message":"unknown media slot"},404)
+                      return out({},302,{"Location":"https://"+os.environ["SITE_DOMAIN"]+"/"+active(slot),"Cache-Control":"no-store"})
+                  data=body(e); slot=str(data.get("slot",""))
+                  if slot not in defaults: return out({"message":"unknown media slot"},400)
+                  if method=="POST" and path=="/media/upload":
+                      content=str(data.get("contentType","")); original=str(data.get("name","media")); expected="video/" if slot=="home-video" else "image/"; ext={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","video/mp4":"mp4","video/webm":"webm"}.get(content)
+                      if not content.startswith(expected) or not ext: return out({"message":"unsupported file type"},400)
+                      friendly=re.sub(r'[^a-zA-Z0-9._-]+','-',original.rsplit('.',1)[0]).strip('-')[:60] or 'media'; key=f'uploads/{slot}-{datetime.utcnow().strftime("%Y%m%d%H%M%S%f")}-{friendly}.{ext}'
+                      url=s3.generate_presigned_url("put_object",Params={"Bucket":os.environ["SITE_BUCKET"],"Key":key,"ContentType":content},ExpiresIn=300); return out({"uploadUrl":url,"key":key})
+                  key=str(data.get("key",""))
+                  if method=="POST" and path=="/media/commit":
+                      if key!=defaults[slot] and not key.startswith("uploads/"+slot+"-"): return out({"message":"invalid media selection"},400)
+                      if key!=defaults[slot]: s3.head_object(Bucket=os.environ["SITE_BUCKET"],Key=key)
+                      tx.put_item(Item={"location":"media:"+slot,"text":key}); return out({"mediaUrl":"/media/"+slot})
+                  if method=="POST" and path=="/media/delete":
+                      if not key.startswith("uploads/"+slot+"-"): return out({"message":"invalid media file"},400)
+                      if key==active(slot): return out({"message":"select another file before deleting this one"},409)
+                      s3.delete_object(Bucket=os.environ["SITE_BUCKET"],Key=key); return out({"deleted":key})
+                  return out({"message":"not found"},404)
+              except Exception as ex: return out({"message":str(ex)},500)
+
+  InvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref MediaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApiId}/*/*/media/*"
+
+Outputs:
+  FunctionArn: {Value: !GetAtt MediaFunction.Arn}
