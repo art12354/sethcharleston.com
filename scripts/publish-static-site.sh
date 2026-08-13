@@ -8,10 +8,23 @@ DISTRIBUTION_ID="${3:?Usage: publish-static-site.sh SOURCE_DIR BUCKET DISTRIBUTI
 aws s3 sync "$SOURCE_DIR/" "s3://$SITE_BUCKET/" \
   --delete \
   --exclude "uploads/*" \
+  --exclude "about" \
+  --exclude "music" \
+  --exclude "shows" \
+  --exclude "services" \
   --exclude "*.html" \
   --exclude "sitemap.xml" \
   --cache-control "public,max-age=86400" \
   --only-show-errors
+
+for page in about music shows services; do
+  if [[ -f "$SOURCE_DIR/$page.html" ]]; then
+    aws s3 cp "$SOURCE_DIR/$page.html" "s3://$SITE_BUCKET/$page" \
+      --cache-control "public,max-age=300,must-revalidate" \
+      --content-type "text/html; charset=utf-8" \
+      --only-show-errors
+  fi
+done
 
 aws s3 sync "$SOURCE_DIR/" "s3://$SITE_BUCKET/" \
   --delete \

@@ -33,6 +33,10 @@ aws s3 sync "$ROOT_DIR/" "s3://$SITE_BUCKET/" \
   --exclude "infra/*" \
   --exclude "scripts/*" \
   --exclude "README.md" \
+  --exclude "about" \
+  --exclude "music" \
+  --exclude "shows" \
+  --exclude "services" \
   --exclude "*.html" \
   --exclude "sitemap.xml" \
   --cache-control "$CACHE_CONTROL_ASSETS"
@@ -43,6 +47,12 @@ aws s3 sync "$ROOT_DIR/" "s3://$SITE_BUCKET/" \
   --include "*.html" \
   --cache-control "$CACHE_CONTROL_HTML" \
   --content-type "text/html; charset=utf-8"
+
+for page in about music shows services; do
+  aws s3 cp "$ROOT_DIR/$page.html" "s3://$SITE_BUCKET/$page" \
+    --cache-control "$CACHE_CONTROL_HTML" \
+    --content-type "text/html; charset=utf-8"
+done
 
 aws s3 cp "$ROOT_DIR/sitemap.xml" "s3://$SITE_BUCKET/sitemap.xml" \
   --cache-control "$CACHE_CONTROL_HTML" \

@@ -40,6 +40,11 @@ grep -q 'put_options "$text_id" GET,POST' "$ROOT_DIR/scripts/deploy-production-m
 grep -q 'put_method "$text_id" GET NONE' "$ROOT_DIR/scripts/deploy-production-media-api.sh"
 grep -q 'AuthorizationType: COGNITO_USER_POOLS' "$ROOT_DIR/infra/cloudformation/backend-api.yaml"
 grep -q -- '--exclude "uploads/\*"' "$ROOT_DIR/scripts/publish-static-site.sh"
+grep -q 's3://\$SITE_BUCKET/\$page' "$ROOT_DIR/scripts/publish-static-site.sh"
+if grep -q 'href="[^" ]*\.html"' "$ROOT_DIR/partials/nav.html"; then
+  echo "Navigation must use extensionless page URLs." >&2
+  exit 1
+fi
 if grep -q 'editor-disabled' "$ROOT_DIR/scripts/package-editor.sh"; then
   echo "Editor pages must load the same live content as public pages." >&2
   exit 1

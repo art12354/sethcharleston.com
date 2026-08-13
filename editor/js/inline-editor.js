@@ -4,7 +4,9 @@
   var API = "https://api.sethcharleston.com/test1";
   var LOGIN = "https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com";
   var LIVE_SITE = "https://sethcharleston.com";
-  var page = location.pathname.split("/").pop() || "index.html";
+  var route = location.pathname.split("/").filter(Boolean).pop() || "index";
+  var page = (route === "index" ? "index" : route.replace(/\.html$/, "")) + ".html";
+  var cleanPath = page === "index.html" ? "/" : "/" + page.replace(".html", "");
   var token = readToken();
   var signedIn = false;
   var previewMode = LOGIN === "PREVIEW";
@@ -19,7 +21,7 @@
       history.replaceState(null, "", location.pathname + location.search);
       var returnPage = sessionStorage.getItem("editor_return_page");
       sessionStorage.removeItem("editor_return_page");
-      if (returnPage && !location.pathname.endsWith(returnPage)) location.replace(returnPage);
+      if (returnPage && location.pathname !== returnPage) location.replace(returnPage);
     }
     return received || sessionStorage.getItem("editor_id_token") || "";
   }
@@ -485,7 +487,7 @@
 
   function enableEditor() {
     setStatus("Signed in", "success");
-    button("View live site", function () { location.href = LIVE_SITE + "/" + (page === "index.html" ? "" : page); });
+    button("View live site", function () { location.href = LIVE_SITE + cleanPath; });
     if (page === "index.html") {
       contextualMedia("home-video", "Change video", "video/mp4,video/webm", "body > header", "edit-media-desktop");
       contextualMedia("home-mobile", "Change photo", "image/jpeg,image/png,image/webp,image/gif", "body > header", "edit-media-mobile");
@@ -526,10 +528,10 @@
     else {
       setStatus("Sign in to edit");
       button("Sign in", function () {
-        sessionStorage.setItem("editor_return_page", page);
+        sessionStorage.setItem("editor_return_page", cleanPath);
         location.href = LOGIN;
       }, true);
-      button("View live site", function () { location.href = LIVE_SITE + "/" + (page === "index.html" ? "" : page); });
+      button("View live site", function () { location.href = LIVE_SITE + cleanPath; });
     }
   });
 }());
