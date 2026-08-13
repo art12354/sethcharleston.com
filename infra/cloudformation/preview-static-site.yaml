@@ -113,7 +113,7 @@ Resources:
           SITE_DOMAIN: !Ref DomainName
       Code:
         ZipFile: |
-          import base64, hashlib, html, json, os
+          import base64, hashlib, html, json, os, re
           from datetime import datetime
           from email.utils import parsedate_to_datetime
           from urllib.parse import parse_qs, urlparse
@@ -123,7 +123,7 @@ Resources:
           mu = db.Table(os.environ["MUSIC_TABLE"])
           tx = db.Table(os.environ["TEXT_TABLE"])
           s3 = boto3.client("s3")
-          media_defaults = {"home-video":"videos/Take a Seat (Website Header).mp4","home-mobile":"photos/Mobile Homepage Header (7.22.23).png","home-logo":"photos/Seth_Charleston.png","about-header":"photos/Bio Page (7.21.23).png","music-header":"photos/Music Page (7.21.23).png","shows-header":"photos/Events Page (7.21.23).png","services-header":"photos/Music Page (7.21.23).png","footer-photo":"photos/NEW Footer Photo (7.21.23).png"}
+          media_defaults = {"home-video":"videos/Take a Seat (Website Header).mp4","home-mobile":"photos/Mobile Homepage Header (7.22.23).png","about-header":"photos/Bio Page (7.21.23).png","music-header":"photos/Music Page (7.21.23).png","shows-header":"photos/Events Page (7.21.23).png","services-header":"photos/Music Page (7.21.23).png","footer-photo":"photos/NEW Footer Photo (7.21.23).png"}
           cors = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Content-Type,HX-Request,HX-Trigger,HX-Trigger-Name,HX-Target,HX-Current-URL,Authorization","Access-Control-Allow-Methods":"GET,POST,OPTIONS","Vary":"Accept,HX-Request"}
           def out(data, code=200, content_type="application/json; charset=utf-8"):
               headers = dict(cors); headers["Content-Type"] = content_type
@@ -178,7 +178,7 @@ Resources:
                       slot=(e.get("queryStringParameters") or {}).get("slot", "")
                       if slot not in media_defaults: return out({"message":"unknown media slot"},400)
                       active=tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text") or media_defaults[slot]
-                      objects=s3.list_objects_v2(Bucket=os.environ["SITE_BUCKET"],Prefix="uploads/"+slot+"-").get("Contents",[])
+                      pages=s3.get_paginator("list_objects_v2").paginate(Bucket=os.environ["SITE_BUCKET"],Prefix="uploads/"+slot+"-"); objects=[obj for page in pages for obj in page.get("Contents",[])]
                       files=[{"key":media_defaults[slot],"name":"Original","url":"https://"+os.environ["SITE_DOMAIN"]+"/"+media_defaults[slot],"active":active==media_defaults[slot],"original":True}]
                       files += [{"key":obj["Key"],"name":obj["Key"].split("/")[-1],"url":"https://"+os.environ["SITE_DOMAIN"]+"/"+obj["Key"],"active":active==obj["Key"],"size":obj.get("Size",0),"modified":str(obj.get("LastModified",""))} for obj in sorted(objects,key=lambda value:value.get("LastModified",datetime.min),reverse=True)]
                       return out({"slot":slot,"files":files})
@@ -189,13 +189,14 @@ Resources:
                       target=saved or media_defaults[slot]
                       return {"statusCode":302,"headers":{"Location":"https://"+os.environ["SITE_DOMAIN"]+"/"+target,"Cache-Control":"no-store","Access-Control-Allow-Origin":"*"},"body":""}
                   if method == "POST" and path == "/media/upload":
-                      upload=body(e); slot=str(upload.get("slot", "")); content_type=str(upload.get("contentType", ""))
+                      upload=body(e); slot=str(upload.get("slot", "")); content_type=str(upload.get("contentType", "")); original=str(upload.get("name", "media"))
                       if slot not in media_defaults: return out({"message":"unknown media slot"},400)
                       expected="video/" if slot == "home-video" else "image/"
                       if not content_type.startswith(expected): return out({"message":"unsupported file type"},400)
                       extension={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","video/mp4":"mp4","video/webm":"webm"}.get(content_type)
                       if not extension: return out({"message":"unsupported file type"},400)
-                      key=f'uploads/{slot}-{datetime.utcnow().strftime("%Y%m%d%H%M%S%f")}.{extension}'
+                      friendly=re.sub(r'[^a-zA-Z0-9._-]+','-',original.rsplit('.',1)[0]).strip('-')[:60] or 'media'
+                      key=f'uploads/{slot}-{datetime.utcnow().strftime("%Y%m%d%H%M%S%f")}-{friendly}.{extension}'
                       upload_url=s3.generate_presigned_url("put_object",Params={"Bucket":os.environ["SITE_BUCKET"],"Key":key,"ContentType":content_type},ExpiresIn=300)
                       return out({"uploadUrl":upload_url,"key":key,"mediaUrl":f'/media/{slot}'})
                   if method == "POST" and path == "/media/commit":

@@ -27,6 +27,8 @@ ALLOWED_ADMIN_EMAILS="$ALLOWED_ADMIN_EMAILS" \
 EVENTS_TABLE_NAME=seth_charleston_staging_events \
 MUSIC_TABLE_NAME=seth_charleston_staging_music \
 TEXT_TABLE_NAME=seth_charleston_staging_text \
+SITE_BUCKET_NAME="$SITE_DOMAIN" \
+SITE_DOMAIN_NAME="$SITE_DOMAIN" \
 HOSTED_ZONE_ID="$HOSTED_ZONE_ID" \
 ./scripts/deploy-backend.sh
 

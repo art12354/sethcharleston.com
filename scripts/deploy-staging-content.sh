@@ -35,8 +35,7 @@ cp -R "$ROOT_DIR"/css "$ROOT_DIR"/photos "$ROOT_DIR"/videos "$WORK_DIR/site/"
 find "$WORK_DIR/site" -type f -name "*.html" -print0 \
   | xargs -0 sed -i "s#https://api.sethcharleston.com#https://${API_DOMAIN}#g"
 
-aws s3 sync "$WORK_DIR/site/" "s3://${SITE_DOMAIN}/" --delete
-aws cloudfront create-invalidation --distribution-id "$SITE_DISTRIBUTION_ID" --paths "/*" >/dev/null
+"$ROOT_DIR/scripts/publish-static-site.sh" "$WORK_DIR/site" "$SITE_DOMAIN" "$SITE_DISTRIBUTION_ID" >/dev/null
 
 "$ROOT_DIR/scripts/package-editor.sh" "$WORK_DIR/editor"
 find "$WORK_DIR/editor" -type f \( -name "*.html" -o -name "*.js" \) -print0 \
@@ -50,8 +49,7 @@ find "$WORK_DIR/editor" -type f \( -name "*.html" -o -name "*.js" \) -print0 \
 find "$WORK_DIR/editor" -type f -name "*.js" -print0 \
   | xargs -0 sed -i "s#https://sethcharleston.com#https://${SITE_DOMAIN}#g"
 
-aws s3 sync "$WORK_DIR/editor/" "s3://${EDITOR_DOMAIN}/" --delete
-aws cloudfront create-invalidation --distribution-id "$EDITOR_DISTRIBUTION_ID" --paths "/*" >/dev/null
+"$ROOT_DIR/scripts/publish-static-site.sh" "$WORK_DIR/editor" "$EDITOR_DOMAIN" "$EDITOR_DISTRIBUTION_ID" >/dev/null
 
 rm -rf "$WORK_DIR"
 echo "Deployed staging content to https://${SITE_DOMAIN} and https://${EDITOR_DOMAIN}."

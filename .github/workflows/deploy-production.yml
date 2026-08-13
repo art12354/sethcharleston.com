@@ -33,6 +33,13 @@ jobs:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Build and validate
+        run: |
+          npm ci
+          npm run build:css
+          git diff --exit-code -- css/site.css
+          npm test
+
       - name: Package website
         shell: bash
         run: |

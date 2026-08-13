@@ -8,6 +8,8 @@ EDITOR_DOMAIN="${EDITOR_DOMAIN:-edit-staging.sethcharleston.com}"
 curl -fsS "https://${API_DOMAIN}/test1/" >/dev/null
 curl -fsS "https://${API_DOMAIN}/test1/text" >/dev/null
 curl -fsS "https://${API_DOMAIN}/test1/songs" >/dev/null
+curl -fsSI "https://${API_DOMAIN}/test1/media/about-header" | grep -q '^location:'
+test "$(curl -sS -o /dev/null -w '%{http_code}' "https://${API_DOMAIN}/test1/media/library?slot=about-header")" = "401"
 curl -fsSI "https://${SITE_DOMAIN}" >/dev/null
 curl -fsSI "https://${EDITOR_DOMAIN}" >/dev/null
 

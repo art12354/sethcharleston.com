@@ -277,7 +277,7 @@
         var limit = slot === "home-video" ? 100 * 1024 * 1024 : 15 * 1024 * 1024;
         if (file.size > limit) { setStatus("File is too large", "error"); return; }
         setStatus("Uploading…");
-        request("/media/upload", { method: "POST", body: JSON.stringify({ slot: slot, contentType: file.type }) })
+        request("/media/upload", { method: "POST", body: JSON.stringify({ slot: slot, contentType: file.type, name: file.name }) })
           .then(function (upload) {
             return fetch(upload.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file })
               .then(function (response) {

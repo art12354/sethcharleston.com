@@ -2,7 +2,8 @@
   "name": "sethcharleston.com",
   "private": true,
   "scripts": {
-    "build:css": "tailwindcss -i ./css/tailwind.css -o ./css/site.css --minify"
+    "build:css": "tailwindcss -i ./css/tailwind.css -o ./css/site.css --minify",
+    "test": "./scripts/validate-release.sh"
   },
   "devDependencies": {
     "tailwindcss": "3.4.17"

@@ -45,6 +45,12 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Ref DomainName
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ["*"]
+            AllowedMethods: [PUT]
+            AllowedOrigins: ["*"]
+            MaxAge: 300
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:

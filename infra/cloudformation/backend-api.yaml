@@ -34,6 +34,12 @@ Parameters:
   TextTableName:
     Type: String
     Default: seth_charleston_text
+  SiteBucketName:
+    Type: String
+    Default: sethcharleston.com
+  SiteDomainName:
+    Type: String
+    Default: sethcharleston.com
   HostedZoneId:
     Type: String
     Default: ""
@@ -229,12 +235,22 @@ Resources:
               - Effect: Allow
                 Action:
                   - dynamodb:DeleteItem
+                  - dynamodb:GetItem
                   - dynamodb:PutItem
                   - dynamodb:Scan
                 Resource:
                   - !GetAtt EventsTable.Arn
                   - !GetAtt MusicTable.Arn
                   - !GetAtt TextTable.Arn
+              - Effect: Allow
+                Action:
+                  - s3:DeleteObject
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${SiteBucketName}/uploads/*"
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${SiteBucketName}"
 
   ApiHandler:
     Type: AWS::Lambda::Function
@@ -250,9 +266,11 @@ Resources:
           EVENTS_TABLE: !Ref EventsTable
           MUSIC_TABLE: !Ref MusicTable
           TEXT_TABLE: !Ref TextTable
+          SITE_BUCKET: !Ref SiteBucketName
+          SITE_DOMAIN: !Ref SiteDomainName
       Code:
         ZipFile: |
-          import base64, hashlib, html, json, os
+          import base64, hashlib, html, json, os, re
           from datetime import datetime
           from email.utils import parsedate_to_datetime
           from urllib.parse import parse_qs, urlparse
@@ -261,6 +279,8 @@ Resources:
           ev = db.Table(os.environ["EVENTS_TABLE"])
           mu = db.Table(os.environ["MUSIC_TABLE"])
           tx = db.Table(os.environ["TEXT_TABLE"])
+          s3 = boto3.client("s3")
+          media_defaults = {"home-video":"videos/Take a Seat (Website Header).mp4","home-mobile":"photos/Mobile Homepage Header (7.22.23).png","about-header":"photos/Bio Page (7.21.23).png","music-header":"photos/Music Page (7.21.23).png","shows-header":"photos/Events Page (7.21.23).png","services-header":"photos/Music Page (7.21.23).png","footer-photo":"photos/NEW Footer Photo (7.21.23).png"}
           hdr = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Content-Type,HX-Request,HX-Trigger,HX-Trigger-Name,HX-Target,HX-Current-URL,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token","Access-Control-Allow-Methods":"GET,POST,OPTIONS","Vary":"Accept,HX-Request"}
           def out(data, code=200, content_type="application/json; charset=utf-8"):
               headers = dict(hdr); headers["Content-Type"] = content_type
@@ -297,7 +317,7 @@ Resources:
               defaults = [{"title":"Production","description":"Full-service music production shaped around your sound, from arrangement and tracking through the final creative details."},{"title":"Mixing","description":"Detailed, musical mixes that bring clarity, depth, balance, and energy to every element of your song."},{"title":"Mastering","description":"Release-ready masters with polish, consistency, and impact across streaming platforms and playback systems."}]
               try: services = json.loads(raw) if raw else defaults
               except Exception: services = defaults
-              return '<div class="grid gap-7 md:grid-cols-3">' + "".join(f'<article class="rounded-xl bg-[#f5f5f5] p-8 shadow-[0_16px_32px_rgba(0,0,0,0.35)]"><h2 class="font-display text-4xl text-[#393939]">{esc(service.get("title"))}</h2><p class="mt-4 leading-7 text-stone-600">{esc(service.get("description"))}</p></article>' for service in services) + '</div>'
+              return '<div class="grid gap-7 lg:grid-cols-3">' + "".join(f'<article class="rounded-xl bg-[#f5f5f5] p-8 shadow-[0_16px_32px_rgba(0,0,0,0.35)]"><h2 class="font-display text-4xl text-[#393939]">{esc(service.get("title"))}</h2><p class="mt-4 leading-7 text-stone-600">{esc(service.get("description"))}</p></article>' for service in services) + '</div>'
           def render_text(items, view):
               values = {item.get("location"): item.get("text", "") for item in items}
               if view == "home":
@@ -319,11 +339,46 @@ Resources:
                   if item.get(n): return item[n]
               return None
           def handler(e, c):
-              path = e.get("resource") or e.get("path", "/")
+              path = e.get("path", "/")
               if len(path) > 1 and path.endswith("/"): path = path[:-1]
               method = e.get("httpMethod", "GET")
               if method == "OPTIONS": return out({})
               try:
+                  if method == "GET" and path == "/media/library":
+                      slot=(e.get("queryStringParameters") or {}).get("slot", "")
+                      if slot not in media_defaults: return out({"message":"unknown media slot"},400)
+                      active=tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text") or media_defaults[slot]
+                      pages=s3.get_paginator("list_objects_v2").paginate(Bucket=os.environ["SITE_BUCKET"],Prefix="uploads/"+slot+"-"); objects=[obj for page in pages for obj in page.get("Contents",[])]
+                      files=[{"key":media_defaults[slot],"name":"Original","url":"https://"+os.environ["SITE_DOMAIN"]+"/"+media_defaults[slot],"active":active==media_defaults[slot],"original":True}]
+                      files += [{"key":obj["Key"],"name":obj["Key"].split("/")[-1],"url":"https://"+os.environ["SITE_DOMAIN"]+"/"+obj["Key"],"active":active==obj["Key"],"size":obj.get("Size",0),"modified":str(obj.get("LastModified",""))} for obj in sorted(objects,key=lambda value:value.get("LastModified",datetime.min),reverse=True)]
+                      return out({"slot":slot,"files":files})
+                  if method == "GET" and path.startswith("/media/"):
+                      slot=path.split("/",2)[2]
+                      if slot not in media_defaults: return out({"message":"unknown media slot"},404)
+                      saved=tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text")
+                      target=saved or media_defaults[slot]
+                      return {"statusCode":302,"headers":{"Location":"https://"+os.environ["SITE_DOMAIN"]+"/"+target,"Cache-Control":"no-store","Access-Control-Allow-Origin":"*"},"body":""}
+                  if method == "POST" and path == "/media/upload":
+                      upload=body(e); slot=str(upload.get("slot", "")); content_type=str(upload.get("contentType", "")); original=str(upload.get("name", "media"))
+                      if slot not in media_defaults: return out({"message":"unknown media slot"},400)
+                      expected="video/" if slot == "home-video" else "image/"
+                      extension={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","video/mp4":"mp4","video/webm":"webm"}.get(content_type)
+                      if not content_type.startswith(expected) or not extension: return out({"message":"unsupported file type"},400)
+                      friendly=re.sub(r'[^a-zA-Z0-9._-]+','-',original.rsplit('.',1)[0]).strip('-')[:60] or 'media'
+                      key=f'uploads/{slot}-{datetime.utcnow().strftime("%Y%m%d%H%M%S%f")}-{friendly}.{extension}'
+                      upload_url=s3.generate_presigned_url("put_object",Params={"Bucket":os.environ["SITE_BUCKET"],"Key":key,"ContentType":content_type},ExpiresIn=300)
+                      return out({"uploadUrl":upload_url,"key":key,"mediaUrl":f'/media/{slot}'})
+                  if method == "POST" and path == "/media/commit":
+                      upload=body(e); slot=str(upload.get("slot", "")); key=str(upload.get("key", ""))
+                      if slot not in media_defaults or (key != media_defaults[slot] and not key.startswith("uploads/"+slot+"-")): return out({"message":"invalid media selection"},400)
+                      if key != media_defaults[slot]: s3.head_object(Bucket=os.environ["SITE_BUCKET"],Key=key)
+                      tx.put_item(Item={"location":"media:"+slot,"text":key}); return out({"mediaUrl":f'/media/{slot}'})
+                  if method == "POST" and path == "/media/delete":
+                      upload=body(e); slot=str(upload.get("slot", "")); key=str(upload.get("key", ""))
+                      if slot not in media_defaults or not key.startswith("uploads/"+slot+"-"): return out({"message":"invalid media file"},400)
+                      active=tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text") or media_defaults[slot]
+                      if key == active: return out({"message":"select another file before deleting this one"},409)
+                      s3.delete_object(Bucket=os.environ["SITE_BUCKET"],Key=key); return out({"deleted":key})
                   if method == "GET" and path == "/":
                       items = ev.scan().get("Items", [])
                       return out(render_events(items), content_type="text/html; charset=utf-8") if wants_html(e) else out({"Items": items})
@@ -408,6 +463,151 @@ Resources:
       RestApiId: !Ref RestApi
       ParentId: !GetAtt RestApi.RootResourceId
       PathPart: access
+
+  MediaResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: {RestApiId: !Ref RestApi, ParentId: !GetAtt RestApi.RootResourceId, PathPart: media}
+  MediaSlotResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: {RestApiId: !Ref RestApi, ParentId: !Ref MediaResource, PathPart: "{slot}"}
+  MediaLibraryResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: {RestApiId: !Ref RestApi, ParentId: !Ref MediaResource, PathPart: library}
+  MediaUploadResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: {RestApiId: !Ref RestApi, ParentId: !Ref MediaResource, PathPart: upload}
+  MediaCommitResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: {RestApiId: !Ref RestApi, ParentId: !Ref MediaResource, PathPart: commit}
+  MediaDeleteResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: {RestApiId: !Ref RestApi, ParentId: !Ref MediaResource, PathPart: delete}
+
+  MediaSlotGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaSlotResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration: {Type: AWS_PROXY, IntegrationHttpMethod: POST, Uri: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandler.Arn}/invocations"}
+  MediaLibraryGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaLibraryResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiAuthorizer
+      Integration: {Type: AWS_PROXY, IntegrationHttpMethod: POST, Uri: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandler.Arn}/invocations"}
+  MediaUploadPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaUploadResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiAuthorizer
+      Integration: {Type: AWS_PROXY, IntegrationHttpMethod: POST, Uri: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandler.Arn}/invocations"}
+  MediaCommitPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaCommitResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiAuthorizer
+      Integration: {Type: AWS_PROXY, IntegrationHttpMethod: POST, Uri: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandler.Arn}/invocations"}
+  MediaDeletePostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaDeleteResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiAuthorizer
+      Integration: {Type: AWS_PROXY, IntegrationHttpMethod: POST, Uri: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandler.Arn}/invocations"}
+
+  MediaSlotOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaSlotResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates: {application/json: '{"statusCode":200}'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters: {method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'", method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'", method.response.header.Access-Control-Allow-Origin: "'*'"}
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: {method.response.header.Access-Control-Allow-Headers: true, method.response.header.Access-Control-Allow-Methods: true, method.response.header.Access-Control-Allow-Origin: true}
+  MediaLibraryOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaLibraryResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates: {application/json: '{"statusCode":200}'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters: {method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'", method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'", method.response.header.Access-Control-Allow-Origin: "'*'"}
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: {method.response.header.Access-Control-Allow-Headers: true, method.response.header.Access-Control-Allow-Methods: true, method.response.header.Access-Control-Allow-Origin: true}
+  MediaUploadOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaUploadResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates: {application/json: '{"statusCode":200}'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters: {method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'", method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'", method.response.header.Access-Control-Allow-Origin: "'*'"}
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: {method.response.header.Access-Control-Allow-Headers: true, method.response.header.Access-Control-Allow-Methods: true, method.response.header.Access-Control-Allow-Origin: true}
+  MediaCommitOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaCommitResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates: {application/json: '{"statusCode":200}'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters: {method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'", method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'", method.response.header.Access-Control-Allow-Origin: "'*'"}
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: {method.response.header.Access-Control-Allow-Headers: true, method.response.header.Access-Control-Allow-Methods: true, method.response.header.Access-Control-Allow-Origin: true}
+  MediaDeleteOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref MediaDeleteResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates: {application/json: '{"statusCode":200}'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters: {method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'", method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'", method.response.header.Access-Control-Allow-Origin: "'*'"}
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: {method.response.header.Access-Control-Allow-Headers: true, method.response.header.Access-Control-Allow-Methods: true, method.response.header.Access-Control-Allow-Origin: true}
 
   RootGetMethod:
     Type: AWS::ApiGateway::Method
@@ -695,6 +895,16 @@ Resources:
       - DeleteOptionsMethod
       - DeleteSongOptionsMethod
       - AccessOptionsMethod
+      - MediaSlotGetMethod
+      - MediaLibraryGetMethod
+      - MediaUploadPostMethod
+      - MediaCommitPostMethod
+      - MediaDeletePostMethod
+      - MediaSlotOptionsMethod
+      - MediaLibraryOptionsMethod
+      - MediaUploadOptionsMethod
+      - MediaCommitOptionsMethod
+      - MediaDeleteOptionsMethod
     Properties:
       RestApiId: !Ref RestApi
 

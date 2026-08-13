@@ -16,6 +16,8 @@ APEX_DOMAIN_NAME="${APEX_DOMAIN_NAME:-sethcharleston.com}"
 EVENTS_TABLE_NAME="${EVENTS_TABLE_NAME:-seth_charleston_events}"
 MUSIC_TABLE_NAME="${MUSIC_TABLE_NAME:-seth_charleston_music}"
 TEXT_TABLE_NAME="${TEXT_TABLE_NAME:-seth_charleston_text}"
+SITE_BUCKET_NAME="${SITE_BUCKET_NAME:-sethcharleston.com}"
+SITE_DOMAIN_NAME="${SITE_DOMAIN_NAME:-sethcharleston.com}"
 HOSTED_ZONE_ID="${HOSTED_ZONE_ID:-}"
 ALLOWED_ADMIN_EMAILS="${ALLOWED_ADMIN_EMAILS:-art12354@gmail.com,seth.charleston@gmail.com}"
 
@@ -48,6 +50,8 @@ aws cloudformation deploy \
     EventsTableName="$EVENTS_TABLE_NAME" \
     MusicTableName="$MUSIC_TABLE_NAME" \
     TextTableName="$TEXT_TABLE_NAME" \
+    SiteBucketName="$SITE_BUCKET_NAME" \
+    SiteDomainName="$SITE_DOMAIN_NAME" \
     HostedZoneId="$HOSTED_ZONE_ID" \
     AllowedAdminEmails="$ALLOWED_ADMIN_EMAILS" \
   --tags \
