@@ -41,6 +41,7 @@
   }
   .legacy-footer {
     @apply flex min-h-[402px] w-full justify-center bg-[#393939] pt-8 text-[#f5f5f5] md:min-h-0 md:justify-around xl:justify-center;
+    line-height: normal;
   }
   .legacy-footer-content {
     @apply flex flex-col items-center text-center text-[48px] md:w-2/5 md:max-w-[400px];
@@ -55,7 +56,7 @@
     @apply px-[5%];
   }
   .legacy-footer-signup h2 {
-    @apply mb-5 whitespace-nowrap font-display text-[29px] font-normal;
+    @apply mb-5 whitespace-nowrap font-display text-[28.8px] font-normal leading-normal;
   }
   .legacy-footer-signup form {
     @apply flex flex-col items-center;
@@ -64,10 +65,10 @@
     @apply m-[10px] h-6 w-[90%] rounded-[5px] border-0 bg-[#f5f5f5] p-0.5 font-body text-[14px] text-[#393939];
   }
   .legacy-footer-signup button {
-    @apply mt-[31px] h-[30px] w-[120px] rounded-[5px] border-0 bg-[#f5f5f5] font-body text-[16px] normal-case text-[#393939] hover:opacity-40;
+    @apply mt-[31px] h-[30px] w-[120px] rounded-[5px] border-0 bg-[#f5f5f5] font-body text-[13.3333px] font-normal normal-case leading-normal text-[#393939] hover:opacity-40;
   }
   .legacy-footer-links {
-    @apply m-5 whitespace-nowrap font-body text-[14px];
+    @apply m-5 whitespace-nowrap font-body text-[14.4px] leading-normal;
   }
   .legacy-footer-links a {
     @apply text-[#f5f5f5] no-underline;
