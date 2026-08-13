@@ -30,6 +30,7 @@ fi
 grep -q '/media/library' "$ROOT_DIR/infra/cloudformation/backend-api.yaml"
 grep -q 'render_songs' "$ROOT_DIR/infra/cloudformation/production-media-api.yaml"
 grep -q 'put_method "$songs_id" GET NONE' "$ROOT_DIR/scripts/deploy-production-media-api.sh"
+grep -q 'put_options "$songs_id" GET' "$ROOT_DIR/scripts/deploy-production-media-api.sh"
 grep -q 'AuthorizationType: COGNITO_USER_POOLS' "$ROOT_DIR/infra/cloudformation/backend-api.yaml"
 grep -q -- '--exclude "uploads/\*"' "$ROOT_DIR/scripts/publish-static-site.sh"
 

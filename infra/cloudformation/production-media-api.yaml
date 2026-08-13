@@ -65,7 +65,7 @@ Resources:
           db=boto3.resource("dynamodb"); s3=boto3.client("s3")
           tx=db.Table(os.environ["TEXT_TABLE"]); ev=db.Table(os.environ["EVENTS_TABLE"]); mu=db.Table(os.environ["MUSIC_TABLE"])
           defaults={"home-video":"videos/Take a Seat (Website Header).mp4","home-mobile":"photos/Mobile Homepage Header (7.22.23).png","about-header":"photos/Bio Page (7.21.23).png","music-header":"photos/Music Page (7.21.23).png","shows-header":"photos/Events Page (7.21.23).png","services-header":"photos/Music Page (7.21.23).png","footer-photo":"photos/NEW Footer Photo (7.21.23).png"}
-          cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Content-Type,Authorization","Access-Control-Allow-Methods":"GET,POST,OPTIONS"}
+          cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Content-Type,HX-Request,HX-Trigger,HX-Trigger-Name,HX-Target,HX-Current-URL,Authorization","Access-Control-Allow-Methods":"GET,POST,OPTIONS"}
           def out(data,code=200,extra=None):
               headers=dict(cors); headers.update(extra or {})
               return {"statusCode":code,"headers":headers,"body":json.dumps(data,default=str)}
