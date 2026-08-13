@@ -22,6 +22,7 @@ fi
 stack_name="sethcharleston-branch-${slug}-site"
 domain_name="${slug}.sethcharleston.com"
 editor_domain_name="edit-${slug}.sethcharleston.com"
+editor_asset_version="$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
 
 aws cloudformation deploy \
   --stack-name "$stack_name" \
@@ -67,6 +68,10 @@ find "$work_dir/editor" -type f \( -name "*.html" -o -name "*.js" \) -print0 \
       -e "s#https://api.sethcharleston.com/test1#${api_url}#g" \
       -e 's#https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com#PREVIEW#g' \
       -e "s#https://sethcharleston.com#https://${domain_name}#g"
+find "$work_dir/editor" -maxdepth 1 -type f -name "*.html" -print0 \
+  | xargs -0 sed -i \
+      -e "s#editor/inline-editor.css#editor/inline-editor.css?v=${editor_asset_version}#g" \
+      -e "s#editor/inline-editor.js#editor/inline-editor.js?v=${editor_asset_version}#g"
 "$ROOT_DIR/scripts/publish-static-site.sh" "$work_dir/editor" "$editor_bucket" "$editor_distribution"
 curl --fail --silent --show-error --retry 5 --retry-delay 5 -H 'HX-Request: true' "${api_url}/text?view=home" >/dev/null
 curl --fail --silent --show-error --retry 5 --retry-delay 10 --head "https://${domain_name}"
