@@ -7,8 +7,10 @@
   display: flex;
   font-family: Adamina, serif;
   gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
   left: 50%;
-  max-width: calc(100% - 28px);
+  max-width: min(900px, calc(100% - 28px));
   padding: 10px 12px;
   position: fixed;
   transform: translateX(-50%);

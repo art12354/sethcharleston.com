@@ -328,7 +328,7 @@
     function render() {
       root.innerHTML = "";
       var grid = document.createElement("div");
-      grid.className = "grid gap-7 md:grid-cols-3";
+      grid.className = "grid gap-7 lg:grid-cols-3";
       services.forEach(function (service, index) {
         var card = document.createElement("article");
         card.className = "edit-item rounded-xl bg-[#f5f5f5] p-8 shadow-[0_16px_32px_rgba(0,0,0,0.35)]";
