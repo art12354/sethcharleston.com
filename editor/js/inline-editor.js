@@ -182,6 +182,40 @@
     item.appendChild(wrap);
   }
 
+  function mediaUpload(slot, label, accept) {
+    button(label, function () {
+      var input = document.createElement("input");
+      input.type = "file";
+      input.accept = accept;
+      input.addEventListener("change", function () {
+        var file = input.files && input.files[0];
+        if (!file) return;
+        var limit = slot === "home-video" ? 100 * 1024 * 1024 : 15 * 1024 * 1024;
+        if (file.size > limit) { setStatus("File is too large", "error"); return; }
+        setStatus("Uploading…");
+        request("/media/upload", { method: "POST", body: JSON.stringify({ slot: slot, contentType: file.type }) })
+          .then(function (upload) {
+            return fetch(upload.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file })
+              .then(function (response) {
+                if (!response.ok) throw new Error("Upload failed (" + response.status + ")");
+                return request("/media/commit", { method: "POST", body: JSON.stringify({ slot: slot, key: upload.key }) });
+              });
+          })
+          .then(function () {
+            var mediaUrl = API + "/media/" + slot + "?v=" + Date.now();
+            document.querySelectorAll('[src*="/media/' + slot + '"]').forEach(function (element) {
+              element.src = mediaUrl;
+              if (element.tagName === "SOURCE") element.parentElement.load();
+            });
+            document.querySelectorAll('[poster*="/media/' + slot + '"]').forEach(function (element) { element.poster = mediaUrl; });
+            setStatus("Media updated", "success");
+          })
+          .catch(function (error) { setStatus(error.message, "error"); });
+      });
+      input.click();
+    });
+  }
+
   function musicEditor() {
     var root = document.getElementById("info");
     function render() {
@@ -337,6 +371,14 @@
   function enableEditor() {
     setStatus("Signed in", "success");
     button("View live site", function () { location.href = LIVE_SITE + "/" + (page === "index.html" ? "" : page); });
+    if (page === "index.html") {
+      mediaUpload("home-video", "Change header video", "video/mp4,video/webm");
+      mediaUpload("home-mobile", "Change mobile header", "image/jpeg,image/png,image/webp,image/gif");
+      mediaUpload("home-logo", "Change mobile logo", "image/jpeg,image/png,image/webp,image/gif");
+    } else {
+      mediaUpload(page.replace(".html", "") + "-header", "Change header photo", "image/jpeg,image/png,image/webp,image/gif");
+    }
+    mediaUpload("footer-photo", "Change footer photo", "image/jpeg,image/png,image/webp,image/gif");
     if (page === "index.html") {
       editableText({ fields: [
       { id: "frontPageHeader", location: "frontPageHeader", label: "Home page heading" },

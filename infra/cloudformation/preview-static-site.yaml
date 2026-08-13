@@ -79,12 +79,16 @@ Resources:
               - Effect: Allow
                 Action:
                   - dynamodb:DeleteItem
+                  - dynamodb:GetItem
                   - dynamodb:PutItem
                   - dynamodb:Scan
                 Resource:
                   - !GetAtt EventsTable.Arn
                   - !GetAtt MusicTable.Arn
                   - !GetAtt TextTable.Arn
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub "${SiteBucket.Arn}/uploads/*"
 
   ApiFunction:
     Type: AWS::Lambda::Function
@@ -100,6 +104,8 @@ Resources:
           EVENTS_TABLE: !Ref EventsTable
           MUSIC_TABLE: !Ref MusicTable
           TEXT_TABLE: !Ref TextTable
+          SITE_BUCKET: !Ref SiteBucket
+          SITE_DOMAIN: !Ref DomainName
       Code:
         ZipFile: |
           import base64, hashlib, html, json, os
@@ -111,6 +117,8 @@ Resources:
           ev = db.Table(os.environ["EVENTS_TABLE"])
           mu = db.Table(os.environ["MUSIC_TABLE"])
           tx = db.Table(os.environ["TEXT_TABLE"])
+          s3 = boto3.client("s3")
+          media_defaults = {"home-video":"videos/Take a Seat (Website Header).mp4","home-mobile":"photos/Mobile Homepage Header (7.22.23).png","home-logo":"photos/Seth_Charleston.png","about-header":"photos/Bio Page (7.21.23).png","music-header":"photos/Music Page (7.21.23).png","shows-header":"photos/Events Page (7.21.23).png","services-header":"photos/Music Page (7.21.23).png","footer-photo":"photos/NEW Footer Photo (7.21.23).png"}
           cors = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Content-Type,HX-Request,HX-Trigger,HX-Trigger-Name,HX-Target,HX-Current-URL,Authorization","Access-Control-Allow-Methods":"GET,POST,OPTIONS","Vary":"Accept,HX-Request"}
           def out(data, code=200, content_type="application/json; charset=utf-8"):
               headers = dict(cors); headers["Content-Type"] = content_type
@@ -161,6 +169,27 @@ Resources:
               method = (e.get("requestContext",{}).get("http",{}).get("method") or e.get("httpMethod") or "GET").upper()
               if method == "OPTIONS": return out({})
               try:
+                  if method == "GET" and path.startswith("/media/"):
+                      slot=path.split("/",2)[2]
+                      if slot not in media_defaults: return out({"message":"unknown media slot"},404)
+                      saved=tx.get_item(Key={"location":"media:"+slot}).get("Item",{}).get("text")
+                      target=saved or media_defaults[slot]
+                      return {"statusCode":302,"headers":{"Location":"https://"+os.environ["SITE_DOMAIN"]+"/"+target,"Cache-Control":"no-store","Access-Control-Allow-Origin":"*"},"body":""}
+                  if method == "POST" and path == "/media/upload":
+                      upload=body(e); slot=str(upload.get("slot", "")); content_type=str(upload.get("contentType", ""))
+                      if slot not in media_defaults: return out({"message":"unknown media slot"},400)
+                      expected="video/" if slot == "home-video" else "image/"
+                      if not content_type.startswith(expected): return out({"message":"unsupported file type"},400)
+                      extension={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","video/mp4":"mp4","video/webm":"webm"}.get(content_type)
+                      if not extension: return out({"message":"unsupported file type"},400)
+                      key=f'uploads/{slot}-{datetime.utcnow().strftime("%Y%m%d%H%M%S%f")}.{extension}'
+                      upload_url=s3.generate_presigned_url("put_object",Params={"Bucket":os.environ["SITE_BUCKET"],"Key":key,"ContentType":content_type},ExpiresIn=300)
+                      return out({"uploadUrl":upload_url,"key":key,"mediaUrl":f'/media/{slot}'})
+                  if method == "POST" and path == "/media/commit":
+                      upload=body(e); slot=str(upload.get("slot", "")); key=str(upload.get("key", ""))
+                      if slot not in media_defaults or not key.startswith("uploads/"+slot+"-"): return out({"message":"invalid media upload"},400)
+                      tx.put_item(Item={"location":"media:"+slot,"text":key})
+                      return out({"mediaUrl":f'/media/{slot}'})
                   if method == "GET" and path == "/":
                       items=ev.scan().get("Items",[]); return out(render_events(items),content_type="text/html; charset=utf-8") if wants_html(e) else out({"Items":items})
                   if method == "GET" and path == "/songs":
@@ -231,6 +260,12 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref DomainName
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ["*"]
+            AllowedMethods: [PUT]
+            AllowedOrigins: ["*"]
+            MaxAge: 300
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:

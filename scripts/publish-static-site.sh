@@ -7,6 +7,7 @@ DISTRIBUTION_ID="${3:?Usage: publish-static-site.sh SOURCE_DIR BUCKET DISTRIBUTI
 
 aws s3 sync "$SOURCE_DIR/" "s3://$SITE_BUCKET/" \
   --delete \
+  --exclude "uploads/*" \
   --exclude "*.html" \
   --exclude "sitemap.xml" \
   --cache-control "public,max-age=86400" \
