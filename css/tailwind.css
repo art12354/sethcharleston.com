@@ -13,7 +13,8 @@
     @apply w-full;
   }
   .featured-video {
-    @apply aspect-video h-auto w-full;
+    @apply w-full;
+    height: min(calc((100vw - 3rem) * 9 / 16), 31.5rem);
   }
 }
 
