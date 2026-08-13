@@ -143,25 +143,10 @@ Resources:
               return '<div class="grid gap-7 md:grid-cols-3">' + "".join(f'<article class="rounded-xl bg-[#f5f5f5] p-8 shadow-[0_16px_32px_rgba(0,0,0,0.35)]"><h2 class="font-display text-4xl text-[#393939]">{esc(i.get("title"))}</h2><p class="mt-4 leading-7 text-stone-600">{esc(i.get("description"))}</p></article>' for i in services) + '</div>'
           def render_text(items, view):
               values = {i.get("location"):i.get("text","") for i in items}
-              if view.startswith("editor-"): return render_editor(view[7:],values)
               if view == "home": return f'<div><h1 id="frontPageHeader" class="font-display text-4xl text-stone-800">{values.get("frontPageHeader","Preview")}</h1><div id="frontPageText" class="mt-5 leading-8 text-stone-600">{values.get("frontPageText","")}</div></div><div id="frontPageVideo" class="mt-12"><h2 class="font-display text-3xl text-stone-800">Newest Video</h2><div class="mt-5 overflow-hidden rounded-sm shadow-xl">{values.get("frontPageVideo","")}</div></div>'
               if view == "bio": return values.get("bio","")
               if view == "services": return render_services(values.get("services"))
               return "".join(i.get("text","") for i in items)
-          def field(label,name,value="",kind="input",type="text"):
-              control = f'<textarea class="edit-field" name="{name}" required>{esc(value)}</textarea>' if kind == "textarea" else f'<input class="edit-field" name="{name}" type="{type}" value="{esc(value)}" required>'
-              return f'<label class="edit-label">{label}{control}</label>'
-          def form(action,title,fields,submit="Save",extra=""):
-              return f'<form data-editor-form class="edit-form" hx-post="{action}" hx-swap="none"><h2 class="edit-form-title">{title}</h2>{fields}{extra}<button class="edit-submit" type="submit">{submit}</button><span class="htmx-indicator">Saving…</span></form>'
-          def render_editor(view,values):
-              text_action = "__API_URL__/text"
-              if view == "home":
-                  return form(text_action,"Home heading",field("Heading","text",values.get("frontPageHeader"))+ '<input type="hidden" name="location" value="frontPageHeader">',"Save heading") + form(text_action,"Home text",field("Text","text",values.get("frontPageText"),"textarea")+'<input type="hidden" name="location" value="frontPageText">',"Save text") + form(text_action,"Newest video",field("Embed HTML","text",values.get("frontPageVideo"),"textarea")+'<input type="hidden" name="location" value="frontPageVideo">',"Save video")
-              if view == "about": return form(text_action,"Biography",field("Biography","text",values.get("bio"),"textarea")+'<input type="hidden" name="location" value="bio">',"Save biography")
-              if view == "services": return form(text_action,"Services JSON",field("Services","text",values.get("services"),"textarea")+'<input type="hidden" name="location" value="services">',"Save services")
-              if view == "shows": return form("__API_URL__/","Add show",field("Name","name")+field("Date and time","when",type="datetime-local")+field("Venue","where")+field("Ticket URL","tickets",type="url"),"Add show")
-              if view == "music": return form("__API_URL__/songs","Add music",field("Name","song")+field("Release date","release",type="date")+field("Spotify embed HTML","link","","textarea"),"Add music")
-              return '<p>No editor is available for this page.</p>'
           def body(e):
               raw = e.get("body") or "{}"
               if e.get("isBase64Encoded"): raw = base64.b64decode(raw).decode()
@@ -181,7 +166,7 @@ Resources:
                   if method == "GET" and path == "/songs":
                       items=mu.scan().get("Items",[]); return out(render_songs(items),content_type="text/html; charset=utf-8") if wants_html(e) else out(items)
                   if method == "GET" and path == "/text":
-                      items=tx.scan().get("Items",[]); view=(e.get("queryStringParameters") or {}).get("view",""); rendered=render_text(items,view).replace("__API_URL__",f'https://{e.get("requestContext",{}).get("domainName","")}'); return out(rendered,content_type="text/html; charset=utf-8") if wants_html(e) else out(items)
+                      items=tx.scan().get("Items",[]); view=(e.get("queryStringParameters") or {}).get("view",""); return out(render_text(items,view),content_type="text/html; charset=utf-8") if wants_html(e) else out(items)
                   if method == "GET" and path == "/access": return out({"preview":True})
                   item=body(e)
                   if method == "POST" and path == "/":
