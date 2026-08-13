@@ -12,6 +12,7 @@ BACKEND_STACK_NAME="${BACKEND_STACK_NAME:-sethcharleston-staging-backend}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK_DIR="$(mktemp -d)"
+trap 'find "$WORK_DIR" -depth -delete 2>/dev/null || true' EXIT
 
 stack_output() {
   local stack="$1"
@@ -27,8 +28,7 @@ SITE_DISTRIBUTION_ID="$(stack_output "$SITE_STACK_NAME" CloudFrontDistributionId
 EDITOR_DISTRIBUTION_ID="$(stack_output "$EDITOR_STACK_NAME" CloudFrontDistributionId)"
 COGNITO_CLIENT_ID="$(stack_output "$BACKEND_STACK_NAME" UserPoolClientId)"
 
-mkdir -p "$WORK_DIR/site" "$WORK_DIR/editor"
-
+mkdir -p "$WORK_DIR/site"
 cp "$ROOT_DIR"/index.html "$ROOT_DIR"/about.html "$ROOT_DIR"/music.html "$ROOT_DIR"/shows.html "$ROOT_DIR"/services.html "$ROOT_DIR"/sitemap.xml "$WORK_DIR/site/"
 cp -R "$ROOT_DIR/partials" "$WORK_DIR/site/"
 cp -R "$ROOT_DIR"/css "$ROOT_DIR"/photos "$ROOT_DIR"/videos "$WORK_DIR/site/"
@@ -36,6 +36,7 @@ find "$WORK_DIR/site" -type f -name "*.html" -print0 \
   | xargs -0 sed -i "s#https://api.sethcharleston.com#https://${API_DOMAIN}#g"
 
 "$ROOT_DIR/scripts/publish-static-site.sh" "$WORK_DIR/site" "$SITE_DOMAIN" "$SITE_DISTRIBUTION_ID" >/dev/null
+find "$WORK_DIR/site" -depth -delete
 
 "$ROOT_DIR/scripts/package-editor.sh" "$WORK_DIR/editor"
 find "$WORK_DIR/editor" -type f \( -name "*.html" -o -name "*.js" \) -print0 \
@@ -50,6 +51,4 @@ find "$WORK_DIR/editor" -type f -name "*.js" -print0 \
   | xargs -0 sed -i "s#https://sethcharleston.com#https://${SITE_DOMAIN}#g"
 
 "$ROOT_DIR/scripts/publish-static-site.sh" "$WORK_DIR/editor" "$EDITOR_DOMAIN" "$EDITOR_DISTRIBUTION_ID" >/dev/null
-
-rm -rf "$WORK_DIR"
 echo "Deployed staging content to https://${SITE_DOMAIN} and https://${EDITOR_DOMAIN}."

@@ -340,6 +340,8 @@ Resources:
               return None
           def handler(e, c):
               path = e.get("path", "/")
+              if path == "/test1": path = "/"
+              elif path.startswith("/test1/"): path = path[6:]
               if len(path) > 1 and path.endswith("/"): path = path[:-1]
               method = e.get("httpMethod", "GET")
               if method == "OPTIONS": return out({})
@@ -877,7 +879,7 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*/*/*"
 
-  ApiDeployment:
+  ApiDeploymentMediaV1:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
       - RootGetMethod
@@ -907,12 +909,13 @@ Resources:
       - MediaDeleteOptionsMethod
     Properties:
       RestApiId: !Ref RestApi
+      Description: Media API revision 1
 
   ApiStage:
     Type: AWS::ApiGateway::Stage
     Properties:
       RestApiId: !Ref RestApi
-      DeploymentId: !Ref ApiDeployment
+      DeploymentId: !Ref ApiDeploymentMediaV1
       StageName: test1
       MethodSettings:
         - ResourcePath: "/*"
