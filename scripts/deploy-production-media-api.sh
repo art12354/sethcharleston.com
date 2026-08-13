@@ -43,10 +43,12 @@ put_method "$delete_id" POST COGNITO_USER_POOLS
 
 put_options() {
   local resource="$1" methods="$2"
+  local response_parameters
+  response_parameters="{\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization'\",\"method.response.header.Access-Control-Allow-Methods\":\"'${methods},OPTIONS'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"}"
   aws apigateway get-method --rest-api-id "$REST_API_ID" --resource-id "$resource" --http-method OPTIONS >/dev/null 2>&1 || aws apigateway put-method --rest-api-id "$REST_API_ID" --resource-id "$resource" --http-method OPTIONS --authorization-type NONE >/dev/null
   aws apigateway put-integration --rest-api-id "$REST_API_ID" --resource-id "$resource" --http-method OPTIONS --type MOCK --request-templates '{"application/json":"{\"statusCode\":200}"}' >/dev/null
   aws apigateway put-method-response --rest-api-id "$REST_API_ID" --resource-id "$resource" --http-method OPTIONS --status-code 200 --response-parameters method.response.header.Access-Control-Allow-Headers=true,method.response.header.Access-Control-Allow-Methods=true,method.response.header.Access-Control-Allow-Origin=true >/dev/null
-  aws apigateway put-integration-response --rest-api-id "$REST_API_ID" --resource-id "$resource" --http-method OPTIONS --status-code 200 --response-parameters "method.response.header.Access-Control-Allow-Headers='Content-Type,Authorization',method.response.header.Access-Control-Allow-Methods='${methods},OPTIONS',method.response.header.Access-Control-Allow-Origin='*'" >/dev/null
+  aws apigateway put-integration-response --rest-api-id "$REST_API_ID" --resource-id "$resource" --http-method OPTIONS --status-code 200 --response-parameters "$response_parameters" >/dev/null
 }
 put_options "$slot_id" GET
 put_options "$library_id" GET
