@@ -233,6 +233,23 @@
     document.body.addEventListener("htmx:afterSettle", attach);
   }
 
+  function contextualAction(label, container, action) {
+    function attach() {
+      var target = document.querySelector(container);
+      if (!target || target.querySelector("[data-contextual-action]")) return;
+      target.classList.add("edit-media-container");
+      var control = document.createElement("button");
+      control.type = "button";
+      control.className = "edit-media-control";
+      control.dataset.contextualAction = "true";
+      control.textContent = label;
+      control.addEventListener("click", action);
+      target.appendChild(control);
+    }
+    attach();
+    document.body.addEventListener("htmx:afterSettle", attach);
+  }
+
   function musicEditor() {
     var root = document.getElementById("info");
     function render() {
@@ -400,15 +417,17 @@
       { id: "frontPageHeader", location: "frontPageHeader", label: "Home page heading" },
       { id: "frontPageText", location: "frontPageText", label: "Home page text" }
       ] });
-      button("Edit newest video", function () {
+      contextualAction("Edit video", "#frontPageVideo > div", function () {
         var video = document.getElementById("frontPageVideo");
-        var clone = video.cloneNode(true);
-        var heading = clone.querySelector("h1");
-        if (heading) heading.remove();
+        var embed = video.querySelector(":scope > div");
+        var clone = embed.cloneNode(true);
+        var control = clone.querySelector("[data-contextual-action]");
+        if (control) control.remove();
         dialog("Edit newest video", [{ name: "video", label: "YouTube embed HTML", value: clone.innerHTML.trim(), multiline: true }], function (values, modal) {
           request("/text/", { method: "POST", body: JSON.stringify([{ location: "frontPageVideo", text: values.video }]) }).then(function () {
-            video.innerHTML = "<h1>Newest Video</h1>" + values.video;
+            embed.innerHTML = values.video;
             modal.closeEditor();
+            htmx.trigger(document.body, "htmx:afterSettle");
             setStatus("Saved", "success");
           }).catch(function (error) { setStatus(error.message, "error"); });
         });
