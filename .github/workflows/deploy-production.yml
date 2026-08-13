@@ -39,7 +39,7 @@ jobs:
           set -euo pipefail
           mkdir dist
           cp index.html about.html music.html shows.html services.html sitemap.xml dist/
-          cp -R css photos videos dist/
+          cp -R css partials photos videos dist/
 
       - name: Publish and invalidate
         run: ./scripts/publish-static-site.sh dist "$SITE_BUCKET" "$CLOUDFRONT_DISTRIBUTION_ID"

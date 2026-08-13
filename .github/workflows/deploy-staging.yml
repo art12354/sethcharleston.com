@@ -41,7 +41,7 @@ jobs:
           set -euo pipefail
           mkdir dist
           cp index.html about.html music.html shows.html services.html sitemap.xml dist/
-          cp -R css photos videos dist/
+          cp -R css partials photos videos dist/
           find dist -type f -name "*.html" -print0 \
             | xargs -0 sed -i 's#https://api.sethcharleston.com#https://api-staging.sethcharleston.com#g'
 
