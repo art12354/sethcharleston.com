@@ -297,7 +297,7 @@
       grid.className = "grid gap-7 md:grid-cols-3";
       services.forEach(function (service, index) {
         var card = document.createElement("article");
-        card.className = "rounded-xl bg-[#f5f5f5] p-8 shadow-[0_16px_32px_rgba(0,0,0,0.35)]";
+        card.className = "edit-item rounded-xl bg-[#f5f5f5] p-8 shadow-[0_16px_32px_rgba(0,0,0,0.35)]";
         var title = document.createElement("h2");
         title.className = "font-display text-4xl text-[#393939]";
         title.textContent = service.title;
