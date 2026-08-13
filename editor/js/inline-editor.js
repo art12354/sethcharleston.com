@@ -190,8 +190,9 @@
         songs.sort(function (a, b) { return new Date(b.release) - new Date(a.release); });
         root.innerHTML = "";
         songs.forEach(function (song) {
-          var item = document.createElement("section");
-          item.className = "album";
+          var item = document.createElement("article");
+          item.className = "col-span-full mx-auto w-full max-w-4xl overflow-hidden rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.8)]";
+          item.setAttribute("aria-label", song.song);
           item.innerHTML = song.link;
           controls(item, function () { musicDialog(song); }, function () { removeMusic(song); });
           root.appendChild(item);
@@ -232,10 +233,10 @@
         root.innerHTML = "";
         events.forEach(function (event) {
           var when = new Date(event.when);
-          var item = document.createElement("div");
-          item.className = "events";
-          item.innerHTML = "<h1></h1><p></p><p></p><button class=\"ticket-button\"><a target=\"_blank\">Tickets</a></button>";
-          item.querySelector("h1").textContent = event.name;
+          var item = document.createElement("article");
+          item.className = "col-span-full rounded-xl bg-[#f5f5f5] p-8 text-center shadow-[0_16px_32px_rgba(0,0,0,0.35)]";
+          item.innerHTML = "<h2 class=\"font-display text-3xl text-stone-800\"></h2><p class=\"mt-3 text-sm uppercase tracking-[0.18em] text-stone-500\"></p><p class=\"mt-2 text-stone-700\"></p><a class=\"mt-6 inline-block bg-[#6b6b6b] px-6 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-md transition-colors hover:bg-[#4f4f4f]\" target=\"_blank\" rel=\"noopener\">Tickets</a>";
+          item.querySelector("h2").textContent = event.name;
           item.querySelectorAll("p")[0].textContent = when.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
           item.querySelectorAll("p")[1].textContent = event.where;
           item.querySelector("a").href = event.tickets;
@@ -292,12 +293,16 @@
     }
     function render() {
       root.innerHTML = "";
+      var grid = document.createElement("div");
+      grid.className = "grid gap-7 md:grid-cols-3";
       services.forEach(function (service, index) {
         var card = document.createElement("article");
-        card.className = "service-card edit-item";
+        card.className = "rounded-xl bg-[#f5f5f5] p-8 shadow-[0_16px_32px_rgba(0,0,0,0.35)]";
         var title = document.createElement("h2");
+        title.className = "font-display text-4xl text-[#393939]";
         title.textContent = service.title;
         var description = document.createElement("p");
+        description.className = "mt-4 leading-7 text-stone-600";
         description.textContent = service.description;
         var actions = document.createElement("span");
         actions.className = "edit-item-controls";
@@ -315,8 +320,9 @@
           actions.appendChild(action);
         });
         card.append(title, description, actions);
-        root.appendChild(card);
+        grid.appendChild(card);
       });
+      root.appendChild(grid);
     }
     button("Add service", function () { serviceDialog(); }, true);
     setStatus("Loading…");
