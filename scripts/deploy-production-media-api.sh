@@ -64,9 +64,9 @@ put_options "$library_id" GET
 put_options "$upload_id" POST
 put_options "$commit_id" POST
 put_options "$delete_id" POST
-put_options "$root_id" GET
-put_options "$songs_id" GET
-put_options "$text_id" GET
+put_options "$root_id" GET,POST
+put_options "$songs_id" GET,POST
+put_options "$text_id" GET,POST
 
 deployment="$(aws apigateway create-deployment --rest-api-id "$REST_API_ID" --description "Media library release $(git -C "$ROOT_DIR" rev-parse --short HEAD)" --query id --output text)"
 aws apigateway update-stage --rest-api-id "$REST_API_ID" --stage-name test1 --patch-operations op=replace,path=/deploymentId,value="$deployment" >/dev/null
