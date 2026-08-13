@@ -12,6 +12,9 @@
   iframe {
     @apply w-full;
   }
+  .featured-video {
+    @apply aspect-video h-auto w-full;
+  }
 }
 
 @layer components {

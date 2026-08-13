@@ -29,7 +29,22 @@ put_if_missing "$EVENTS_TABLE_NAME" event "{\"event\":{\"S\":\"preview-show\"},\
 put_if_missing "$MUSIC_TABLE_NAME" song '{"song":{"S":"Preview Track"},"release":{"S":"2028-01-01T00:00:00-08:00"},"link":{"S":"<iframe title=\"Preview track\" src=\"https://open.spotify.com/embed/artist/1A5BJhYP6UBWnqVhuJnTqy\" height=\"352\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>"}}'
 put_if_missing "$TEXT_TABLE_NAME" location "{\"location\":{\"S\":\"frontPageHeader\"},\"text\":{\"S\":\"${PREVIEW_NAME}\"}}"
 put_if_missing "$TEXT_TABLE_NAME" location '{"location":{"S":"frontPageText"},"text":{"S":"This content comes from this branch’s isolated DynamoDB tables."}}'
-put_if_missing "$TEXT_TABLE_NAME" location '{"location":{"S":"frontPageVideo"},"text":{"S":""}}'
+put_if_missing "$TEXT_TABLE_NAME" location '{"location":{"S":"frontPageVideo"},"text":{"S":"<iframe class=\"featured-video\" src=\"https://www.youtube.com/embed/ozgBy7SskOg?si=Q-nr8v87JbiXua-z\" title=\"Seth Charleston newest video\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>"}}'
+
+# Upgrade the original empty preview seed without overwriting edited branch content.
+if ! result="$(aws dynamodb update-item \
+    --region "$AWS_REGION" \
+    --table-name "$TEXT_TABLE_NAME" \
+    --key '{"location":{"S":"frontPageVideo"}}' \
+    --update-expression 'SET #text = :video' \
+    --condition-expression '#text = :empty' \
+    --expression-attribute-names '{"#text":"text"}' \
+    --expression-attribute-values '{":empty":{"S":""},":video":{"S":"<iframe class=\"featured-video\" src=\"https://www.youtube.com/embed/ozgBy7SskOg?si=Q-nr8v87JbiXua-z\" title=\"Seth Charleston newest video\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>"}}' 2>&1)"; then
+  if [[ "$result" != *ConditionalCheckFailedException* ]]; then
+    echo "$result" >&2
+    exit 1
+  fi
+fi
 put_if_missing "$TEXT_TABLE_NAME" location '{"location":{"S":"bio"},"text":{"S":"This biography is isolated to the current feature preview."}}'
 put_if_missing "$TEXT_TABLE_NAME" location '{"location":{"S":"services"},"text":{"S":"[{\"title\":\"Production\",\"description\":\"Shape your song from arrangement through tracking.\"},{\"title\":\"Mixing\",\"description\":\"Bring clarity, depth, and energy to every element.\"},{\"title\":\"Mastering\",\"description\":\"Prepare a polished, consistent master for release.\"}]"}}'
 
