@@ -1,117 +1,32 @@
-.edit-toolbar {
-  align-items: center;
-  background: #161616;
-  bottom: 18px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, .35);
-  color: whitesmoke;
-  display: flex;
+.edit-shell {
+  background: #393939;
+  bottom: 1rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .45);
+  color: #f5f5f5;
   font-family: Adamina, serif;
-  gap: 12px;
-  left: 50%;
-  max-width: calc(100% - 28px);
-  padding: 10px 12px;
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  padding: 1rem;
   position: fixed;
-  transform: translateX(-50%);
+  right: 1rem;
+  width: min(28rem, calc(100vw - 2rem));
   z-index: 10000;
 }
 
-.edit-toolbar button,
-.edit-control,
-.edit-dialog button {
-  background: whitesmoke;
-  border: 1px solid whitesmoke;
-  color: #393939;
-  cursor: pointer;
-  font: inherit;
-  padding: 8px 13px;
-}
-
-.edit-toolbar button:hover,
-.edit-control:hover,
-.edit-dialog button:hover {
-  background: #393939;
-  color: whitesmoke;
-}
-
-.edit-toolbar .edit-primary,
-.edit-dialog .edit-primary {
-  background: #b98c42;
-  border-color: #b98c42;
-  color: #17120a;
-}
-
-.edit-status {
-  min-width: 7em;
-  text-align: center;
-}
-
-.edit-status[data-state="error"] { color: #ffb4b4; }
-.edit-status[data-state="success"] { color: #bce8c5; }
-
-[data-inline-editable="true"] {
-  border-radius: 2px;
-  cursor: text;
-  outline: 2px dashed rgba(185, 140, 66, .8);
-  outline-offset: 7px;
-}
-
-[data-inline-editable="true"]:focus {
-  outline-style: solid;
-  box-shadow: 0 0 0 8px rgba(185, 140, 66, .12);
-}
-
-.edit-item {
-  position: relative;
-}
-
-.edit-item-controls {
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  display: flex;
-  gap: 7px;
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  z-index: 3;
-}
-
-.edit-control {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
-  font-size: .8rem;
-  padding: 6px 9px;
-}
-
-.edit-dialog {
-  background: whitesmoke;
-  border: 0;
-  box-shadow: 0 18px 70px rgba(0, 0, 0, .45);
-  color: #393939;
-  font-family: Adamina, serif;
-  max-width: 560px;
-  padding: 26px;
-  width: calc(100% - 40px);
-  z-index: 10002;
-}
-
-.edit-dialog[open] { display: block; left: 50%; position: fixed; top: 50%; transform: translate(-50%, -50%); }
-
-.edit-dialog::backdrop { background: rgba(0, 0, 0, .65); }
-.edit-dialog h2 { font-family: "Dancing Script", cursive; font-size: 2.4rem; margin: 0 0 18px; }
-.edit-dialog label { display: block; font-weight: bold; margin: 14px 0 5px; }
-.edit-dialog input,
-.edit-dialog textarea { box-sizing: border-box; font: inherit; padding: 9px; width: 100%; }
-.edit-dialog textarea { min-height: 120px; resize: vertical; }
-.edit-dialog menu { display: flex; gap: 10px; justify-content: flex-end; margin: 20px 0 0; padding: 0; }
-
-body.edit-busy::after {
-  background: rgba(255, 255, 255, .5);
-  content: "";
-  inset: 0;
-  position: fixed;
-  z-index: 9999;
-}
+.edit-shell[hidden] { display: none; }
+.edit-shell-header { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.edit-view-link { color: #f5f5f5; font-size: .8rem; text-decoration: underline; }
+.edit-form { border-top: 1px solid #6b6b6b; display: grid; gap: .75rem; padding: 1rem 0; }
+.edit-form-title { font-family: "Dancing Script", cursive; font-size: 1.75rem; margin: 0; }
+.edit-label { display: grid; font-size: .8rem; gap: .35rem; }
+.edit-field { background: #f5f5f5; border: 0; border-radius: 0; box-sizing: border-box; color: #393939; font: inherit; padding: .65rem; width: 100%; }
+textarea.edit-field { min-height: 7rem; resize: vertical; }
+.edit-submit { background: #6b6b6b; border: 0; color: white; cursor: pointer; font: inherit; justify-self: start; padding: .65rem 1rem; text-transform: uppercase; }
+.edit-submit:hover { background: #4f4f4f; }
+.edit-skeleton { animation: edit-pulse 1.5s ease-in-out infinite; background: rgba(255,255,255,.1); height: 12rem; }
+.edit-shell .htmx-indicator { font-size: .75rem; }
+@keyframes edit-pulse { 50% { opacity: .45; } }
 
 @media (max-width: 600px) {
-  .edit-toolbar { bottom: 8px; flex-wrap: wrap; justify-content: center; width: calc(100% - 28px); }
-  .edit-status { flex-basis: 100%; order: -1; }
+  .edit-shell { bottom: .5rem; max-height: 55vh; right: .5rem; width: calc(100vw - 1rem); }
 }

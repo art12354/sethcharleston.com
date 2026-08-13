@@ -11,10 +11,15 @@ cp -R "$ROOT_DIR"/css "$ROOT_DIR"/photos "$ROOT_DIR"/videos "$DESTINATION/"
 mkdir -p "$DESTINATION/editor"
 cp "$ROOT_DIR/editor/css/inline-editor.css" "$DESTINATION/editor/"
 cp "$ROOT_DIR/editor/js/inline-editor.js" "$DESTINATION/editor/"
+cp "$ROOT_DIR/editor/editor-shell.html" "$DESTINATION/editor/"
 
 find "$DESTINATION" -maxdepth 1 -type f -name "*.html" -print0 | while IFS= read -r -d '' page; do
+  page_name="$(basename "$page")"
+  view="${page_name%.html}"
+  [[ "$view" == "index" ]] && view="home"
+  shell="$(sed -e "s#EDITOR_PANEL_URL#https://api.sethcharleston.com/test1/text?view=editor-${view}#g" -e "s#LIVE_PAGE#https://sethcharleston.com/${page_name}#g" "$ROOT_DIR/editor/editor-shell.html")"
   sed -i \
     -e 's#</head>#  <link rel="stylesheet" href="editor/inline-editor.css">\n</head>#' \
-    -e 's#</body>#  <script src="editor/inline-editor.js"></script>\n</body>#' \
+    -e "s#</body>#${shell//$'\n'/\\n}\n  <script src=\"editor/inline-editor.js\"></script>\n</body>#" \
     "$page"
 done
