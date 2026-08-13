@@ -292,7 +292,7 @@ Resources:
           def render_songs(items):
               items = sorted(items, key=lambda item: item.get("release", ""), reverse=True)
               if not items: return '<p class="col-span-full text-center text-stone-500">New music is on the way.</p>'
-              return "".join(f'<article class="col-span-full mx-auto w-full max-w-4xl overflow-hidden rounded-xl bg-[#f5f5f5] p-3 shadow-[0_16px_32px_rgba(0,0,0,0.8)]" aria-label="{esc(item.get("song"))}">{item.get("link", "")}</article>' for item in items)
+              return "".join(f'<article class="col-span-full mx-auto w-full max-w-4xl overflow-hidden rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.8)]" aria-label="{esc(item.get("song"))}">{item.get("link", "")}</article>' for item in items)
           def render_services(raw):
               defaults = [{"title":"Production","description":"Full-service music production shaped around your sound, from arrangement and tracking through the final creative details."},{"title":"Mixing","description":"Detailed, musical mixes that bring clarity, depth, balance, and energy to every element of your song."},{"title":"Mastering","description":"Release-ready masters with polish, consistency, and impact across streaming platforms and playback systems."}]
               try: services = json.loads(raw) if raw else defaults
