@@ -23,6 +23,7 @@ put_if_missing() {
       return 1
     fi
   fi
+  return 0
 }
 
 put_if_missing "$EVENTS_TABLE_NAME" event "{\"event\":{\"S\":\"preview-show\"},\"name\":{\"S\":\"Preview Show\"},\"when\":{\"S\":\"2028-01-01T19:00:00-08:00\"},\"where\":{\"S\":\"Preview Venue\"},\"tickets\":{\"S\":\"https://example.com\"}}"
@@ -45,6 +46,7 @@ if ! result="$(aws dynamodb update-item \
     exit 1
   fi
 fi
+true
 put_if_missing "$TEXT_TABLE_NAME" location '{"location":{"S":"bio"},"text":{"S":"This biography is isolated to the current feature preview."}}'
 put_if_missing "$TEXT_TABLE_NAME" location '{"location":{"S":"services"},"text":{"S":"[{\"title\":\"Production\",\"description\":\"Shape your song from arrangement through tracking.\"},{\"title\":\"Mixing\",\"description\":\"Bring clarity, depth, and energy to every element.\"},{\"title\":\"Mastering\",\"description\":\"Prepare a polished, consistent master for release.\"}]"}}'
 
