@@ -15,7 +15,6 @@ cp "$ROOT_DIR/editor/js/inline-editor.js" "$DESTINATION/editor/"
 find "$DESTINATION" -maxdepth 1 -type f -name "*.html" -print0 | while IFS= read -r -d '' page; do
   sed -i \
     -e 's#</head>#  <link rel="stylesheet" href="editor/inline-editor.css">\n</head>#' \
-    -e 's#hx-trigger="load"#hx-trigger="editor-disabled"#g' \
     -e 's#</body>#  <script src="editor/inline-editor.js"></script>\n</body>#' \
     "$page"
 done

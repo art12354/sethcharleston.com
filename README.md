@@ -85,6 +85,8 @@ npm run build:css
 
 The compiled `css/site.css` is committed so the static-site deployment has no runtime build dependency. The legacy editor continues to use the JSON representation while its authenticated write flows are migrated to HTMX.
 
+Every non-master branch deploys a disposable full-stack preview: the public site at `<branch>.sethcharleston.com`, an inline editor at `edit-<branch>.sethcharleston.com`, and isolated API and DynamoDB resources. Deleting the branch removes both sites and the branch data stack.
+
 The production static site is managed by [static-site.yaml](infra/cloudformation/static-site.yaml). Disposable previews use [preview-static-site.yaml](infra/cloudformation/preview-static-site.yaml), which deliberately does not retain branch resources on deletion.
 
 The production backend currently uses nine Lambda functions. Its adopted infrastructure and inventory are documented in [live-inventory.md](infra/import/live-inventory.md), [live-backend-foundation.yaml](infra/cloudformation/live-backend-foundation.yaml), and [live-api-gateway.yaml](infra/cloudformation/live-api-gateway.yaml).

@@ -21,6 +21,7 @@ fi
 
 stack_name="sethcharleston-branch-${slug}-site"
 domain_name="${slug}.sethcharleston.com"
+editor_domain_name="edit-${slug}.sethcharleston.com"
 
 aws cloudformation deploy \
   --stack-name "$stack_name" \
@@ -29,6 +30,7 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
     DomainName="$domain_name" \
+    EditorDomainName="$editor_domain_name" \
     PreviewId="$slug" \
     HostedZoneId="$HOSTED_ZONE_ID" \
     AcmCertificateArn="$ACM_CERTIFICATE_ARN" \
@@ -37,6 +39,8 @@ aws cloudformation deploy \
 
 bucket="$(aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" --query "Stacks[0].Outputs[?OutputKey=='SiteBucketName'].OutputValue | [0]" --output text)"
 distribution="$(aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue | [0]" --output text)"
+editor_bucket="$(aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" --query "Stacks[0].Outputs[?OutputKey=='EditorBucketName'].OutputValue | [0]" --output text)"
+editor_distribution="$(aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" --query "Stacks[0].Outputs[?OutputKey=='EditorCloudFrontDistributionId'].OutputValue | [0]" --output text)"
 api_url="$(aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue | [0]" --output text)"
 events_table="$(aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" --query "Stacks[0].Outputs[?OutputKey=='EventsTableName'].OutputValue | [0]" --output text)"
 music_table="$(aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" --query "Stacks[0].Outputs[?OutputKey=='MusicTableName'].OutputValue | [0]" --output text)"
@@ -56,6 +60,15 @@ find "$work_dir/site" -type f -name "*.html" -print0 \
   | xargs -0 sed -i "s#https://api.sethcharleston.com/test1#${api_url}#g"
 
 "$ROOT_DIR/scripts/publish-static-site.sh" "$work_dir/site" "$bucket" "$distribution"
+
+"$ROOT_DIR/scripts/package-editor.sh" "$work_dir/editor"
+find "$work_dir/editor" -type f \( -name "*.html" -o -name "*.js" \) -print0 \
+  | xargs -0 sed -i \
+      -e "s#https://api.sethcharleston.com/test1#${api_url}#g" \
+      -e 's#https://login.sethcharleston.com/login?response_type=token&client_id=76g2um3ps3ri68ac30agopcmc9&redirect_uri=https://edit.sethcharleston.com#PREVIEW#g' \
+      -e "s#https://sethcharleston.com#https://${domain_name}#g"
+"$ROOT_DIR/scripts/publish-static-site.sh" "$work_dir/editor" "$editor_bucket" "$editor_distribution"
 curl --fail --silent --show-error --retry 5 --retry-delay 5 -H 'HX-Request: true' "${api_url}/text?view=home" >/dev/null
 curl --fail --silent --show-error --retry 5 --retry-delay 10 --head "https://${domain_name}"
-echo "Preview deployed to https://${domain_name} with isolated API ${api_url}"
+curl --fail --silent --show-error --retry 5 --retry-delay 10 --head "https://${editor_domain_name}"
+echo "Preview deployed to https://${domain_name}, editor https://${editor_domain_name}, with isolated API ${api_url}"

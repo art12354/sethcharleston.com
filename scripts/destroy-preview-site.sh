@@ -23,7 +23,11 @@ if ! aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AW
 fi
 
 bucket="$(aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" --query "Stacks[0].Outputs[?OutputKey=='SiteBucketName'].OutputValue | [0]" --output text)"
+editor_bucket="$(aws cloudformation describe-stacks --stack-name "$stack_name" --region "$AWS_REGION" --query "Stacks[0].Outputs[?OutputKey=='EditorBucketName'].OutputValue | [0]" --output text)"
 aws s3 rm "s3://${bucket}/" --recursive --only-show-errors
+if [[ -n "$editor_bucket" && "$editor_bucket" != "None" ]]; then
+  aws s3 rm "s3://${editor_bucket}/" --recursive --only-show-errors
+fi
 aws cloudformation delete-stack --stack-name "$stack_name" --region "$AWS_REGION"
 aws cloudformation wait stack-delete-complete --stack-name "$stack_name" --region "$AWS_REGION"
 echo "Deleted preview for '$BRANCH_NAME'."

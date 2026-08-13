@@ -1,8 +1,10 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Disposable website, API, and data store for a feature-branch preview.
+Description: Disposable public site, editor, API, and data store for a feature-branch preview.
 
 Parameters:
   DomainName:
+    Type: String
+  EditorDomainName:
     Type: String
   PreviewId:
     Type: String
@@ -165,6 +167,7 @@ Resources:
                       items=mu.scan().get("Items",[]); return out(render_songs(items),content_type="text/html; charset=utf-8") if wants_html(e) else out(items)
                   if method == "GET" and path == "/text":
                       items=tx.scan().get("Items",[]); view=(e.get("queryStringParameters") or {}).get("view",""); return out(render_text(items,view),content_type="text/html; charset=utf-8") if wants_html(e) else out(items)
+                  if method == "GET" and path == "/access": return out({"preview":True})
                   item=body(e)
                   if method == "POST" and path == "/":
                       item.setdefault("event",hashlib.sha256((item.get("name","")+item.get("when","")+item.get("where","")).encode()).hexdigest()); ev.put_item(Item=item); return out(item)
@@ -328,6 +331,105 @@ Resources:
         HostedZoneId: Z2FDTNDATAQYW2
         EvaluateTargetHealth: false
 
+  EditorBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref EditorDomainName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      Tags:
+        - Key: Project
+          Value: sethcharleston
+        - Key: Environment
+          Value: preview-editor
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+
+  EditorBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: EditorBucket
+    Properties:
+      Bucket: !Ref EditorBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${EditorBucket.Arn}/*"
+
+  EditorDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Aliases:
+          - !Ref EditorDomainName
+        DefaultRootObject: index.html
+        HttpVersion: http2
+        IPV6Enabled: true
+        PriceClass: !Ref PriceClass
+        Origins:
+          - Id: !Sub "S3-${EditorDomainName}"
+            DomainName: !Sub "${EditorDomainName}.s3-website-${AWS::Region}.${AWS::URLSuffix}"
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginKeepaliveTimeout: 5
+              OriginProtocolPolicy: http-only
+              OriginReadTimeout: 30
+              OriginSSLProtocols:
+                - TLSv1.2
+        DefaultCacheBehavior:
+          TargetOriginId: !Sub "S3-${EditorDomainName}"
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [HEAD, GET, OPTIONS]
+          CachedMethods: [HEAD, GET]
+          Compress: true
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+          MinTTL: 0
+          DefaultTTL: 300
+          MaxTTL: 86400
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+        ViewerCertificate:
+          AcmCertificateArn: !Ref AcmCertificateArn
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+
+  EditorRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref EditorDomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt EditorDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+        EvaluateTargetHealth: false
+
 Outputs:
   SiteBucketName:
     Value: !Ref SiteBucket
@@ -335,6 +437,12 @@ Outputs:
     Value: !Ref SiteDistribution
   WebsiteUrl:
     Value: !Sub "https://${DomainName}"
+  EditorBucketName:
+    Value: !Ref EditorBucket
+  EditorCloudFrontDistributionId:
+    Value: !Ref EditorDistribution
+  EditorUrl:
+    Value: !Sub "https://${EditorDomainName}"
   ApiUrl:
     Value: !GetAtt PreviewApi.ApiEndpoint
   EventsTableName:

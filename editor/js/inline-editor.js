@@ -7,6 +7,7 @@
   var page = location.pathname.split("/").pop() || "index.html";
   var token = readToken();
   var signedIn = false;
+  var previewMode = LOGIN === "PREVIEW";
   var toolbar;
   var status;
 
@@ -30,7 +31,7 @@
 
   function request(path, options) {
     options = options || {};
-    options.headers = Object.assign({ "Content-Type": "application/json", Authorization: token }, options.headers || {});
+    options.headers = Object.assign({ "Content-Type": "application/json" }, token ? { Authorization: token } : {}, options.headers || {});
     document.body.classList.add("edit-busy");
     return fetch(API + path, options).then(function (response) {
       if (!response.ok) throw new Error("Request failed (" + response.status + ")");
@@ -62,6 +63,7 @@
   }
 
   function authenticate() {
+    if (previewMode) return request("/access").then(function () { return true; });
     if (!token) return Promise.resolve(false);
     return request("/access").then(function () { return true; }).catch(function () {
       sessionStorage.removeItem("editor_id_token");

@@ -131,7 +131,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: sethcharleston-github-actions-preview
-      Description: Create and remove fully isolated website, API, and database previews for feature branches.
+      Description: Create and remove fully isolated website, editor, API, and database previews for feature branches.
       MaxSessionDuration: 3600
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
