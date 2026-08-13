@@ -12,10 +12,12 @@
   iframe {
     @apply w-full;
   }
-  .featured-video {
-    @apply w-full;
-    height: min(calc((100vw - 3rem) * 9 / 16), 31.5rem);
-  }
+}
+
+/* Dynamic HTMX content is not visible to Tailwind's source scanner. */
+.featured-video {
+  width: 100%;
+  height: min(calc((100vw - 3rem) * 9 / 16), 31.5rem);
 }
 
 @layer components {
