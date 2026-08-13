@@ -417,15 +417,14 @@
       { id: "frontPageHeader", location: "frontPageHeader", label: "Home page heading" },
       { id: "frontPageText", location: "frontPageText", label: "Home page text" }
       ] });
-      contextualAction("Edit video", "#frontPageVideo > div", function () {
+      contextualAction("Edit video", "#frontPageVideo", function () {
         var video = document.getElementById("frontPageVideo");
-        var embed = video.querySelector(":scope > div");
-        var clone = embed.cloneNode(true);
+        var clone = video.cloneNode(true);
         var control = clone.querySelector("[data-contextual-action]");
         if (control) control.remove();
         dialog("Edit newest video", [{ name: "video", label: "YouTube embed HTML", value: clone.innerHTML.trim(), multiline: true }], function (values, modal) {
           request("/text/", { method: "POST", body: JSON.stringify([{ location: "frontPageVideo", text: values.video }]) }).then(function () {
-            embed.innerHTML = values.video;
+            video.innerHTML = values.video;
             modal.closeEditor();
             htmx.trigger(document.body, "htmx:afterSettle");
             setStatus("Saved", "success");
