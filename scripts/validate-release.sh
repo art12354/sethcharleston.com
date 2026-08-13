@@ -40,5 +40,9 @@ grep -q 'put_options "$text_id" GET,POST' "$ROOT_DIR/scripts/deploy-production-m
 grep -q 'put_method "$text_id" GET NONE' "$ROOT_DIR/scripts/deploy-production-media-api.sh"
 grep -q 'AuthorizationType: COGNITO_USER_POOLS' "$ROOT_DIR/infra/cloudformation/backend-api.yaml"
 grep -q -- '--exclude "uploads/\*"' "$ROOT_DIR/scripts/publish-static-site.sh"
+if grep -q 'editor-disabled' "$ROOT_DIR/scripts/package-editor.sh"; then
+  echo "Editor pages must load the same live content as public pages." >&2
+  exit 1
+fi
 
 echo "Release validation passed."
