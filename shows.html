@@ -15,7 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=Adamina&family=Dancing+Script:wght@600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/site.css?v=5" />
+    <link rel="stylesheet" href="css/site.css?v=6" />
     <script
       src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"
       integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
@@ -24,9 +24,7 @@
   </head>
   <body class="flex min-h-screen flex-col">
     <nav class="site-nav" aria-label="Main navigation">
-      <div
-        class="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 md:grid md:grid-cols-3"
-      >
+      <div class="nav-shell">
         <div class="hidden items-center gap-6 md:flex">
           <a
             class="font-display text-2xl hover:text-amber-300"
@@ -101,13 +99,45 @@
         Loading shows…
       </p>
     </main>
-    <footer class="bg-stone-900 px-6 py-10 text-center text-stone-200">
-      <p class="font-display text-3xl">Seth Charleston</p>
-      <p class="mt-4">
-        <a class="underline" href="mailto:seth.charleston@gmail.com"
-          >Booking &amp; inquiries</a
+    <footer class="grid bg-[#393939] text-stone-200 md:grid-cols-2">
+      <div
+        class="flex flex-col items-center justify-center gap-8 px-8 py-12 text-center"
+      >
+        <h2 class="font-display text-4xl">Stay in the loop</h2>
+        <form
+          class="flex w-full max-w-md flex-col gap-3 sm:flex-row"
+          action="https://sethcharleston.us19.list-manage.com/subscribe/post?u=0c8404aae0a66221037b9174b&amp;id=e6ff11268b"
+          method="post"
+          target="_blank"
         >
-      </p>
+          <label class="sr-only" for="footer-email">Email address</label
+          ><input
+            class="min-w-0 flex-1 rounded-sm border-0 px-4 py-3 text-stone-900"
+            id="footer-email"
+            name="EMAIL"
+            type="email"
+            placeholder="Email address"
+            required
+          /><button
+            class="bg-amber-700 px-6 py-3 text-sm font-bold uppercase tracking-widest hover:bg-amber-600"
+            type="submit"
+          >
+            Subscribe
+          </button>
+        </form>
+        <p class="text-sm">
+          <a class="underline" href="mailto:seth.charleston@gmail.com"
+            >Booking &amp; inquiries</a
+          >
+        </p>
+      </div>
+      <div class="hidden items-center justify-center p-8 md:flex">
+        <img
+          class="max-h-96 w-full max-w-md object-cover object-top shadow-[0_16px_32px_rgba(0,0,0,0.8)]"
+          src="photos/NEW Footer Photo (7.21.23).png"
+          alt="Seth Charleston"
+        />
+      </div>
     </footer>
   </body>
 </html>

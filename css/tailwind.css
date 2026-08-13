@@ -18,6 +18,9 @@
   .site-nav {
     @apply fixed inset-x-0 top-0 z-50 min-h-[68px] bg-[#393939] text-white shadow-lg;
   }
+  .nav-shell {
+    @apply mx-auto flex min-h-[68px] max-w-[1500px] items-center justify-between px-5 py-3 md:grid md:min-h-[88px] md:grid-cols-3 md:py-5;
+  }
   .nav-link {
     @apply font-display text-2xl transition-colors hover:bg-[#f5f5f5] hover:text-[#393939] lg:text-3xl;
   }

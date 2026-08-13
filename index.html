@@ -1,43 +1,191 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Official site of Los Angeles indie rock artist Seth Charleston.">
-  <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
-  <title>Seth Charleston — Home</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Adamina&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="css/site.css?v=5">
-  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js" integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V" crossorigin="anonymous"></script>
-</head>
-<body class="flex min-h-screen flex-col">
-  <nav class="site-nav" aria-label="Main navigation">
-    <div class="mx-auto flex min-h-[68px] max-w-[1500px] items-center justify-between px-5 py-3 md:grid md:min-h-[88px] md:grid-cols-3 md:py-5">
-      <div class="hidden items-stretch justify-center md:flex">
-        <a class="nav-link px-4 py-2" href="about.html">About</a><a class="nav-link px-4 py-2" href="music.html">Music</a><a class="nav-link px-4 py-2" href="shows.html">Shows</a><a class="nav-link px-4 py-2" href="services.html">Services</a>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Official site of Los Angeles indie rock artist Seth Charleston."
+    />
+    <meta name="htmx-config" content='{"selfRequestsOnly":false}' />
+    <title>Seth Charleston — Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Adamina&family=Dancing+Script:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="css/site.css?v=6" />
+    <script
+      src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"
+      integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="nav-shell">
+        <div class="hidden items-stretch justify-center md:flex">
+          <a class="nav-link px-4 py-2" href="about.html">About</a
+          ><a class="nav-link px-4 py-2" href="music.html">Music</a
+          ><a class="nav-link px-4 py-2" href="shows.html">Shows</a
+          ><a class="nav-link px-4 py-2" href="services.html">Services</a>
+        </div>
+        <a class="justify-self-center" href="index.html"
+          ><img
+            class="h-9 w-auto md:h-11"
+            src="photos/Seth_Charleston_Logo.png"
+            alt="Seth Charleston"
+        /></a>
+        <div class="hidden justify-center md:flex">
+          <a
+            class="social-link fa fa-twitter"
+            aria-label="Twitter"
+            href="https://twitter.com/sethcharleston"
+            target="_blank"
+            rel="noopener"
+          ></a
+          ><a
+            class="social-link fa fa-facebook"
+            aria-label="Facebook"
+            href="https://www.facebook.com/sethcharlestonmusic/"
+            target="_blank"
+            rel="noopener"
+          ></a
+          ><a
+            class="social-link fa fa-instagram"
+            aria-label="Instagram"
+            href="https://www.instagram.com/sethcharleston/"
+            target="_blank"
+            rel="noopener"
+          ></a
+          ><a
+            class="social-link fa fa-spotify"
+            aria-label="Spotify"
+            href="https://open.spotify.com/artist/1A5BJhYP6UBWnqVhuJnTqy"
+            target="_blank"
+            rel="noopener"
+          ></a
+          ><a
+            class="social-link fa fa-youtube"
+            aria-label="YouTube"
+            href="https://www.youtube.com/channel/UC1F4-aWEuIr2PRG2BP5qZDA"
+            target="_blank"
+            rel="noopener"
+          ></a>
+        </div>
+        <details class="group md:hidden">
+          <summary
+            class="cursor-pointer list-none text-3xl"
+            aria-label="Open menu"
+          >
+            ☰
+          </summary>
+          <div
+            class="absolute left-0 top-full flex w-full flex-col gap-4 bg-stone-900 px-6 py-6 text-center font-display text-3xl"
+          >
+            <a href="about.html">About</a><a href="music.html">Music</a
+            ><a href="shows.html">Shows</a><a href="services.html">Services</a>
+          </div>
+        </details>
       </div>
-      <a class="justify-self-center" href="index.html"><img class="h-9 w-auto md:h-11" src="photos/Seth_Charleston_Logo.png" alt="Seth Charleston"></a>
-      <div class="hidden justify-center md:flex"><a class="social-link fa fa-twitter" aria-label="Twitter" href="https://twitter.com/sethcharleston" target="_blank" rel="noopener"></a><a class="social-link fa fa-facebook" aria-label="Facebook" href="https://www.facebook.com/sethcharlestonmusic/" target="_blank" rel="noopener"></a><a class="social-link fa fa-instagram" aria-label="Instagram" href="https://www.instagram.com/sethcharleston/" target="_blank" rel="noopener"></a><a class="social-link fa fa-spotify" aria-label="Spotify" href="https://open.spotify.com/artist/1A5BJhYP6UBWnqVhuJnTqy" target="_blank" rel="noopener"></a><a class="social-link fa fa-youtube" aria-label="YouTube" href="https://www.youtube.com/channel/UC1F4-aWEuIr2PRG2BP5qZDA" target="_blank" rel="noopener"></a></div>
-      <details class="group md:hidden"><summary class="cursor-pointer list-none text-3xl" aria-label="Open menu">☰</summary><div class="absolute left-0 top-full flex w-full flex-col gap-4 bg-stone-900 px-6 py-6 text-center font-display text-3xl"><a href="about.html">About</a><a href="music.html">Music</a><a href="shows.html">Shows</a><a href="services.html">Services</a></div></details>
-    </div>
-  </nav>
-  <header class="relative mt-[68px] overflow-hidden bg-[#393939] md:mt-[88px]">
-    <video class="hidden max-h-[calc(100vh-84px)] w-full object-cover md:block" autoplay muted loop playsinline poster="photos/Mobile Homepage Header (7.22.23).png"><source src="videos/Take a Seat (Website Header).mp4" type="video/mp4"></video>
-    <img class="h-auto w-full md:hidden" src="photos/Mobile Homepage Header (7.22.23).png" alt="Seth Charleston performing">
-    <img class="absolute left-1/2 top-1/2 w-4/5 -translate-x-1/2 -translate-y-1/2 md:hidden" src="photos/Seth_Charleston.png" alt="Seth Charleston">
-  </header>
-  <main class="flex-1 bg-[#f5f5f5] px-6 py-16 md:py-24">
-    <section class="mx-auto max-w-4xl text-center text-lg md:text-2xl" hx-get="https://api.sethcharleston.com/test1/text?view=home" hx-trigger="load" hx-swap="innerHTML" aria-live="polite">
-      <div><h1 id="frontPageHeader" class="font-display text-4xl text-stone-800">New music is coming!</h1><p id="frontPageText" class="mt-5 leading-8 text-stone-600">Follow Seth on Spotify for the latest releases.</p></div><div id="frontPageVideo" class="mt-12"><h2 class="font-display text-3xl text-stone-800">Newest Video</h2></div>
-      <p class="htmx-indicator mt-8 text-sm uppercase tracking-widest text-stone-500">Loading latest news…</p>
-    </section>
-  </main>
-  <footer class="grid bg-[#393939] text-stone-200 md:grid-cols-2">
-    <div class="flex flex-col items-center justify-center gap-8 px-8 py-12 text-center"><h2 class="font-display text-4xl">Stay in the loop</h2><form class="flex w-full max-w-md flex-col gap-3 sm:flex-row" action="https://sethcharleston.us19.list-manage.com/subscribe/post?u=0c8404aae0a66221037b9174b&amp;id=e6ff11268b" method="post" target="_blank"><label class="sr-only" for="footer-email">Email address</label><input class="min-w-0 flex-1 rounded-sm border-0 px-4 py-3 text-stone-900" id="footer-email" name="EMAIL" type="email" placeholder="Email address" required><button class="bg-amber-700 px-6 py-3 text-sm font-bold uppercase tracking-widest hover:bg-amber-600" type="submit">Subscribe</button></form><p class="text-sm"><a class="underline" href="mailto:seth.charleston@gmail.com">Booking &amp; inquiries</a></p></div>
-    <div class="hidden items-center justify-center p-8 md:flex"><img class="max-h-96 w-full max-w-md object-cover object-top shadow-[0_16px_32px_rgba(0,0,0,0.8)]" src="photos/NEW Footer Photo (7.21.23).png" alt="Seth Charleston"></div>
-  </footer>
-</body>
+    </nav>
+    <header
+      class="relative mt-[68px] overflow-hidden bg-[#393939] md:mt-[88px]"
+    >
+      <video
+        class="hidden max-h-[calc(100vh-84px)] w-full object-cover md:block"
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="photos/Mobile Homepage Header (7.22.23).png"
+      >
+        <source
+          src="videos/Take a Seat (Website Header).mp4"
+          type="video/mp4"
+        />
+      </video>
+      <img
+        class="h-auto w-full md:hidden"
+        src="photos/Mobile Homepage Header (7.22.23).png"
+        alt="Seth Charleston performing"
+      />
+      <img
+        class="absolute left-1/2 top-1/2 w-4/5 -translate-x-1/2 -translate-y-1/2 md:hidden"
+        src="photos/Seth_Charleston.png"
+        alt="Seth Charleston"
+      />
+    </header>
+    <main class="flex-1 bg-[#f5f5f5] px-6 py-16 md:py-24">
+      <section
+        class="mx-auto max-w-4xl text-center text-lg md:text-2xl"
+        hx-get="https://api.sethcharleston.com/test1/text?view=home"
+        hx-trigger="load"
+        hx-swap="innerHTML"
+        aria-live="polite"
+      >
+        <div>
+          <h1 id="frontPageHeader" class="font-display text-4xl text-stone-800">
+            New music is coming!
+          </h1>
+          <p id="frontPageText" class="mt-5 leading-8 text-stone-600">
+            Follow Seth on Spotify for the latest releases.
+          </p>
+        </div>
+        <div id="frontPageVideo" class="mt-12">
+          <h2 class="font-display text-3xl text-stone-800">Newest Video</h2>
+        </div>
+        <p
+          class="htmx-indicator mt-8 text-sm uppercase tracking-widest text-stone-500"
+        >
+          Loading latest news…
+        </p>
+      </section>
+    </main>
+    <footer class="grid bg-[#393939] text-stone-200 md:grid-cols-2">
+      <div
+        class="flex flex-col items-center justify-center gap-8 px-8 py-12 text-center"
+      >
+        <h2 class="font-display text-4xl">Stay in the loop</h2>
+        <form
+          class="flex w-full max-w-md flex-col gap-3 sm:flex-row"
+          action="https://sethcharleston.us19.list-manage.com/subscribe/post?u=0c8404aae0a66221037b9174b&amp;id=e6ff11268b"
+          method="post"
+          target="_blank"
+        >
+          <label class="sr-only" for="footer-email">Email address</label
+          ><input
+            class="min-w-0 flex-1 rounded-sm border-0 px-4 py-3 text-stone-900"
+            id="footer-email"
+            name="EMAIL"
+            type="email"
+            placeholder="Email address"
+            required
+          /><button
+            class="bg-amber-700 px-6 py-3 text-sm font-bold uppercase tracking-widest hover:bg-amber-600"
+            type="submit"
+          >
+            Subscribe
+          </button>
+        </form>
+        <p class="text-sm">
+          <a class="underline" href="mailto:seth.charleston@gmail.com"
+            >Booking &amp; inquiries</a
+          >
+        </p>
+      </div>
+      <div class="hidden items-center justify-center p-8 md:flex">
+        <img
+          class="max-h-96 w-full max-w-md object-cover object-top shadow-[0_16px_32px_rgba(0,0,0,0.8)]"
+          src="photos/NEW Footer Photo (7.21.23).png"
+          alt="Seth Charleston"
+        />
+      </div>
+    </footer>
+  </body>
 </html>
